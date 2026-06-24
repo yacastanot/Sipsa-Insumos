@@ -1,0 +1,6 @@
+jornales:
+  modulo: "JORNALES"
+  archivo_liviana: "data/01_raw/MAY2026/Jornales may 2026.xlsx"
+  hoja_liviana: "Información Insumos"
+  grupos:
+    - "JORNALES"

@@ -1,0 +1,116 @@
+﻿# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: PROPAGACION
+# =============================================================================
+
+propagacion.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/propagacion/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/propagacion/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/propagacion/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/propagacion/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/propagacion/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/propagacion/mayor2_${globals:periodo_anterior}.parquet
+
+propagacion.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/propagacion/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/FALTAN_DIVIPOLA_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+propagacion.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/FALTAN_GRUPO_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+propagacion.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/FALTAN_PUBLICA_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+propagacion.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/DUPLI_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+propagacion.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/CVs_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+propagacion.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/VAR_ATIPICO_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+propagacion.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/propagacion/MENOR2_PROPAGACION_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+propagacion.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

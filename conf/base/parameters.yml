@@ -1,0 +1,28 @@
+# =============================================================================
+# SIPSA INSUMOS — Parámetros globales del período
+# Actualizar junto con globals.yml al inicio de cada período mensual.
+# =============================================================================
+
+periodo: "MAY2026"
+periodo_anterior: "ABR2026"
+mes_actual: "Mayo"
+mes_anterior: "Abril"
+mes_num_actual: 5
+mes_num_anterior: 4
+mes_num_menos2: 3       # Número mes t-2
+mes_num_menos3: 2       # Número mes t-3
+anio: 2026
+fecha_proceso: "20260615"   # YYYYMMDD para nombres de archivo de salida
+
+# Rutas de salida
+ruta_reporting: "data/08_reporting"
+
+# Archivo DIVIPOLA compartido (municipios y departamentos)
+archivo_divipola: "data/01_raw/DIVIPOLA.xlsx"
+hoja_divipola: "Dep_Mun"
+
+# Umbrales de control de calidad (comunes a todos los módulos)
+umbral_var_alta: 25.0       # VAR >= umbral → REVISA=1
+umbral_var_baja: -25.0      # VAR <= umbral → REVISA=1
+umbral_var_extrema: 100.0   # VAR >= umbral → REVISA=3
+umbral_cv: 30.0             # CV > umbral → alerta en informe

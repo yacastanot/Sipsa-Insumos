@@ -1,0 +1,13 @@
+# =============================================================================
+# SIPSA INSUMOS — Variables globales del período (Kedro OmegaConfLoader)
+# Referenciadas en catalog_*.yml con ${globals:<clave>}
+# Actualizar al inicio de cada período mensual.
+# =============================================================================
+
+periodo: "MAY2026"          # ID del período: MMMAAAA (mayúsculas)
+periodo_anterior: "ABR2026" # ID del período anterior
+mes_actual: "Mayo"          # Nombre mes actual en español
+mes_anterior: "Abril"       # Nombre mes anterior en español
+mes_num_actual: 5           # Número del mes actual (sin cero)
+mes_num_anterior: 4         # Número del mes anterior
+anio: 2026                  # Año del período

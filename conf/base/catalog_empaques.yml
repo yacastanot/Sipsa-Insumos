@@ -1,0 +1,116 @@
+﻿# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: EMPAQUES
+# =============================================================================
+
+empaques.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/empaques/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/empaques/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/empaques/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/empaques/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/empaques/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/empaques/mayor2_${globals:periodo_anterior}.parquet
+
+empaques.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/empaques/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/FALTAN_DIVIPOLA_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+empaques.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/FALTAN_GRUPO_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+empaques.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/FALTAN_PUBLICA_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+empaques.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/DUPLI_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+empaques.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/CVs_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+empaques.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/VAR_ATIPICO_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+empaques.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/empaques/MENOR2_EMPAQUES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+empaques.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

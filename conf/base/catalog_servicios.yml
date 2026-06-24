@@ -1,0 +1,116 @@
+﻿# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: SERVICIOS
+# =============================================================================
+
+servicios.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/servicios/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/servicios/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/servicios/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/servicios/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/servicios/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/servicios/mayor2_${globals:periodo_anterior}.parquet
+
+servicios.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/servicios/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/FALTAN_DIVIPOLA_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+servicios.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/FALTAN_GRUPO_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+servicios.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/FALTAN_PUBLICA_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+servicios.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/DUPLI_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+servicios.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/CVs_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+servicios.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/VAR_ATIPICO_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+servicios.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/servicios/MENOR2_SERVICIOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+servicios.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

@@ -1,0 +1,116 @@
+﻿# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: ARRIENDOS
+# =============================================================================
+
+arriendos.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/arriendos/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/arriendos/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/arriendos/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/arriendos/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/arriendos/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/arriendos/mayor2_${globals:periodo_anterior}.parquet
+
+arriendos.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/arriendos/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/FALTAN_DIVIPOLA_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+arriendos.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/FALTAN_GRUPO_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+arriendos.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/FALTAN_PUBLICA_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+arriendos.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/DUPLI_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+arriendos.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/CVs_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+arriendos.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/VAR_ATIPICO_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+arriendos.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/arriendos/MENOR2_ARRIENDOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+arriendos.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

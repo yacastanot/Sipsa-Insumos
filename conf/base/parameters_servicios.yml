@@ -1,0 +1,6 @@
+servicios:
+  modulo: "SERVICIOS"
+  archivo_liviana: "data/01_raw/MAY2026/Servicios may 2026.xlsx"
+  hoja_liviana: "Información Insumos"
+  grupos:
+    - "SERVICIOS"

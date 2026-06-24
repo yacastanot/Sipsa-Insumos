@@ -1,0 +1,116 @@
+﻿# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: JORNALES
+# =============================================================================
+
+jornales.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/jornales/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/jornales/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/jornales/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/jornales/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/jornales/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/jornales/mayor2_${globals:periodo_anterior}.parquet
+
+jornales.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/jornales/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/FALTAN_DIVIPOLA_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+jornales.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/FALTAN_GRUPO_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+jornales.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/FALTAN_PUBLICA_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+jornales.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/DUPLI_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+jornales.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/CVs_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+jornales.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/VAR_ATIPICO_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+jornales.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/jornales/MENOR2_JORNALES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+jornales.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

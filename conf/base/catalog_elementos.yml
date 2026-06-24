@@ -1,0 +1,116 @@
+﻿# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: ELEMENTOS
+# =============================================================================
+
+elementos.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/elementos/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/elementos/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/elementos/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/elementos/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/elementos/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/elementos/mayor2_${globals:periodo_anterior}.parquet
+
+elementos.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/elementos/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/FALTAN_DIVIPOLA_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+elementos.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/FALTAN_GRUPO_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+elementos.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/FALTAN_PUBLICA_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+elementos.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/DUPLI_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+elementos.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/CVs_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+elementos.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/VAR_ATIPICO_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+elementos.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/elementos/MENOR2_ELEMENTOS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+elementos.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

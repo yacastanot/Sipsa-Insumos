@@ -1,0 +1,25 @@
+# =============================================================================
+# SIPSA INSUMOS — Catalog compartido
+# Datasets usados por todos los módulos.
+# =============================================================================
+
+# ── DIVIPOLA: tabla de municipios y departamentos ─────────────────────────────
+# Leído por el nodo merge_divipola. Se usa el mismo archivo para todos los módulos.
+divipola_raw:
+  type: pandas.ExcelDataset
+  filepath: "data/01_raw/MAY2026/DIVIPOLA MAY2026/DIVIPOLA.xlsx"
+  load_args:
+    sheet_name: "Dep_Mun"
+    dtype:
+      CódigoMunicipio: str
+
+# ── Mappings YAML (catálogo compartido) ───────────────────────────────────────
+# Art_Unmed_Casacomer_ICA → Grupo de insumo
+mappings_grupos:
+  type: yaml.YAMLDataset
+  filepath: conf/base/mappings_grupos.yml
+
+# Art_Unmed_Casacomer_ICA → Nombre de publicación
+mappings_articulos:
+  type: yaml.YAMLDataset
+  filepath: conf/base/mappings_articulos.yml

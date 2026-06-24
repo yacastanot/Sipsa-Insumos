@@ -1,0 +1,25 @@
+## Kedro
+data/02_intermediate/
+data/03_primary/
+data/04_feature/
+data/08_reporting/
+logs/
+
+## Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+## Ambiente
+.env
+.venv/
+venv/
+
+## OS
+.DS_Store
+Thumbs.db

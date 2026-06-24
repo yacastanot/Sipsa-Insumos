@@ -1,0 +1,6 @@
+propagacion:
+  modulo: "PROPAGACION"
+  archivo_liviana: "data/01_raw/MAY2026/Material propagacion may 2026.xlsx"
+  hoja_liviana: "Información Insumos"
+  grupos:
+    - "MATERIAL DE PROPAGACION"

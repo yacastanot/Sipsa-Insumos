@@ -1,0 +1,130 @@
+# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: INSUMOS AGRÍCOLAS
+# Todos los datasets tienen el prefijo "agricolas." que el pipeline_registry.py
+# asigna automáticamente vía namespace.
+# =============================================================================
+
+# ── BRONZE: snapshot inmutable tras la ingesta ───────────────────────────────
+agricolas.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/agricolas/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+# ── SILVER: datos enriquecidos con DIVIPOLA, Grupo y Artículo de publicación ─
+agricolas.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/agricolas/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+# ── SILVER: precio promedio por municipio-producto ────────────────────────────
+agricolas.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/agricolas/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+# ── SILVER: mayor2 y menor2 (secreto estadístico) ────────────────────────────
+agricolas.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/agricolas/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/agricolas/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+# ── GOLD: datos del período anterior para comparativa interperiódica ──────────
+# Nota: este dataset se genera en el período anterior. Si no existe (primer período),
+# el nodo comparison lo maneja retornando TENDENCIA='n.d.' para todos los registros.
+agricolas.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/agricolas/mayor2_${globals:periodo_anterior}.parquet
+
+# ── GOLD: base con variación y tendencia ─────────────────────────────────────
+agricolas.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/agricolas/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+# ── DIAGNÓSTICO: archivos Excel de control (1 hoja cada uno) ─────────────────
+agricolas.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/FALTAN_DIVIPOLA_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+agricolas.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/FALTAN_GRUPO_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+agricolas.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/FALTAN_PUBLICA_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+agricolas.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/DUPLI_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+agricolas.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/CVs_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+agricolas.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/VAR_ATIPICO_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+agricolas.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/agricolas/MENOR2_AGRICOLAS_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+# ── REPORTES FINALES: multi-hoja (el nodo escribe con pd.ExcelWriter) ─────────
+# El nodo retorna un DataFrame de metadatos que se persiste en Parquet.
+# La ruta del Excel la construye el nodo directamente.
+agricolas.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

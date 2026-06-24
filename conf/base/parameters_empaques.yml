@@ -1,0 +1,6 @@
+empaques:
+  modulo: "EMPAQUES"
+  archivo_liviana: "data/01_raw/MAY2026/Empaques may 2026.xlsx"
+  hoja_liviana: "Información Insumos"
+  grupos:
+    - "EMPAQUES"

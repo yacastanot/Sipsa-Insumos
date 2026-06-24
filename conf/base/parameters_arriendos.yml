@@ -1,0 +1,6 @@
+arriendos:
+  modulo: "ARRIENDOS"
+  archivo_liviana: "data/01_raw/MAY2026/Arriendos may 2026.xlsx"
+  hoja_liviana: "Información Insumos"
+  grupos:
+    - "ARRIENDOS"
