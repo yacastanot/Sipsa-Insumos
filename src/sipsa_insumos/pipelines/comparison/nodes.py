@@ -19,7 +19,7 @@ import pandas as pd
 
 log = logging.getLogger(__name__)
 
-_LLAVE_JOIN = ["CÓDIGO DIVIPOLA", "LLAVE_ARTICULO"]
+_LLAVE_JOIN = ["CÓDIGO DIVIPOLA", "Nombre_Publica"]
 
 
 def calcular_variacion_tendencia(

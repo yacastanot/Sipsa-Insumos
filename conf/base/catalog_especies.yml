@@ -1,0 +1,116 @@
+# =============================================================================
+# SIPSA INSUMOS — Catalog módulo: ESPECIES PRODUCTIVAS
+# =============================================================================
+
+especies.base_bronze:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/especies/base_bronze_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.base_enriquecida:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/especies/base_enriquecida_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.precio_promedio:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/especies/precio_promedio_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.mayor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/especies/mayor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.menor2:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/especies/menor2_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.mayor2_anterior:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/especies/mayor2_${globals:periodo_anterior_trimestral}.parquet
+
+especies.base_comparada:
+  type: pandas.ParquetDataset
+  filepath: data/04_feature/especies/base_comparada_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.faltan_divipola:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/FALTAN_DIVIPOLA_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_DIVIPOLA"
+
+especies.faltan_grupo:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/FALTAN_GRUPO_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_GRUPO"
+
+especies.faltan_publica:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/FALTAN_PUBLICA_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "FALTAN_PUBLICA"
+
+especies.duplicados:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/DUPLI_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "DUPLICADOS"
+
+especies.cvs_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/CVs_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "CVs"
+
+especies.var_atipico:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/VAR_ATIPICO_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "VAR_ATIPICO"
+
+especies.menor2_reporte:
+  type: pandas.ExcelDataset
+  filepath: data/08_reporting/especies/MENOR2_ESPECIES_${globals:periodo}.xlsx
+  save_args:
+    index: false
+    sheet_name: "MENOR2"
+
+especies.bases_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_bases_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.tablas_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_tablas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.anexos_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_anexos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.cuadros_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false

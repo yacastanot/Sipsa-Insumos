@@ -34,7 +34,7 @@ jornales.menor2:
 
 jornales.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/jornales/mayor2_${globals:periodo_anterior}.parquet
+  filepath: data/03_primary/jornales/mayor2_${globals:periodo_anterior_trimestral}.parquet
 
 jornales.base_comparada:
   type: pandas.ParquetDataset

@@ -34,7 +34,7 @@ elementos.menor2:
 
 elementos.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/elementos/mayor2_${globals:periodo_anterior}.parquet
+  filepath: data/03_primary/elementos/mayor2_${globals:periodo_anterior_bimestral}.parquet
 
 elementos.base_comparada:
   type: pandas.ParquetDataset

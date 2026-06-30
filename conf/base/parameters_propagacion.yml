@@ -1,6 +1,9 @@
 propagacion:
   modulo: "PROPAGACION"
-  archivo_liviana: "data/01_raw/MAY2026/Material propagacion may 2026.xlsx"
+  archivo_liviana: "data/01_raw/ABR2026/BASES LIVIANAS ABR2026/Material de Propagación abr 2026.xlsx"
   hoja_liviana: "Información Insumos"
+  tipo_modulo: "estandar"
+  tipo_llave: "unmed"
+  min_n: 2
   grupos:
     - "MATERIAL DE PROPAGACION"

@@ -2,6 +2,9 @@ agricolas:
   modulo: "AGRICOLAS"
   archivo_liviana: "data/01_raw/MAY2026/BASES LIVIANAS MAY2026/Insumos agrícolas may 2026.xlsx"
   hoja_liviana: "Información Insumos"
+  tipo_modulo: "estandar"
+  tipo_llave: "unmed"
+  min_n: 2
   grupos:
     - "COADYUDANTES"
     - "FERTILIZANTES"

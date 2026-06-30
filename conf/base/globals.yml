@@ -4,10 +4,12 @@
 # Actualizar al inicio de cada período mensual.
 # =============================================================================
 
-periodo: "MAY2026"          # ID del período: MMMAAAA (mayúsculas)
-periodo_anterior: "ABR2026" # ID del período anterior
-mes_actual: "Mayo"          # Nombre mes actual en español
-mes_anterior: "Abril"       # Nombre mes anterior en español
-mes_num_actual: 5           # Número del mes actual (sin cero)
-mes_num_anterior: 4         # Número del mes anterior
-anio: 2026                  # Año del período
+periodo: "MAY2026"                      # ID del período: MMMAAAA (mayúsculas)
+periodo_anterior: "ABR2026"             # ID período anterior (mensual)
+periodo_anterior_bimestral: "MAR2026"   # ID período anterior bimestral par (Elementos, Empaques: ENE,MAR,MAY... | Propagacion: FEB,ABR,JUN...)
+periodo_anterior_trimestral: "FEB2026"  # ID período anterior trimestral (Arriendos,Servicios: FEB,MAY,AGO,NOV | Jornales,Especies: MAR,JUN,SEP,DIC)
+mes_actual: "Mayo"                      # Nombre mes actual en español
+mes_anterior: "Abril"                   # Nombre mes anterior en español
+mes_num_actual: 5                       # Número del mes actual (sin cero)
+mes_num_anterior: 4                     # Número del mes anterior
+anio: 2026                              # Año del período

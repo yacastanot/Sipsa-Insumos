@@ -1,6 +1,9 @@
 empaques:
   modulo: "EMPAQUES"
-  archivo_liviana: "data/01_raw/MAY2026/Empaques may 2026.xlsx"
+  archivo_liviana: "data/01_raw/MAY2026/BASES LIVIANAS MAY2026/Empaques may 2026.xlsx"
   hoja_liviana: "Información Insumos"
+  tipo_modulo: "caracte"
+  tipo_llave: "unmed"
+  min_n: 1
   grupos:
     - "EMPAQUES"

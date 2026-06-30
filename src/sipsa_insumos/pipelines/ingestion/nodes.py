@@ -5,20 +5,18 @@ SAS equivalente:
     out=INSUMOS_BASE replace;
     sheet="Información Insumos"; getnames=yes;
   run;
-  /* Filtrado: Estado='ANALIZADO CENTRAL' AND Precio > 0 */
+  /* Filtrado: Estado IN ('ANALIZADO CENTRAL','APROBADO') AND Precio > 0 */
 
 Flujo:
   params:<modulo>.archivo_liviana ──► [leer_base_liviana] ──► <modulo>.base_bronze
 
-Notas sobre el Excel de entrada:
-  - La hoja "Información Insumos" contiene la base de supervisión COMPLETA,
-    no solo los registros publicables. Se filtra a:
-      Estado = 'ANALIZADO CENTRAL'  (centralmente verificados)
-      Precio Actual > 0             (precio efectivo reportado)
-  - Las columnas tienen nombres abreviados (Municipio, Articulo, etc.).
-    Se renombran a los nombres canónicos del proyecto.
-  - Municipio viene sin padding (ej: 5001 → 05001 con zfill(5)).
-  - MES_AÑO no está en el Excel; se agrega desde el parámetro periodo.
+Tipos de módulo (tipo_modulo):
+  "estandar" — Agricolas, Pecuarios, Elementos: usa columnas UnMed./CasaCom./RegICA.
+  "caracte"  — Arriendos, Servicios, Empaques: usa columna Caracte. (sin UnMed).
+
+Modos de llave (tipo_llave):
+  "unmed"            — ARTÍCULO_UNMED (Agricolas, Pecuarios: marcas distintas ≡ misma publi)
+  "casacom_ica_unmed" — ARTÍCULO_CASACOM_ICA_UNMED (Elementos: especificaciones diferencian)
 """
 from __future__ import annotations
 
@@ -31,8 +29,9 @@ from sipsa_insumos.validations.schemas import SCHEMA_BASE_LIVIANA
 
 log = logging.getLogger(__name__)
 
-# Mapeo de columnas abreviadas del Excel → nombres canónicos del proyecto
-_RENAME_COLS: dict[str, str] = {
+_ESTADOS_VALIDOS = {"ANALIZADO CENTRAL", "APROBADO"}
+
+_RENAME_ESTANDAR: dict[str, str] = {
     "Municipio":      "CÓDIGO DIVIPOLA",
     "Codigo CPC":     "CÓDIGO CPC",
     "Articulo":       "ARTÍCULO",
@@ -42,7 +41,14 @@ _RENAME_COLS: dict[str, str] = {
     "UnMed.":         "UNIDAD DE MEDIDA",
 }
 
-# Columnas a leer como string (para evitar conversión numérica de códigos)
+_RENAME_CARACTE: dict[str, str] = {
+    "Municipio":      "CÓDIGO DIVIPOLA",
+    "Codigo CPC":     "CÓDIGO CPC",
+    "Articulo":       "ARTÍCULO",
+    "Precio Actual":  "PRECIO",
+    "Caracte.":       "CARACTERÍSTICA",
+}
+
 _DTYPE_EXCEL: dict[str, type] = {
     "Municipio":  str,
     "Codigo CPC": str,
@@ -50,6 +56,7 @@ _DTYPE_EXCEL: dict[str, type] = {
     "CasaCom.":   str,
     "RegICA":     str,
     "UnMed.":     str,
+    "Caracte.":   str,
     "Estado":     str,
 }
 
@@ -58,27 +65,22 @@ def leer_base_liviana(
     archivo_liviana: str,
     hoja_liviana: str,
     periodo: str,
+    tipo_modulo: str = "estandar",
+    tipo_llave: str = "unmed",
 ) -> pd.DataFrame:
     """Lee el Excel mensual de supervisión, filtra y estandariza para el pipeline.
-
-    Pasos:
-    1. Leer Excel con nombres de columna abreviados.
-    2. Filtrar a registros ANALIZADO CENTRAL con Precio Actual > 0.
-    3. Renombrar columnas al estándar del proyecto.
-    4. Zero-pad CÓDIGO DIVIPOLA a 5 dígitos (ej: '5001' → '05001').
-    5. Agregar MES_AÑO = periodo.
-    6. Validar con schema Pandera.
-    7. Parsear UNIDAD DE MEDIDA → NOMBRE_UM, UNIDAD, CANTIDAD, LLAVE_ARTICULO.
 
     Args:
         archivo_liviana: Ruta relativa al Excel de entrada.
         hoja_liviana: Nombre de la hoja ("Información Insumos").
         periodo: Período mensual (ej: "MAY2026"). Se usa como valor de MES_AÑO.
-
-    Returns:
-        DataFrame listo para el pipeline de enriquecimiento.
+        tipo_modulo: "estandar" (UnMed/CasaCom/ICA) o "caracte" (Caracte.).
+        tipo_llave: "unmed" (ARTÍCULO+UNMED) o "casacom_ica_unmed" (Elementos).
     """
-    log.info("Leyendo base liviana: %s | hoja: %s", archivo_liviana, hoja_liviana)
+    log.info(
+        "Leyendo base liviana: %s | tipo_modulo=%s | tipo_llave=%s",
+        archivo_liviana, tipo_modulo, tipo_llave,
+    )
 
     df = pd.read_excel(
         archivo_liviana,
@@ -88,43 +90,69 @@ def leer_base_liviana(
     )
     log.info("Excel leído | filas_raw=%d | columnas=%d", len(df), len(df.columns))
 
-    # 1. Filtrar: solo registros ANALIZADO CENTRAL con precio efectivo
     if "Estado" in df.columns:
-        df = df[df["Estado"].str.strip().str.upper() == "ANALIZADO CENTRAL"].copy()
-        log.info("Filtrado por Estado=ANALIZADO CENTRAL | filas=%d", len(df))
+        mask = df["Estado"].str.strip().str.upper().isin(_ESTADOS_VALIDOS)
+        df = df[mask].copy()
+        log.info("Filtrado por Estado válido | filas=%d", len(df))
 
     df["Precio Actual"] = pd.to_numeric(df["Precio Actual"], errors="coerce")
     df = df[df["Precio Actual"] > 0].copy()
     log.info("Filtrado por Precio Actual > 0 | filas=%d", len(df))
 
-    # 2. Renombrar columnas abreviadas
-    df = df.rename(columns=_RENAME_COLS)
+    if tipo_modulo == "caracte":
+        return _procesar_caracte(df, periodo)
+    return _procesar_estandar(df, periodo, tipo_llave)
 
-    # 3. Zero-pad CÓDIGO DIVIPOLA a 5 dígitos (ej: '5001' → '05001')
+
+def _procesar_estandar(df: pd.DataFrame, periodo: str, tipo_llave: str) -> pd.DataFrame:
+    """Procesa módulos con columnas UnMed./CasaCom./RegICA."""
+    df = df.rename(columns=_RENAME_ESTANDAR)
     df["CÓDIGO DIVIPOLA"] = df["CÓDIGO DIVIPOLA"].str.strip().str.zfill(5)
-
-    # 4. Limpiar CÓDIGO CPC (puede tener espacios o decimal si se leyó como número)
     df["CÓDIGO CPC"] = df["CÓDIGO CPC"].astype(str).str.strip().str.split(".").str[0]
-
-    # 5. Agregar MES_AÑO desde el parámetro periodo
     df["MES_AÑO"] = periodo
-
-    # 6. Limpiar REGISTRO ICA
     df["REGISTRO ICA"] = df["REGISTRO ICA"].astype(str).str.strip().str.split(".").str[0]
 
-    # 7. Conservar solo las columnas canónicas (descartar columnas auxiliares del Excel)
-    _COLS_CANON = list(_RENAME_COLS.values()) + ["MES_AÑO"]
-    df = df[[c for c in _COLS_CANON if c in df.columns]].copy()
+    cols_canon = list(_RENAME_ESTANDAR.values()) + ["MES_AÑO"]
+    df = df[[c for c in cols_canon if c in df.columns]].copy()
 
-    # 8. Validar schema Pandera (lazy=True → expone todas las violaciones de una vez)
     df = SCHEMA_BASE_LIVIANA.validate(df, lazy=True)
-
-    # 9. Parsear UNIDAD DE MEDIDA → NOMBRE_UM, UNIDAD, CANTIDAD, LLAVE_ARTICULO
-    df = agregar_columnas_unidad_medida(df)
+    df = agregar_columnas_unidad_medida(df, tipo_llave=tipo_llave)
 
     log.info(
-        "leer_base_liviana OK | filas=%d | municipios_únicos=%d",
-        len(df),
-        df["CÓDIGO DIVIPOLA"].nunique(),
+        "leer_base_liviana (estandar/%s) OK | filas=%d | municipios=%d",
+        tipo_llave, len(df), df["CÓDIGO DIVIPOLA"].nunique(),
+    )
+    return df
+
+
+def _procesar_caracte(df: pd.DataFrame, periodo: str) -> pd.DataFrame:
+    """Procesa módulos con columna Caracte. (Arriendos, Servicios, Empaques).
+
+    LLAVE_ARTICULO = ARTÍCULO.upper() + '_' + CARACTERÍSTICA.upper()
+    """
+    df = df.rename(columns=_RENAME_CARACTE)
+    df["CÓDIGO DIVIPOLA"] = df["CÓDIGO DIVIPOLA"].str.strip().str.zfill(5)
+    df["CÓDIGO CPC"] = df["CÓDIGO CPC"].astype(str).str.strip().str.split(".").str[0]
+    df["MES_AÑO"] = periodo
+    df["CARACTERÍSTICA"] = df["CARACTERÍSTICA"].astype(str).str.strip()
+
+    df["LLAVE_ARTICULO"] = (
+        df["ARTÍCULO"].str.strip().str.upper() + "_" + df["CARACTERÍSTICA"].str.upper()
+    )
+    df["UNIDAD DE MEDIDA"] = df["CARACTERÍSTICA"]
+    df["NOMBRE_UM"] = df["CARACTERÍSTICA"]
+    df["UNIDAD"] = ""
+    df["CANTIDAD"] = ""
+
+    cols_canon = [
+        "CÓDIGO DIVIPOLA", "CÓDIGO CPC", "ARTÍCULO", "PRECIO",
+        "CARACTERÍSTICA", "UNIDAD DE MEDIDA", "LLAVE_ARTICULO",
+        "NOMBRE_UM", "UNIDAD", "CANTIDAD", "MES_AÑO",
+    ]
+    df = df[[c for c in cols_canon if c in df.columns]].copy()
+
+    log.info(
+        "leer_base_liviana (caracte) OK | filas=%d | municipios=%d",
+        len(df), df["CÓDIGO DIVIPOLA"].nunique(),
     )
     return df

@@ -1,6 +1,9 @@
 jornales:
   modulo: "JORNALES"
-  archivo_liviana: "data/01_raw/MAY2026/Jornales may 2026.xlsx"
+  archivo_liviana: "data/01_raw/JUN2026/BASES LIVIANAS JUN2026/Jornales jun 2026.xlsx"
   hoja_liviana: "Información Insumos"
+  tipo_modulo: "caracte"
+  tipo_llave: "unmed"
+  min_n: 2
   grupos:
     - "JORNALES"

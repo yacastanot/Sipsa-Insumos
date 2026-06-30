@@ -18,7 +18,9 @@ import pandas as pd
 
 log = logging.getLogger(__name__)
 
-# Llave compuesta para detección de duplicados (equivale a la llave SAS)
+# Llave compuesta para detección de duplicados (equivale a SAS PROC SORT nodup)
+# Incluye PRECIO para solo eliminar registros completamente idénticos.
+# Registros del mismo vendedor con diferente precio son observaciones válidas.
 _LLAVE_DUPLICADOS = [
     "CÓDIGO DIVIPOLA",
     "CÓDIGO CPC",
@@ -26,10 +28,17 @@ _LLAVE_DUPLICADOS = [
     "CASA COMERCIAL",
     "REGISTRO ICA",
     "UNIDAD DE MEDIDA",
+    "PRECIO",
 ]
 
-# Columnas de agrupación para el CV por municipio-producto
-_LLAVE_CV = ["CÓDIGO DIVIPOLA", "LLAVE_ARTICULO"]
+# Columnas de agrupación para el CV por municipio-producto (nivel Nombre_Publica)
+# Equivale al nivel de agregación SAS: (municipio, Nombre_productos_agr_publ)
+_LLAVE_CV = ["CÓDIGO DIVIPOLA", "Nombre_Publica"]
+
+# Columnas adicionales de contexto que se incluyen en el reporte de CVs
+_COLS_CV_CONTEXTO = [
+    "NombreDepartamento", "NombreMunicipio", "CÓDIGO CPC", "Grupo",
+]
 
 
 def detectar_duplicados(
@@ -81,16 +90,19 @@ def calcular_cv(
             DataFrame del reporte de CVs (N, MIN, MAX, MEAN, CV) por grupo.
     """
     llave_cv = [c for c in _LLAVE_CV if c in base_sin_dupli.columns]
+    cols_contexto = [c for c in _COLS_CV_CONTEXTO if c in base_sin_dupli.columns]
+    # Incluir columnas de contexto en el groupby para que aparezcan en el reporte
+    llave_completa = llave_cv + [c for c in cols_contexto if c not in llave_cv]
 
     agg = (
-        base_sin_dupli.groupby(llave_cv)["PRECIO"]
+        base_sin_dupli.groupby(llave_completa, dropna=False)["PRECIO"]
         .agg(N="count", MIN="min", MAX="max", MEAN="mean", STD="std")
         .reset_index()
     )
     agg["CV"] = (agg["STD"] / agg["MEAN"] * 100).where(agg["N"] >= 2)
     agg = agg.rename(columns={"MEAN": "PRECIO_PROMEDIO_CV"})
 
-    # Unir CV de vuelta al DataFrame original
+    # Unir CV de vuelta al DataFrame original usando solo la llave principal
     base_con_cv = base_sin_dupli.merge(
         agg[llave_cv + ["N", "CV"]],
         on=llave_cv,
@@ -140,7 +152,14 @@ def detectar_var_atipica(
     Returns:
         (base_calidad, var_atipico): base con columna 'REVISA' + reporte de atípicos.
     """
-    llave = [c for c in ["CÓDIGO DIVIPOLA", "LLAVE_ARTICULO"] if c in base_con_cv.columns]
+    llave = [
+        c for c in ["CÓDIGO DIVIPOLA", "Nombre_Publica"]
+        if c in base_con_cv.columns and (
+            mayor2_anterior is None or c in mayor2_anterior.columns
+        )
+    ]
+    if not llave:
+        llave = [c for c in ["CÓDIGO DIVIPOLA", "LLAVE_ARTICULO"] if c in base_con_cv.columns]
 
     df = base_con_cv.copy()
 

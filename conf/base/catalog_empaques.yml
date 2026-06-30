@@ -34,7 +34,7 @@ empaques.menor2:
 
 empaques.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/empaques/mayor2_${globals:periodo_anterior}.parquet
+  filepath: data/03_primary/empaques/mayor2_${globals:periodo_anterior_bimestral}.parquet
 
 empaques.base_comparada:
   type: pandas.ParquetDataset

@@ -34,7 +34,7 @@ arriendos.menor2:
 
 arriendos.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/arriendos/mayor2_${globals:periodo_anterior}.parquet
+  filepath: data/03_primary/arriendos/mayor2_${globals:periodo_anterior_trimestral}.parquet
 
 arriendos.base_comparada:
   type: pandas.ParquetDataset

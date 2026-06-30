@@ -9,7 +9,13 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=leer_base_liviana,
-                inputs=["params:archivo_liviana", "params:hoja_liviana", "params:periodo"],
+                inputs=[
+                    "params:archivo_liviana",
+                    "params:hoja_liviana",
+                    "params:periodo",
+                    "params:tipo_modulo",
+                    "params:tipo_llave",
+                ],
                 outputs="base_bronze",
                 name="leer_base_liviana",
             ),

@@ -10,6 +10,12 @@ Ejemplo:
 La llave de lookup (LLAVE_ARTICULO) se construye a partir de las
 mismas partes normalizadas (UPPER, strip) para coincidir con las
 claves de mappings_grupos.yml y mappings_articulos.yml.
+
+Modos de llave:
+  "unmed"            ARTÍCULO_UNMED  (Agricolas, Pecuarios — marcas distintas
+                     del mismo producto se agregan bajo la misma Nombre_Publica)
+  "casacom_ica_unmed" ARTÍCULO_CASACOM_ICA_UNMED  (Elementos — la CasaCom y el
+                     RegICA son especificaciones que diferencian productos)
 """
 from __future__ import annotations
 
@@ -38,12 +44,10 @@ def parsear_unidad_medida(valor: str) -> dict[str, str]:
 
 
 def construir_llave_articulo(articulo: str, unidad_medida: str) -> str:
-    """Construye la llave normalizada para los mappings.
+    """Construye la llave normalizada para los mappings (modo 'unmed').
 
     Formato: ARTÍCULO.upper() + "_" + UNIDAD_DE_MEDIDA.upper()
-    Equivale a la columna Art_Unmed_Casacomer_ICA del SAS:
-        UPCASE(ARTICULO)||'_'||UPCASE('Unidad de medida'n)
-    Coincide con las claves de mappings_grupos.yml y mappings_articulos.yml.
+    Equivale a la columna Art_Unmed_Casacomer_ICA del SAS (Agricolas/Pecuarios).
 
     Args:
         articulo: Nombre del artículo (ej: "Glifosato 480 SL").
@@ -56,15 +60,45 @@ def construir_llave_articulo(articulo: str, unidad_medida: str) -> str:
     return f"{articulo.strip().upper()}_{unidad_medida.strip().upper()}"
 
 
-def agregar_columnas_unidad_medida(df: pd.DataFrame) -> pd.DataFrame:
-    """Parsea 'UNIDAD DE MEDIDA' y agrega NOMBRE_UM, UNIDAD, CANTIDAD y LLAVE_ARTICULO.
+def _clean(value: str) -> str:
+    """Normaliza un componente de la llave: uppercase, sin NaN."""
+    s = str(value).strip().upper()
+    return "NA" if s in ("NAN", "NONE", "") else s
 
-    LLAVE_ARTICULO = ARTÍCULO.upper() + "_" + "UNIDAD DE MEDIDA".upper()
-    Equivale a Art_Unmed_Casacomer_ICA del SAS (sin CASA COMERCIAL ni REGISTRO ICA,
-    que el DIVIPOLA no usa para la clasificación de grupos y artículos de publicación).
+
+def construir_llave_casacom_ica_unmed(
+    articulo: str,
+    casa_comercial: str,
+    registro_ica: str,
+    unidad_medida: str,
+) -> str:
+    """Construye la llave compuesta para Elementos (modo 'casacom_ica_unmed').
+
+    Equivale a Art_Casacomer_ICA_Unmed del SAS:
+        CATX('_', Articulo, 'CasaCom.'n, RegICA, 'UnMed.'n)
+
+    Trata nulos como 'NA' (igual que CATX en SAS con missing string).
+    """
+    parts = [
+        _clean(articulo),
+        _clean(casa_comercial),
+        _clean(registro_ica),
+        _clean(unidad_medida),
+    ]
+    return "_".join(parts)
+
+
+def agregar_columnas_unidad_medida(
+    df: pd.DataFrame,
+    tipo_llave: str = "unmed",
+) -> pd.DataFrame:
+    """Parsea 'UNIDAD DE MEDIDA' y agrega NOMBRE_UM, UNIDAD, CANTIDAD y LLAVE_ARTICULO.
 
     Args:
         df: DataFrame con las columnas 'ARTÍCULO' y 'UNIDAD DE MEDIDA'.
+            Para tipo_llave='casacom_ica_unmed' también necesita
+            'CASA COMERCIAL' y 'REGISTRO ICA'.
+        tipo_llave: "unmed" (default) o "casacom_ica_unmed" (Elementos).
 
     Returns:
         DataFrame con 4 columnas adicionales: NOMBRE_UM, UNIDAD, CANTIDAD, LLAVE_ARTICULO.
@@ -74,8 +108,20 @@ def agregar_columnas_unidad_medida(df: pd.DataFrame) -> pd.DataFrame:
     df["NOMBRE_UM"] = parsed["nombre_um"]
     df["UNIDAD"]    = parsed["unidad"]
     df["CANTIDAD"]  = parsed["cantidad"]
-    df["LLAVE_ARTICULO"] = df.apply(
-        lambda r: construir_llave_articulo(r["ARTÍCULO"], r["UNIDAD DE MEDIDA"]),
-        axis=1,
-    )
+
+    if tipo_llave == "casacom_ica_unmed":
+        df["LLAVE_ARTICULO"] = df.apply(
+            lambda r: construir_llave_casacom_ica_unmed(
+                r["ARTÍCULO"],
+                r.get("CASA COMERCIAL", ""),
+                r.get("REGISTRO ICA", ""),
+                r["UNIDAD DE MEDIDA"],
+            ),
+            axis=1,
+        )
+    else:
+        df["LLAVE_ARTICULO"] = df.apply(
+            lambda r: construir_llave_articulo(r["ARTÍCULO"], r["UNIDAD DE MEDIDA"]),
+            axis=1,
+        )
     return df

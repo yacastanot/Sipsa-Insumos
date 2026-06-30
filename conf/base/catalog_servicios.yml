@@ -34,7 +34,7 @@ servicios.menor2:
 
 servicios.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/servicios/mayor2_${globals:periodo_anterior}.parquet
+  filepath: data/03_primary/servicios/mayor2_${globals:periodo_anterior_trimestral}.parquet
 
 servicios.base_comparada:
   type: pandas.ParquetDataset

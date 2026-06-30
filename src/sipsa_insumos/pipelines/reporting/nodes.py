@@ -29,12 +29,17 @@ def exportar_bases(
     periodo: str,
     ruta_reporting: str,
 ) -> pd.DataFrame:
-    """Exporta la base completa procesada, una hoja por grupo.
+    """Exporta la base de precios por municipio, una hoja por grupo.
 
-    SAS: DATA BASES_AGRICOLA_MAY2026; SET base; por grupo;
+    Formato SAS: una fila por (municipio × Nombre_Publica) con precio actual,
+    precio anterior, variación, cuenta de fuentes y tendencia.
+    Columnas: CodigoDepto, NombreDepartamento, CodigoMpio, NombreMunicipio,
+              Mercado, Codigo_CPC, Nombre_Publica, PRECIO_ABR, PRECIO_ACT,
+              Variacion(%), Cuenta, Tendencia.
 
     Args:
-        base_comparada: DataFrame con todas las columnas enriquecidas + TENDENCIA.
+        base_comparada: DataFrame con columnas de precio, variación y tendencia
+                        a nivel (municipio × Nombre_Publica).
         grupos: Lista de nombres de grupo del módulo.
         modulo: Nombre del módulo (ej: "AGRICOLAS").
         periodo: ID del período (ej: "MAY2026").
@@ -47,10 +52,52 @@ def exportar_bases(
     ruta = Path(ruta_reporting) / modulo.lower() / nombre
     ruta.parent.mkdir(parents=True, exist_ok=True)
 
+    # Detectar columnas de precio actual y anterior (generadas en calcular_variacion_tendencia)
+    col_precio_actual = next(
+        (c for c in base_comparada.columns if c.startswith("PRECIO_") and "Abril" not in c
+         and c not in ("PRECIO_MIN", "PRECIO_MAX")), None
+    )
+    col_precio_anterior = next(
+        (c for c in base_comparada.columns if "Abril" in c or
+         (c.startswith("PRECIO_") and c != col_precio_actual
+          and c not in ("PRECIO_MIN", "PRECIO_MAX"))), None
+    )
+
     hojas: dict[str, pd.DataFrame] = {}
     for grupo in grupos:
         df_grupo = base_comparada[base_comparada["Grupo"] == grupo].copy()
-        hojas[grupo] = df_grupo
+        if df_grupo.empty:
+            hojas[grupo] = pd.DataFrame()
+            continue
+
+        # Construir Mercado = "NombreMunicipio (NombreDepartamento)"
+        if "NombreMunicipio" in df_grupo.columns and "NombreDepartamento" in df_grupo.columns:
+            df_grupo["Mercado"] = (
+                df_grupo["NombreMunicipio"] + " (" + df_grupo["NombreDepartamento"] + ")"
+            )
+
+        # Seleccionar y ordenar columnas equivalentes al SAS BASES
+        col_map = {
+            "CodigoDepto":        next((c for c in ["CodigoDepto"] if c in df_grupo.columns), None),
+            "NombreDepartamento": "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
+            "CÓDIGO DIVIPOLA":    "CÓDIGO DIVIPOLA" if "CÓDIGO DIVIPOLA" in df_grupo.columns else None,
+            "NombreMunicipio":    "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
+            "Mercado":            "Mercado" if "Mercado" in df_grupo.columns else None,
+            "CÓDIGO CPC":         "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
+            "Nombre_Publica":     "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
+            "PRECIO_ANTERIOR":    col_precio_anterior,
+            "PRECIO_ACTUAL":      col_precio_actual,
+            "VARIACION(%)":       "VARIACION" if "VARIACION" in df_grupo.columns else None,
+            "Cuenta":             "N_ARTICULOS" if "N_ARTICULOS" in df_grupo.columns else None,
+            "Tendencia":          "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
+        }
+        cols_sel = [v for v in col_map.values() if v and v in df_grupo.columns]
+        rename_inv = {v: k for k, v in col_map.items() if v and v in df_grupo.columns}
+        df_out = df_grupo[cols_sel].rename(columns=rename_inv)
+        df_out = df_out.sort_values(
+            [c for c in ["NombreDepartamento", "NombreMunicipio", "Nombre_Publica"] if c in df_out.columns]
+        )
+        hojas[grupo] = df_out
 
     escribir_excel_multisheet(ruta, hojas)
 
@@ -100,7 +147,7 @@ def exportar_tablas(
             continue
 
         pivot = (
-            df_grupo.groupby(["Nombre_Publica", "TENDENCIA"])
+            df_grupo.groupby(["Nombre_Publica", "TENDENCIA"], observed=True)
             .size()
             .unstack(fill_value=0)
             .reset_index()
@@ -136,12 +183,18 @@ def exportar_anexos(
     periodo: str,
     ruta_reporting: str,
 ) -> pd.DataFrame:
-    """Exporta el anexo con artículo y presentación, una hoja por grupo.
+    """Exporta el anexo por municipio con nombre e insumo por separado, una hoja por grupo.
 
-    SAS: Genera el nombre (2 primeros campos de ARTÍCULO) + presentación (NOMBRE_UM + CANTIDAD + UNIDAD)
+    Formato SAS ANEXO: igual que BASES pero con Nombre_Publica desglosado en
+    Nombre_insumo (texto antes de la coma) y Presentación_insumo (texto después).
+    Columnas: CodigoDepto, NombreDepartamento, CodigoMpio/DIVIPOLA, NombreMunicipio,
+              Codigo_CPC, Nombre_insumo, Presentación_insumo,
+              PRECIO_ABR, PRECIO_ACT, Variacion(%), Cuenta, Tendencia, Mercado,
+              Nombre_Publica.
 
     Args:
-        base_comparada: DataFrame con Nombre_Publica, NOMBRE_UM, UNIDAD, CANTIDAD, Grupo.
+        base_comparada: DataFrame con columnas de precio, variación y tendencia
+                        a nivel (municipio × Nombre_Publica).
         grupos: Lista de nombres de grupo.
         modulo: Nombre del módulo.
         periodo: ID del período.
@@ -154,6 +207,16 @@ def exportar_anexos(
     ruta = Path(ruta_reporting) / modulo.lower() / nombre
     ruta.parent.mkdir(parents=True, exist_ok=True)
 
+    col_precio_actual = next(
+        (c for c in base_comparada.columns if c.startswith("PRECIO_") and "Abril" not in c
+         and c not in ("PRECIO_MIN", "PRECIO_MAX")), None
+    )
+    col_precio_anterior = next(
+        (c for c in base_comparada.columns if "Abril" in c or
+         (c.startswith("PRECIO_") and c != col_precio_actual
+          and c not in ("PRECIO_MIN", "PRECIO_MAX"))), None
+    )
+
     hojas: dict[str, pd.DataFrame] = {}
     for grupo in grupos:
         df_grupo = base_comparada[base_comparada["Grupo"] == grupo].copy()
@@ -161,16 +224,42 @@ def exportar_anexos(
             hojas[grupo] = pd.DataFrame()
             continue
 
-        cols_disponibles = ["CÓDIGO CPC", "Nombre_Publica", "ARTÍCULO", "NOMBRE_UM", "UNIDAD", "CANTIDAD"]
-        cols = [c for c in cols_disponibles if c in df_grupo.columns]
-        df_grupo = df_grupo[cols].drop_duplicates().sort_values(["Nombre_Publica"] if "Nombre_Publica" in cols else cols[:1])
+        # Mercado = "NombreMunicipio (NombreDepartamento)"
+        if "NombreMunicipio" in df_grupo.columns and "NombreDepartamento" in df_grupo.columns:
+            df_grupo["Mercado"] = (
+                df_grupo["NombreMunicipio"] + " (" + df_grupo["NombreDepartamento"] + ")"
+            )
 
-        if "NOMBRE_UM" in df_grupo.columns and "CANTIDAD" in df_grupo.columns and "UNIDAD" in df_grupo.columns:
-            df_grupo["Presentacion"] = (
-                df_grupo["NOMBRE_UM"] + " " + df_grupo["CANTIDAD"] + " " + df_grupo["UNIDAD"]
-            ).str.strip()
+        # Desglosar Nombre_Publica en Nombre_insumo + Presentación_insumo
+        # Formato SAS: "Artículo, Presentación" → separar por la última coma
+        if "Nombre_Publica" in df_grupo.columns:
+            partes = df_grupo["Nombre_Publica"].str.rsplit(",", n=1, expand=True)
+            df_grupo["Nombre_insumo"] = partes[0].str.strip()
+            df_grupo["Presentación_insumo"] = partes[1].str.strip() if 1 in partes.columns else ""
 
-        hojas[grupo] = df_grupo
+        col_map = {
+            "CodigoDepto":         next((c for c in ["CodigoDepto"] if c in df_grupo.columns), None),
+            "NombreDepartamento":  "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
+            "CÓDIGO DIVIPOLA":     "CÓDIGO DIVIPOLA" if "CÓDIGO DIVIPOLA" in df_grupo.columns else None,
+            "NombreMunicipio":     "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
+            "CÓDIGO CPC":          "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
+            "Nombre_insumo":       "Nombre_insumo" if "Nombre_insumo" in df_grupo.columns else None,
+            "Presentación_insumo": "Presentación_insumo" if "Presentación_insumo" in df_grupo.columns else None,
+            "PRECIO_ANTERIOR":     col_precio_anterior,
+            "PRECIO_ACTUAL":       col_precio_actual,
+            "VARIACION(%)":        "VARIACION" if "VARIACION" in df_grupo.columns else None,
+            "Cuenta":              "N_ARTICULOS" if "N_ARTICULOS" in df_grupo.columns else None,
+            "Tendencia":           "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
+            "Mercado":             "Mercado" if "Mercado" in df_grupo.columns else None,
+            "Nombre_Publica":      "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
+        }
+        cols_sel = [v for v in col_map.values() if v and v in df_grupo.columns]
+        rename_inv = {v: k for k, v in col_map.items() if v and v in df_grupo.columns}
+        df_out = df_grupo[cols_sel].rename(columns=rename_inv)
+        df_out = df_out.sort_values(
+            [c for c in ["NombreDepartamento", "NombreMunicipio", "Nombre_Publica"] if c in df_out.columns]
+        )
+        hojas[grupo] = df_out
 
     escribir_excel_multisheet(ruta, hojas)
 
@@ -235,7 +324,7 @@ def exportar_cuadros(
 
         # Conteo de mercados por tendencia
         conteo = (
-            df_grupo.groupby(["CÓDIGO CPC", "Nombre_Publica", "TENDENCIA"])
+            df_grupo.groupby(["CÓDIGO CPC", "Nombre_Publica", "TENDENCIA"], observed=True)
             .size()
             .unstack(fill_value=0)
             .reset_index()

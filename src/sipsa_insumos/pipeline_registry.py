@@ -1,19 +1,20 @@
 """Registro de pipelines del proyecto SIPSA Insumos.
 
-Pipeline genérico: los 8 módulos de insumos ejecutan el mismo flujo de 6 etapas.
+Pipeline genérico: los 9 módulos de insumos ejecutan el mismo flujo de 6 etapas.
 Se instancian vía namespace para que los datasets sean únicos en el catalog.
 
 Módulos:
-  agricolas    Insumos Agrícolas (6 grupos: COADYUDANTES, FERTILIZANTES, FUNGICIDAS,
-               HERBICIDAS, INSECTICIDAS, BIOINSUMOS)
-  pecuarios    Insumos Pecuarios (7 grupos: ALIMENTOS, ANTIBIOTICOS, ANTISEPTICOS,
-               HORMONALES, INSECTICIDAS, MEDICAMENTOS, VITAMINAS)
-  arriendos    Arriendos de Tierras
-  jornales     Jornales Agrícolas
-  elementos    Elementos Agropecuarios
-  empaques     Empaques Agropecuarios
-  servicios    Servicios Agropecuarios
-  propagacion  Material de Propagación
+  agricolas    Insumos Agrícolas — Mensual (6 grupos: COADYUDANTES, FERTILIZANTES,
+               FUNGICIDAS, HERBICIDAS, INSECTICIDAS, BIOINSUMOS)
+  pecuarios    Insumos Pecuarios — Mensual (7 grupos: ALIMENTOS, ANTIBIOTICOS,
+               ANTISEPTICOS, HORMONALES, INSECTICIDAS, MEDICAMENTOS, VITAMINAS)
+  arriendos    Arriendos de Tierras — Trimestral (FEB, MAY, AGO, NOV)
+  servicios    Servicios Agrícolas — Trimestral (FEB, MAY, AGO, NOV)
+  jornales     Jornales Agrícolas — Trimestral (MAR, JUN, SEP, DIC)
+  especies     Especies Productivas — Trimestral (MAR, JUN, SEP, DIC)
+  elementos    Elementos Agropecuarios — Bimestral (ENE, MAR, MAY, JUL, SEP, NOV)
+  empaques     Empaques Agropecuarios — Bimestral (ENE, MAR, MAY, JUL, SEP, NOV)
+  propagacion  Material de Propagación — Bimestral (FEB, ABR, JUN, AGO, OCT, DIC)
 
 Pipelines compuestos:
   __default__  Todos los módulos en secuencia.
@@ -21,8 +22,7 @@ Pipelines compuestos:
 Uso frecuente:
   kedro run                          # todos los módulos
   kedro run --pipeline agricolas     # solo insumos agrícolas
-  kedro run --pipeline pecuarios     # solo insumos pecuarios
-  kedro run --tags agricolas         # alternativa por tags
+  kedro run --pipeline propagacion   # solo material de propagación
 """
 from __future__ import annotations
 
@@ -39,10 +39,11 @@ MODULOS = [
     "agricolas",
     "pecuarios",
     "arriendos",
+    "servicios",
     "jornales",
+    "especies",
     "elementos",
     "empaques",
-    "servicios",
     "propagacion",
 ]
 
