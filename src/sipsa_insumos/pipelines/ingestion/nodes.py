@@ -21,6 +21,8 @@ Modos de llave (tipo_llave):
 from __future__ import annotations
 
 import logging
+import re
+from datetime import date
 
 import pandas as pd
 
@@ -33,6 +35,7 @@ _ESTADOS_VALIDOS = {"ANALIZADO CENTRAL", "APROBADO"}
 
 _RENAME_ESTANDAR: dict[str, str] = {
     "Municipio":      "CÓDIGO DIVIPOLA",
+    "Fuente":         "FUENTE",
     "Codigo CPC":     "CÓDIGO CPC",
     "Articulo":       "ARTÍCULO",
     "CasaCom.":       "CASA COMERCIAL",
@@ -43,6 +46,8 @@ _RENAME_ESTANDAR: dict[str, str] = {
 
 _RENAME_CARACTE: dict[str, str] = {
     "Municipio":      "CÓDIGO DIVIPOLA",
+    "Fuente":         "FUENTE",
+    "Informante":     "INFORMANTE",
     "Codigo CPC":     "CÓDIGO CPC",
     "Articulo":       "ARTÍCULO",
     "Precio Actual":  "PRECIO",
@@ -104,13 +109,35 @@ def leer_base_liviana(
     return _procesar_estandar(df, periodo, tipo_llave)
 
 
+_EXCEL_EPOCH = date(1899, 12, 30)
+_RE_DATE_ICA = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+
+def _ica_fix(v: str) -> str:
+    """Convierte ICA leído como fecha de Excel de vuelta al serial numérico.
+
+    pandas lee celdas de Excel con formato fecha aunque se pida dtype=str.
+    Ejemplo: ICA 3119 → '1908-07-14 00:00:00' → se devuelve '3119'.
+    Valores ya en formato correcto (p.ej. '3167-3', 'NA') se devuelven tal cual.
+    """
+    if _RE_DATE_ICA.match(v):
+        try:
+            d = pd.to_datetime(v).date()
+            return str((d - _EXCEL_EPOCH).days)
+        except Exception:
+            pass
+    return v
+
+
 def _procesar_estandar(df: pd.DataFrame, periodo: str, tipo_llave: str) -> pd.DataFrame:
     """Procesa módulos con columnas UnMed./CasaCom./RegICA."""
     df = df.rename(columns=_RENAME_ESTANDAR)
     df["CÓDIGO DIVIPOLA"] = df["CÓDIGO DIVIPOLA"].str.strip().str.zfill(5)
     df["CÓDIGO CPC"] = df["CÓDIGO CPC"].astype(str).str.strip().str.split(".").str[0]
     df["MES_AÑO"] = periodo
-    df["REGISTRO ICA"] = df["REGISTRO ICA"].astype(str).str.strip().str.split(".").str[0]
+    df["REGISTRO ICA"] = (
+        df["REGISTRO ICA"].astype(str).str.strip().str.split(".").str[0].map(_ica_fix)
+    )
 
     cols_canon = list(_RENAME_ESTANDAR.values()) + ["MES_AÑO"]
     df = df[[c for c in cols_canon if c in df.columns]].copy()
@@ -145,7 +172,7 @@ def _procesar_caracte(df: pd.DataFrame, periodo: str) -> pd.DataFrame:
     df["CANTIDAD"] = ""
 
     cols_canon = [
-        "CÓDIGO DIVIPOLA", "CÓDIGO CPC", "ARTÍCULO", "PRECIO",
+        "CÓDIGO DIVIPOLA", "FUENTE", "INFORMANTE", "CÓDIGO CPC", "ARTÍCULO", "PRECIO",
         "CARACTERÍSTICA", "UNIDAD DE MEDIDA", "LLAVE_ARTICULO",
         "NOMBRE_UM", "UNIDAD", "CANTIDAD", "MES_AÑO",
     ]

@@ -16,13 +16,21 @@ Módulos:
   empaques     Empaques Agropecuarios — Bimestral (ENE, MAR, MAY, JUL, SEP, NOV)
   propagacion  Material de Propagación — Bimestral (FEB, ABR, JUN, AGO, OCT, DIC)
 
+Pipeline auxiliar:
+  sin_precio_ant   Revisión Sin Precio Anterior — genera REV_SIN_PRECIO_ANTE_*.xlsx
+                   para registros con REVISA=2. Sub-pipelines por módulo:
+                   sin_precio_ant_agricolas / sin_precio_ant_pecuarios /
+                   sin_precio_ant_elementos / sin_precio_ant_propagacion
+
 Pipelines compuestos:
-  __default__  Todos los módulos en secuencia.
+  __default__  Todos los módulos principales en secuencia (sin sin_precio_ant).
 
 Uso frecuente:
-  kedro run                          # todos los módulos
-  kedro run --pipeline agricolas     # solo insumos agrícolas
-  kedro run --pipeline propagacion   # solo material de propagación
+  kedro run                                 # todos los módulos principales
+  kedro run --pipeline agricolas            # solo insumos agrícolas
+  kedro run --pipeline propagacion          # solo material de propagación
+  kedro run --pipeline sin_precio_ant       # revisión sin precio anterior (todos)
+  kedro run --tags sin_precio_ant_agricolas # solo agricolas sin precio anterior
 """
 from __future__ import annotations
 
@@ -34,6 +42,13 @@ from .pipelines.quality.pipeline import create_pipeline as quality
 from .pipelines.aggregation.pipeline import create_pipeline as aggregation
 from .pipelines.comparison.pipeline import create_pipeline as comparison
 from .pipelines.reporting.pipeline import create_pipeline as reporting
+from .pipelines.sin_precio_ant.pipeline import (
+    create_pipeline as sin_precio_ant,
+    create_pipeline_agricolas as sin_precio_ant_agricolas,
+    create_pipeline_pecuarios as sin_precio_ant_pecuarios,
+    create_pipeline_elementos as sin_precio_ant_elementos,
+    create_pipeline_propagacion as sin_precio_ant_propagacion,
+)
 
 MODULOS = [
     "agricolas",
@@ -98,4 +113,12 @@ def register_pipelines() -> dict[str, Pipeline]:
     """Registra todos los pipelines del proyecto SIPSA Insumos."""
     pipelines: dict[str, Pipeline] = {m: _pipeline_modulo(m) for m in MODULOS}
     pipelines["__default__"] = sum(pipelines[m] for m in MODULOS)
+
+    # Sin Precio Anterior: pipeline auxiliar post-procesamiento
+    pipelines["sin_precio_ant"] = sin_precio_ant()
+    pipelines["sin_precio_ant_agricolas"] = sin_precio_ant_agricolas()
+    pipelines["sin_precio_ant_pecuarios"] = sin_precio_ant_pecuarios()
+    pipelines["sin_precio_ant_elementos"] = sin_precio_ant_elementos()
+    pipelines["sin_precio_ant_propagacion"] = sin_precio_ant_propagacion()
+
     return pipelines

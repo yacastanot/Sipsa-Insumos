@@ -1,0 +1,73 @@
+# =============================================================================
+# SIPSA INSUMOS — Parámetros Sin Precio Anterior
+# Actualizar cada período: rutas de entrada (ruta_historico, ruta_var_atipico)
+# y el flag 'activo' según qué módulos corresponden al período.
+#
+# Periodicidades:
+#   Agrícolas   — mensual (activo todos los meses)
+#   Pecuarios   — mensual (activo todos los meses)
+#   Elementos   — bimestral impar (ENE, MAR, MAY, JUL, SEP, NOV)
+#   Propagación — bimestral par   (FEB, ABR, JUN, AGO, OCT, DIC)
+#
+# Rutas de la carpeta de entrada (varía por período):
+#   SIN_PRECIO_ANT/2026/01Entrada/01Entrada/YYYYMMDD/
+# =============================================================================
+
+sin_precio_ant:
+
+  # ─── Insumos Agrícolas (mensual) ───────────────────────────────────────────
+  agricolas:
+    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/Ins_Agrícolas para revisiones.xlsx"
+    hoja_historico: "Agrícolas"
+    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/VAR_ATIPICO_AGRICOLA_MAY2026.XLSX"
+    hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"
+    casacom_col_hist: "CasaCom."
+    unmed_col_hist:   "UnMed."
+    casacom_col_var:  "CasaCom."
+    unmed_col_var:    "UnMed."
+    nov_col:          "Nov."
+    modulo:           "AGRICOLAS"
+    activo:           true        # siempre activo (mensual)
+
+  # ─── Insumos Pecuarios (mensual) ───────────────────────────────────────────
+  pecuarios:
+    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/Ins_Pecuarios para revisiones.xlsx"
+    hoja_historico: "Pecuarios"
+    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/VAR_ATIPICO_PECUARIO_MAY2026.XLSX"
+    hoja_var_atipico: "VAR_ATIPICO_PECUARIO"
+    casacom_col_hist: "CasaCom."
+    unmed_col_hist:   "UnMed."
+    casacom_col_var:  "CasaCom."
+    unmed_col_var:    "UnMed."
+    nov_col:          "Nov."
+    modulo:           "PECUARIOS"
+    activo:           true        # siempre activo (mensual)
+
+  # ─── Elementos Agropecuarios (bimestral impar: ENE, MAR, MAY, JUL, SEP, NOV)
+  elementos:
+    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/Elementos para revisiones.xlsx"
+    hoja_historico: "Elementos"
+    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/VAR_ATIPICO_ELEMENTOS_MAY2026.XLSX"
+    hoja_var_atipico: "VAR_ATIPICO_ELEMENTOS"
+    casacom_col_hist: "CasaCom."
+    unmed_col_hist:   "UnMed."
+    casacom_col_var:  "CasaCom."
+    unmed_col_var:    "UnMed."
+    nov_col:          "Nov."
+    modulo:           "ELEMENTOS"
+    activo:           true        # MAY es bimestral impar → activo
+
+  # ─── Material de Propagación (bimestral par: FEB, ABR, JUN, AGO, OCT, DIC)
+  propagacion:
+    # Actualizar rutas cuando corresponda al bimestral par siguiente (JUN2026)
+    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260430/Material_propag para revisiones.xlsx"
+    hoja_historico: "Material"
+    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260430/VAR_ATIPICO_MATERIAL_ABR2026.XLSX"
+    hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"   # nombre de hoja en el archivo fuente
+    casacom_col_hist: "CasaCom."   # el histórico usa punto
+    unmed_col_hist:   "UnMed."
+    casacom_col_var:  "CasaCom#"   # el VAR_ATIPICO usa numeral (#)
+    unmed_col_var:    "UnMed#"
+    nov_col:          "Nov#"
+    modulo:           "MATERIAL"
+    activo:           false       # MAY no es bimestral par; activar en JUN2026

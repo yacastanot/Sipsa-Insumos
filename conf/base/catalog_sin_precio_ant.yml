@@ -1,0 +1,29 @@
+# =============================================================================
+# SIPSA INSUMOS — Catalog Sin Precio Anterior
+# Metadata que devuelve cada nodo tras generar el Excel de revisión.
+# Los Excel de revisión se escriben directamente en el nodo (data/08_reporting/sin_precio_ant/).
+# =============================================================================
+
+sin_precio_ant.meta_agricolas:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/sin_precio_ant/meta_agricolas_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+sin_precio_ant.meta_pecuarios:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/sin_precio_ant/meta_pecuarios_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+sin_precio_ant.meta_elementos:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/sin_precio_ant/meta_elementos_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+sin_precio_ant.meta_propagacion:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/sin_precio_ant/meta_propagacion_${globals:periodo}.parquet
+  save_args:
+    index: false

@@ -4,6 +4,6 @@ arriendos:
   hoja_liviana: "Información Insumos"
   tipo_modulo: "caracte"
   tipo_llave: "unmed"
-  min_n: 1
+  min_n: 2
   grupos:
     - "ARRIENDOS"

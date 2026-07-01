@@ -19,10 +19,12 @@ import pandas as pd
 log = logging.getLogger(__name__)
 
 # Llave compuesta para detección de duplicados (equivale a SAS PROC SORT nodup)
-# Incluye PRECIO para solo eliminar registros completamente idénticos.
-# Registros del mismo vendedor con diferente precio son observaciones válidas.
+# FUENTE diferencia observaciones de distintos puntos de venta — dos fuentes distintas
+# que reportan el mismo producto al mismo precio son observaciones independientes válidas.
 _LLAVE_DUPLICADOS = [
     "CÓDIGO DIVIPOLA",
+    "FUENTE",
+    "INFORMANTE",       # caracte modules only — differentiates informants within same fuente
     "CÓDIGO CPC",
     "ARTÍCULO",
     "CASA COMERCIAL",
