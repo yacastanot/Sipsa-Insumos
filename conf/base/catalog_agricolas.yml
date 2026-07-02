@@ -55,49 +55,49 @@ agricolas.base_comparada:
 # ── DIAGNÓSTICO: archivos Excel de control (1 hoja cada uno) ─────────────────
 agricolas.faltan_divipola:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/FALTAN_DIVIPOLA_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/agricolas/FALTAN_DIVIPOLA_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_DIVIPOLA"
 
 agricolas.faltan_grupo:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/FALTAN_GRUPO_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/agricolas/FALTAN_GRUPO_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_GRUPO"
 
 agricolas.faltan_publica:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/FALTAN_PUBLICA_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/agricolas/FALTAN_PUBLICA_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_PUBLICA"
 
 agricolas.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/DUPLI_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/agricolas/INSUMOS_AGRICOLAS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 agricolas.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/CVs_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/agricolas/CV's INSUMOS AGRICOLAS ${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
 
 agricolas.var_atipico:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/VAR_ATIPICO_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/agricolas/VAR_ATIPICO_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "VAR_ATIPICO"
 
 agricolas.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/agricolas/MENOR2_AGRICOLAS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/agricolas/INSU_AGRIC_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -126,5 +126,23 @@ agricolas.anexos_meta:
 agricolas.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/agricolas/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+agricolas.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/agricolas/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

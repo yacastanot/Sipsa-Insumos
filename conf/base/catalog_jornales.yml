@@ -65,14 +65,14 @@ jornales.faltan_publica:
 
 jornales.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/DUPLI_JORNALES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/jornales/JORNALES_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 jornales.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/CVs_JORNALES_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/jornales/CV's_JORNALES_${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
@@ -86,7 +86,7 @@ jornales.var_atipico:
 
 jornales.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/MENOR2_JORNALES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/jornales/JORNALES_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ jornales.anexos_meta:
 jornales.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/jornales/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+jornales.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/jornales/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

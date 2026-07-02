@@ -65,14 +65,14 @@ elementos.faltan_publica:
 
 elementos.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/elementos/DUPLI_ELEMENTOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/elementos/ELEM_AGROPE_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 elementos.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/elementos/CVs_ELEMENTOS_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/elementos/CV's_ELEMENTOS_${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
@@ -86,7 +86,7 @@ elementos.var_atipico:
 
 elementos.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/elementos/MENOR2_ELEMENTOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/elementos/ELEM_AGROPE_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ elementos.anexos_meta:
 elementos.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/elementos/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+elementos.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/elementos/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

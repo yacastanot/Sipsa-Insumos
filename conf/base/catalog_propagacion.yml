@@ -58,35 +58,35 @@ propagacion.faltan_grupo:
 
 propagacion.faltan_publica:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/propagacion/FALTAN_PUBLICA_PROPAGACION_${globals:periodo}.xlsx
+  filepath: data/08_reporting/propagacion/FALTAN_PUBLICA_MATERIAL_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_PUBLICA"
 
 propagacion.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/propagacion/DUPLI_PROPAGACION_${globals:periodo}.xlsx
+  filepath: data/08_reporting/propagacion/MATERIAL_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 propagacion.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/propagacion/CVs_PROPAGACION_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/propagacion/CV's MATERIAL ${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
 
 propagacion.var_atipico:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/propagacion/VAR_ATIPICO_PROPAGACION_${globals:periodo}.xlsx
+  filepath: data/08_reporting/propagacion/VAR_ATIPICO_MATERIAL_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "VAR_ATIPICO"
 
 propagacion.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/propagacion/MENOR2_PROPAGACION_${globals:periodo}.xlsx
+  filepath: data/08_reporting/propagacion/MATE_PROPAGA_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ propagacion.anexos_meta:
 propagacion.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/propagacion/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+propagacion.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/propagacion/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIPSA Insumos Agropecuarios</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f4f0;color:#1a2e1a;min-height:100vh}
+header{background:linear-gradient(135deg,#1b4332 0%,#2d6a4f 100%);padding:1.25rem 2rem;
+  display:flex;align-items:center;gap:1rem;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+header svg{width:36px;height:36px;flex-shrink:0}
+header h1{color:#fff;font-size:1.35rem;font-weight:700;letter-spacing:.01em}
+header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
+.periodo-badge{margin-left:auto;background:rgba(255,255,255,.15);color:#d8f3dc;
+  padding:.35rem .8rem;border-radius:20px;font-size:.85rem;font-weight:600;
+  border:1px solid rgba(255,255,255,.25);white-space:nowrap}
+
+.container{max-width:1100px;margin:0 auto;padding:1.5rem}
+.step{background:#fff;border-radius:12px;margin-bottom:1.25rem;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden}
+.step-header{padding:1rem 1.25rem;cursor:pointer;display:flex;
+  align-items:center;gap:.75rem;user-select:none;border-bottom:1px solid #e8f5e9}
+.step-header:hover{background:#f9fef9}
+.step-num{background:#2d6a4f;color:#fff;width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.78rem;
+  font-weight:700;flex-shrink:0}
+.step-title{font-weight:600;font-size:.95rem;color:#1b4332;flex:1}
+.step-tag{font-size:.72rem;padding:.2rem .55rem;border-radius:10px;font-weight:600;
+  letter-spacing:.03em;white-space:nowrap}
+.tag-cuadros{background:#e8f5e9;color:#1b5e20}
+.tag-spa{background:#e8eaf6;color:#283593}
+.tag-exec{background:#fff3e0;color:#e65100}
+.step-arrow{color:#95a5a6;font-size:1rem;transition:.2s}
+.step-body{padding:1.25rem;display:none}
+.step.open .step-body{display:block}
+.step.open .step-arrow{transform:rotate(180deg)}
+
+/* Configuración de período */
+.config-row{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.25rem}
+.form-group{display:flex;flex-direction:column;gap:.35rem}
+.form-group label{font-size:.8rem;font-weight:600;color:#555}
+.form-group select,.form-group input{
+  padding:.5rem .75rem;border:1.5px solid #c8e6c9;border-radius:8px;
+  font-size:.9rem;color:#1a2e1a;background:#fff;min-width:160px}
+.form-group select:focus,.form-group input:focus{
+  outline:none;border-color:#2d6a4f;box-shadow:0 0 0 3px rgba(45,106,79,.15)}
+.btn{padding:.55rem 1.25rem;border-radius:8px;font-size:.88rem;font-weight:600;
+  border:none;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:.5rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#2d6a4f;color:#fff}
+.btn-primary:hover:not(:disabled){background:#1b4332}
+.btn-secondary{background:#e8f5e9;color:#1b4332;border:1.5px solid #a5d6a7}
+.btn-secondary:hover:not(:disabled){background:#c8e6c9}
+.btn-indigo{background:#3949ab;color:#fff}
+.btn-indigo:hover:not(:disabled){background:#283593}
+.btn-danger{background:#c62828;color:#fff}
+.btn-danger:hover:not(:disabled){background:#b71c1c}
+.btn-sm{padding:.35rem .85rem;font-size:.82rem}
+
+/* Grid de módulos */
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem;margin-top:.75rem}
+.module-card{border:1.5px solid #e8f5e9;border-radius:10px;padding:.75rem;
+  display:flex;flex-direction:column;gap:.4rem;transition:.15s}
+.module-card.active{border-color:#52b788;background:#f0faf4}
+.module-card.inactive{border-color:#e0e0e0;background:#fafafa;opacity:.7}
+.module-label{font-size:.82rem;font-weight:600;color:#1b4332}
+.module-card.inactive .module-label{color:#9e9e9e}
+.module-period{font-size:.72rem;color:#666}
+.module-status{display:inline-block;padding:.18rem .55rem;border-radius:8px;
+  font-size:.7rem;font-weight:700;letter-spacing:.04em;align-self:flex-start}
+.status-active{background:#d8f3dc;color:#1b4332}
+.status-inactive{background:#e0e0e0;color:#757575}
+
+/* Zonas de carga */
+.upload-section-title{font-size:.88rem;font-weight:700;color:#2d6a4f;
+  margin:1rem 0 .6rem;display:flex;align-items:center;gap:.5rem;
+  padding-bottom:.4rem;border-bottom:1.5px solid #e8f5e9}
+.upload-section-title.spa-title{color:#3949ab;border-bottom-color:#e8eaf6}
+.upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem}
+.upload-card{border:1.5px dashed #c8e6c9;border-radius:10px;padding:.9rem;
+  display:flex;flex-direction:column;gap:.6rem;transition:.15s;position:relative}
+.upload-card:hover{border-color:#2d6a4f;background:#f9fef9}
+.upload-card.inactive-module{border-color:#e0e0e0;background:#f9f9f9;opacity:.55;pointer-events:none}
+.upload-card.spa-card{border-color:#c5cae9}
+.upload-card.spa-card:hover{border-color:#3949ab;background:#f3f4fc}
+.upload-card-title{font-size:.82rem;font-weight:700;color:#1b4332;
+  display:flex;align-items:center;gap:.45rem}
+.upload-card.spa-card .upload-card-title{color:#283593}
+.upload-input{display:none}
+.upload-label{display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;
+  border-radius:7px;font-size:.8rem;cursor:pointer;font-weight:500;
+  border:1px solid #a5d6a7;color:#1b4332;background:#e8f5e9;transition:.15s;
+  width:fit-content}
+.upload-label:hover{background:#c8e6c9}
+.upload-card.spa-card .upload-label{border-color:#9fa8da;color:#283593;background:#e8eaf6}
+.upload-card.spa-card .upload-label:hover{background:#c5cae9}
+.upload-status{font-size:.75rem;color:#555;font-style:italic;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.upload-ok{color:#1b4332;font-style:normal;font-weight:600}
+.upload-err{color:#c62828;font-style:normal;font-weight:600}
+.spa-subfiles{display:flex;flex-direction:column;gap:.5rem}
+.spa-file-row{display:flex;flex-direction:column;gap:.3rem}
+.spa-file-label{font-size:.72rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+
+/* Sección de ejecución */
+.run-section{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-top:.5rem}
+.run-divider{color:#bbb;font-size:.75rem;font-weight:600}
+.run-module-btns{display:flex;flex-wrap:wrap;gap:.5rem}
+
+/* Terminal de log */
+.terminal{background:#0d1117;border-radius:10px;padding:1rem;
+  font-family:'Cascadia Code','Consolas',monospace;font-size:.78rem;
+  line-height:1.55;height:360px;overflow-y:auto;color:#c9d1d9}
+.terminal .log-ok{color:#56d364}
+.terminal .log-err{color:#f85149}
+.terminal .log-info{color:#79c0ff}
+.terminal .log-warn{color:#e3b341}
+.terminal::-webkit-scrollbar{width:6px}
+.terminal::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+
+/* Archivos de salida */
+.outputs-section{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:640px){.outputs-section{grid-template-columns:1fr}}
+.outputs-group{border:1.5px solid #e0e0e0;border-radius:10px;overflow:hidden}
+.outputs-group-header{padding:.65rem 1rem;font-weight:700;font-size:.82rem;
+  display:flex;align-items:center;gap:.5rem}
+.outputs-group.cuadros .outputs-group-header{background:#e8f5e9;color:#1b4332}
+.outputs-group.spa .outputs-group-header{background:#e8eaf6;color:#283593}
+.outputs-list{padding:.5rem;max-height:260px;overflow-y:auto}
+.output-item{display:flex;align-items:center;justify-content:space-between;
+  padding:.4rem .6rem;border-radius:7px;font-size:.78rem;transition:.1s}
+.output-item:hover{background:#f5f5f5}
+.output-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:#333;margin-right:.5rem}
+.output-dl{color:#2d6a4f;font-weight:600;text-decoration:none;font-size:.75rem;
+  flex-shrink:0;padding:.2rem .5rem;border-radius:5px;background:#e8f5e9}
+.output-dl:hover{background:#c8e6c9}
+.outputs-group.spa .output-dl{color:#3949ab;background:#e8eaf6}
+.outputs-group.spa .output-dl:hover{background:#c5cae9}
+.outputs-empty{padding:.75rem;text-align:center;color:#aaa;font-style:italic;font-size:.8rem}
+.refresh-row{display:flex;justify-content:flex-end;margin-bottom:.6rem}
+
+/* Toast */
+.toast-container{position:fixed;top:1rem;right:1rem;display:flex;flex-direction:column;
+  gap:.5rem;z-index:9999;pointer-events:none}
+.toast{padding:.7rem 1.1rem;border-radius:9px;font-size:.83rem;font-weight:500;
+  pointer-events:auto;box-shadow:0 4px 12px rgba(0,0,0,.2);display:flex;gap:.5rem;
+  animation:slideIn .2s ease;max-width:340px}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.toast.success{background:#1b4332;color:#fff}
+.toast.error{background:#c62828;color:#fff}
+.toast.info{background:#1565c0;color:#fff}
+
+/* Running indicator */
+.running-indicator{display:none;align-items:center;gap:.5rem;color:#2d6a4f;
+  font-size:.82rem;font-weight:600}
+.running-indicator.visible{display:flex}
+.spinner{width:16px;height:16px;border:2.5px solid #c8e6c9;
+  border-top-color:#2d6a4f;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="18" cy="18" r="18" fill="rgba(255,255,255,.15)"/>
+    <path d="M18 6 C12 10 10 15 14 18 C10 21 12 28 18 30 C24 28 26 21 22 18 C26 15 24 10 18 6Z" fill="#95d5b2"/>
+    <path d="M11 20 C8 20 7 23 9 25 C11 27 14 27 16 25" stroke="#fff" stroke-width="1.5" fill="none"/>
+    <path d="M25 20 C28 20 29 23 27 25 C25 27 22 27 20 25" stroke="#fff" stroke-width="1.5" fill="none"/>
+    <circle cx="18" cy="18" r="3" fill="#fff"/>
+  </svg>
+  <h1>SIPSA Insumos Agropecuarios<span>DANE</span></h1>
+  <div class="periodo-badge" id="hdr-periodo">{{ cfg.periodo }}</div>
+</header>
+
+<div class="container">
+
+  <!-- ── 1. Período ─────────────────────────────────────────────────── -->
+  <div class="step open" id="step-config">
+    <div class="step-header" onclick="toggleStep('step-config')">
+      <div class="step-num">1</div>
+      <span class="step-title">Configurar período de procesamiento</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div class="config-row">
+        <div class="form-group">
+          <label>Mes</label>
+          <select id="sel-mes">
+            {% for num, (cod, nombre) in [
+              (1,("ENE","Enero")), (2,("FEB","Febrero")), (3,("MAR","Marzo")),
+              (4,("ABR","Abril")), (5,("MAY","Mayo")), (6,("JUN","Junio")),
+              (7,("JUL","Julio")), (8,("AGO","Agosto")), (9,("SEP","Septiembre")),
+              (10,("OCT","Octubre")), (11,("NOV","Noviembre")), (12,("DIC","Diciembre"))
+            ] %}
+            <option value="{{ num }}" {% if num == mes_num %}selected{% endif %}>
+              {{ "%02d" | format(num) }} — {{ nombre }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Año</label>
+          <input type="number" id="inp-anio" value="{{ anio }}" min="2020" max="2040">
+        </div>
+        <div class="form-group" style="justify-content:flex-end">
+          <button class="btn btn-primary" onclick="configurar()">Aplicar período</button>
+        </div>
+      </div>
+
+      <div style="font-size:.82rem;font-weight:700;color:#555;margin-bottom:.6rem">
+        Calendario de módulos activos
+      </div>
+      <div class="modules-grid" id="modules-grid">
+        {% for m in modulos %}
+        {% set is_active = m.id in activos %}
+        <div class="module-card {% if is_active %}active{% else %}inactive{% endif %}"
+             id="card-{{ m.id }}">
+          <div class="module-label">{{ m.label }}</div>
+          <div class="module-period">{{ m.period_label }}</div>
+          <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}"
+                id="badge-{{ m.id }}">
+            {% if is_active %}ACTIVO{% else %}INACTIVO{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div style="font-size:.82rem;font-weight:700;color:#555;margin:.9rem 0 .6rem">
+        Sin Precio Anterior — módulos activos
+      </div>
+      <div class="modules-grid" id="spa-modules-grid">
+        {% for m in spa_modulos %}
+        {% set is_active = m.id in spa_activos %}
+        <div class="module-card {% if is_active %}active{% else %}inactive{% endif %}"
+             id="spa-card-{{ m.id }}">
+          <div class="module-label">{{ m.label }}</div>
+          <div class="module-period">SPA</div>
+          <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}"
+                id="spa-badge-{{ m.id }}">
+            {% if is_active %}ACTIVO{% else %}INACTIVO{% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. CUADROS – Cargar bases livianas ──────────────────────────── -->
+  <div class="step open" id="step-cuadros">
+    <div class="step-header" onclick="toggleStep('step-cuadros')">
+      <div class="step-num">2</div>
+      <span class="step-title">Cargar bases livianas</span>
+      <span class="step-tag tag-cuadros">CUADROS</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div class="upload-section-title">
+        📂 Archivos Excel — una base liviana por módulo activo
+      </div>
+      <div class="upload-grid" id="upload-grid-cuadros">
+        {% for m in modulos %}
+        {% set is_active = m.id in activos %}
+        <div class="upload-card {% if not is_active %}inactive-module{% endif %}"
+             id="ucard-{{ m.id }}">
+          <div class="upload-card-title">
+            <span>{{ m.label }}</span>
+            <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}">
+              {% if is_active %}ACTIVO{% else %}INACT.{% endif %}
+            </span>
+          </div>
+          <label class="upload-label" for="file-{{ m.id }}">
+            📎 Seleccionar base liviana
+          </label>
+          <input type="file" class="upload-input" id="file-{{ m.id }}"
+                 accept=".xlsx,.xls" data-modulo="{{ m.id }}"
+                 onchange="uploadCuadros(this)">
+          <div class="upload-status" id="status-{{ m.id }}">Sin archivo cargado</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. SIN PRECIO ANTERIOR – Cargar archivos ─────────────────── -->
+  <div class="step open" id="step-spa">
+    <div class="step-header" onclick="toggleStep('step-spa')">
+      <div class="step-num">3</div>
+      <span class="step-title">Cargar archivos Sin Precio Anterior</span>
+      <span class="step-tag tag-spa">SIN_PRECIO_ANT</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div class="upload-section-title spa-title">
+        📂 Histórico + Variación Atípica — por sub-módulo activo
+      </div>
+      <div class="upload-grid" id="upload-grid-spa">
+        {% for m in spa_modulos %}
+        {% set is_active = m.id in spa_activos %}
+        <div class="upload-card spa-card {% if not is_active %}inactive-module{% endif %}"
+             id="spa-ucard-{{ m.id }}">
+          <div class="upload-card-title">
+            <span>{{ m.label }}</span>
+            <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}">
+              {% if is_active %}ACTIVO{% else %}INACT.{% endif %}
+            </span>
+          </div>
+          <div class="spa-subfiles">
+            <div class="spa-file-row">
+              <div class="spa-file-label">📘 Histórico (Ins_Revisiones)</div>
+              <label class="upload-label" for="spa-hist-{{ m.id }}">
+                📎 Seleccionar histórico
+              </label>
+              <input type="file" class="upload-input" id="spa-hist-{{ m.id }}"
+                     accept=".xlsx,.xls" data-modulo="{{ m.id }}" data-tipo="historico"
+                     onchange="uploadSPA(this)">
+              <div class="upload-status" id="spa-hist-status-{{ m.id }}">Sin archivo cargado</div>
+            </div>
+            <div class="spa-file-row">
+              <div class="spa-file-label">📙 Variación Atípica (VAR_ATIPICO)</div>
+              <label class="upload-label" for="spa-var-{{ m.id }}">
+                📎 Seleccionar var. atípica
+              </label>
+              <input type="file" class="upload-input" id="spa-var-{{ m.id }}"
+                     accept=".xlsx,.xls" data-modulo="{{ m.id }}" data-tipo="var_atipico"
+                     onchange="uploadSPA(this)">
+              <div class="upload-status" id="spa-var-status-{{ m.id }}">Sin archivo cargado</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 4. Ejecutar pipelines ──────────────────────────────────────── -->
+  <div class="step open" id="step-run">
+    <div class="step-header" onclick="toggleStep('step-run')">
+      <div class="step-num">4</div>
+      <span class="step-title">Ejecutar pipelines</span>
+      <span class="step-tag tag-exec">EJECUTAR</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div style="font-size:.82rem;font-weight:700;color:#555;margin-bottom:.75rem">
+        Cuadros (BASES_*.xlsx)
+      </div>
+      <div class="run-section">
+        <button class="btn btn-primary" id="btn-run-all" onclick="runPipeline('all_active')">
+          ▶ Ejecutar todos los módulos activos
+        </button>
+        <span class="run-divider">— o módulo individual —</span>
+        <div class="run-module-btns" id="run-individual-btns">
+          {% for m in modulos %}
+          {% set is_active = m.id in activos %}
+          <button class="btn btn-secondary btn-sm" data-modulo="{{ m.id }}"
+                  id="btn-mod-{{ m.id }}"
+                  onclick="runPipeline('{{ m.id }}')"
+                  {% if not is_active %}disabled{% endif %}>
+            {{ m.label[:18] }}…
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="height:1px;background:#e8f5e9;margin:1rem 0"></div>
+
+      <div style="font-size:.82rem;font-weight:700;color:#555;margin-bottom:.75rem">
+        Sin Precio Anterior (REV_SIN_PRECIO_ANTE_*.xlsx)
+      </div>
+      <div class="run-section">
+        <button class="btn btn-indigo" id="btn-run-spa" onclick="runPipeline('sin_precio_ant')">
+          ▶ Ejecutar Sin Precio Anterior (todos)
+        </button>
+        <span class="run-divider">— o sub-módulo —</span>
+        <div class="run-module-btns" id="run-spa-btns">
+          {% for m in spa_modulos %}
+          {% set is_active = m.id in spa_activos %}
+          <button class="btn btn-sm"
+                  style="{% if is_active %}background:#e8eaf6;color:#283593;border:1.5px solid #9fa8da;
+                         {% else %}background:#f5f5f5;color:#aaa;border:1.5px solid #e0e0e0;{% endif %}"
+                  id="btn-spa-{{ m.id }}"
+                  onclick="runPipeline('sin_precio_ant_{{ m.id }}')"
+                  {% if not is_active %}disabled{% endif %}>
+            {{ m.label[:18] }}…
+          </button>
+          {% endfor %}
+        </div>
+        <div class="running-indicator" id="running-indicator">
+          <div class="spinner"></div> Ejecutando…
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 5. Log de ejecución ────────────────────────────────────────── -->
+  <div class="step open" id="step-log">
+    <div class="step-header" onclick="toggleStep('step-log')">
+      <div class="step-num">5</div>
+      <span class="step-title">Log de ejecución</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.65rem">
+        <span style="font-size:.8rem;color:#777">Salida en tiempo real vía SSE</span>
+        <button class="btn btn-secondary btn-sm" onclick="clearLog()">Limpiar</button>
+      </div>
+      <div class="terminal" id="terminal">
+        <span class="log-info">── Esperando ejecución… ──</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 6. Archivos de salida ──────────────────────────────────────── -->
+  <div class="step open" id="step-outputs">
+    <div class="step-header" onclick="toggleStep('step-outputs')">
+      <div class="step-num">6</div>
+      <span class="step-title">Archivos de salida</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div class="refresh-row">
+        <button class="btn btn-secondary btn-sm" onclick="loadOutputs()">⟳ Actualizar lista</button>
+      </div>
+      <div class="outputs-section">
+        <div class="outputs-group cuadros">
+          <div class="outputs-group-header">📊 CUADROS — BASES_*.xlsx</div>
+          <div class="outputs-list" id="cuadros-list">
+            <div class="outputs-empty">Sin archivos</div>
+          </div>
+        </div>
+        <div class="outputs-group spa">
+          <div class="outputs-group-header">📋 SIN_PRECIO_ANT — REV_*.xlsx</div>
+          <div class="outputs-list" id="spa-list">
+            <div class="outputs-empty">Sin archivos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+const MODULOS = {{ activos | tojson }};
+const SPA_ACTIVOS = {{ spa_activos | tojson }};
+let _activeSSE = null;
+let _currentActivos = [...MODULOS];
+let _currentSpaActivos = [...SPA_ACTIVOS];
+
+// ── Acordeón ──────────────────────────────────────────────────────────────────
+function toggleStep(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info', ms = 4000) {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), ms);
+}
+
+// ── Configurar período ────────────────────────────────────────────────────────
+async function configurar() {
+  const mes_num = parseInt(document.getElementById('sel-mes').value);
+  const anio    = parseInt(document.getElementById('inp-anio').value);
+  try {
+    const r = await fetch('/configure', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({mes_num, anio}),
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+    const data = await r.json();
+    document.getElementById('hdr-periodo').textContent = data.periodo;
+    _currentActivos    = data.modulos_activos;
+    _currentSpaActivos = data.spa_activos;
+    _updateModulosBadges(data.modulos_activos, data.spa_activos);
+    toast(`Período actualizado: ${data.periodo}`, 'success');
+  } catch (e) { toast(`Error: ${e.message}`, 'error'); }
+}
+
+function _updateModulosBadges(activos, spaActivos) {
+  const allMods = ['agricolas','pecuarios','elementos','empaques','propagacion',
+                   'arriendos','servicios','jornales','especies'];
+  allMods.forEach(id => {
+    const isActive = activos.includes(id);
+    const card  = document.getElementById(`card-${id}`);
+    const badge = document.getElementById(`badge-${id}`);
+    const ucard = document.getElementById(`ucard-${id}`);
+    const btn   = document.getElementById(`btn-mod-${id}`);
+    if (card) {
+      card.className = `module-card ${isActive ? 'active' : 'inactive'}`;
+      badge.className = `module-status ${isActive ? 'status-active' : 'status-inactive'}`;
+      badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+    }
+    if (ucard) {
+      ucard.className = `upload-card${isActive ? '' : ' inactive-module'}`;
+    }
+    if (btn) btn.disabled = !isActive;
+  });
+
+  const spaMods = ['agricolas','pecuarios','elementos','propagacion'];
+  spaMods.forEach(id => {
+    const isActive = spaActivos.includes(id);
+    const card  = document.getElementById(`spa-card-${id}`);
+    const badge = document.getElementById(`spa-badge-${id}`);
+    const ucard = document.getElementById(`spa-ucard-${id}`);
+    const btn   = document.getElementById(`btn-spa-${id}`);
+    if (card) {
+      card.className = `module-card ${isActive ? 'active' : 'inactive'}`;
+      badge.className = `module-status ${isActive ? 'status-active' : 'status-inactive'}`;
+      badge.textContent = isActive ? 'ACTIVO' : 'INACTIVO';
+    }
+    if (ucard) {
+      ucard.className = `upload-card spa-card${isActive ? '' : ' inactive-module'}`;
+    }
+    if (btn) {
+      btn.disabled = !isActive;
+      btn.style.background  = isActive ? '#e8eaf6' : '#f5f5f5';
+      btn.style.color       = isActive ? '#283593' : '#aaa';
+      btn.style.borderColor = isActive ? '#9fa8da' : '#e0e0e0';
+    }
+  });
+}
+
+// ── Upload CUADROS ────────────────────────────────────────────────────────────
+async function uploadCuadros(input) {
+  const modulo   = input.dataset.modulo;
+  const file     = input.files[0];
+  const statusEl = document.getElementById(`status-${modulo}`);
+  if (!file) return;
+  statusEl.textContent = '⏳ Cargando…';
+  statusEl.className = 'upload-status';
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const r = await fetch(`/upload/cuadros/${modulo}`, {method:'POST', body:fd});
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+    const data = await r.json();
+    statusEl.textContent = `✅ ${data.filename} (${data.size_kb} KB)`;
+    statusEl.className = 'upload-status upload-ok';
+    toast(`${modulo}: base liviana cargada`, 'success');
+  } catch (e) {
+    statusEl.textContent = `❌ ${e.message}`;
+    statusEl.className = 'upload-status upload-err';
+    toast(`Error al cargar ${modulo}: ${e.message}`, 'error');
+  }
+}
+
+// ── Upload SIN PRECIO ANTERIOR ────────────────────────────────────────────────
+async function uploadSPA(input) {
+  const modulo = input.dataset.modulo;
+  const tipo   = input.dataset.tipo;   // "historico" | "var_atipico"
+  const file   = input.files[0];
+  const key    = tipo === 'historico' ? 'hist' : 'var';
+  const statusEl = document.getElementById(`spa-${key}-status-${modulo}`);
+  if (!file) return;
+  statusEl.textContent = '⏳ Cargando…';
+  statusEl.className = 'upload-status';
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const r = await fetch(`/upload/spa/${modulo}/${tipo}`, {method:'POST', body:fd});
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+    const data = await r.json();
+    statusEl.textContent = `✅ ${data.filename} (${data.size_kb} KB)`;
+    statusEl.className = 'upload-status upload-ok';
+    toast(`SPA ${modulo} / ${tipo}: cargado`, 'success');
+  } catch (e) {
+    statusEl.textContent = `❌ ${e.message}`;
+    statusEl.className = 'upload-status upload-err';
+    toast(`Error SPA ${modulo}/${tipo}: ${e.message}`, 'error');
+  }
+}
+
+// ── Ejecutar pipeline ─────────────────────────────────────────────────────────
+function setRunning(on) {
+  document.getElementById('running-indicator').classList.toggle('visible', on);
+  ['btn-run-all','btn-run-spa'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = on;
+  });
+  document.querySelectorAll('[id^="btn-mod-"],[id^="btn-spa-"]').forEach(b => {
+    if (!b.dataset.wasDisabled) b.dataset.wasDisabled = b.disabled;
+    if (on) b.disabled = true;
+    else b.disabled = b.dataset.wasDisabled === 'true';
+  });
+}
+
+function logLine(text) {
+  const term = document.getElementById('terminal');
+  const line = document.createElement('div');
+  if (text.includes('ERROR') || text.includes('__ERROR__') || text.includes('CRITICAL')) {
+    line.className = 'log-err';
+  } else if (text.startsWith('▶') || text.includes('INFO') || text.includes('kedro')) {
+    line.className = 'log-info';
+  } else if (text.includes('WARNING') || text.includes('WARN')) {
+    line.className = 'log-warn';
+  } else if (text.includes('__SUCCESS__')) {
+    line.className = 'log-ok';
+    text = '✓ Pipeline completado exitosamente';
+  } else {
+    line.className = '';
+  }
+  line.textContent = text;
+  term.appendChild(line);
+  term.scrollTop = term.scrollHeight;
+}
+
+function clearLog() {
+  const t = document.getElementById('terminal');
+  t.innerHTML = '<span class="log-info">── Log limpiado ──</span>';
+}
+
+async function runPipeline(name) {
+  if (_activeSSE) { _activeSSE.close(); _activeSSE = null; }
+  clearLog();
+  logLine(`▶ Iniciando: ${name}`);
+  setRunning(true);
+
+  const fd = new FormData();
+  fd.append('pipeline_name', name);
+
+  const resp = await fetch('/run', {method:'POST', body:fd});
+  if (!resp.ok) {
+    const e = await resp.json();
+    logLine(`ERROR: ${e.detail}`);
+    toast(`Error: ${e.detail}`, 'error');
+    setRunning(false);
+    return;
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  try {
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, {stream: true});
+      const events = buf.split('\n\n');
+      buf = events.pop();
+      for (const evt of events) {
+        if (evt.startsWith('data: ')) {
+          const msg = evt.slice(6).trim();
+          if (msg === '__SUCCESS__') {
+            logLine('__SUCCESS__');
+            toast('Pipeline completado exitosamente', 'success', 6000);
+            loadOutputs();
+          } else if (msg.startsWith('__ERROR__')) {
+            const detail = msg.replace('__ERROR__', '').trim();
+            logLine(`ERROR: ${detail || 'Pipeline falló'}`);
+            toast('El pipeline terminó con errores', 'error', 6000);
+          } else {
+            logLine(msg);
+          }
+        }
+      }
+    }
+  } finally {
+    setRunning(false);
+  }
+}
+
+// ── Archivos de salida ────────────────────────────────────────────────────────
+async function loadOutputs() {
+  try {
+    const r = await fetch('/outputs');
+    const data = await r.json();
+    renderOutputList('cuadros-list', data.cuadros, 'cuadros');
+    renderOutputList('spa-list',     data.spa,     'spa');
+  } catch (e) {
+    console.error('Error cargando outputs', e);
+  }
+}
+
+function renderOutputList(elId, files, tipo) {
+  const el = document.getElementById(elId);
+  if (!files || files.length === 0) {
+    el.innerHTML = '<div class="outputs-empty">Sin archivos</div>';
+    return;
+  }
+  el.innerHTML = files.map(f => `
+    <div class="output-item">
+      <span class="output-name" title="${f}">${f}</span>
+      <a class="output-dl" href="/download/${tipo}/${encodeURIComponent(f)}" download="${f}">
+        ⬇ Descargar
+      </a>
+    </div>
+  `).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadOutputs();
+</script>
+</body>
+</html>

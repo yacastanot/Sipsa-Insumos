@@ -65,14 +65,14 @@ empaques.faltan_publica:
 
 empaques.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/empaques/DUPLI_EMPAQUES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/empaques/EMPA_AGROPE_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 empaques.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/empaques/CVs_EMPAQUES_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/empaques/CV's_EMPAQUES_${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
@@ -86,7 +86,7 @@ empaques.var_atipico:
 
 empaques.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/empaques/MENOR2_EMPAQUES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/empaques/EMPA_AGROPE_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ empaques.anexos_meta:
 empaques.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/empaques/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+empaques.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/empaques/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

@@ -103,7 +103,7 @@ def _pipeline_modulo(nombre: str) -> Pipeline:
         + pipeline(
             reporting(),
             namespace=nombre,
-            parameters={"periodo", "ruta_reporting", "mes_actual", "mes_anterior"},
+            parameters={"periodo", "ruta_reporting", "mes_actual", "mes_anterior", "mes_num_actual"},
             tags=[nombre],
           )
     )

@@ -65,14 +65,14 @@ arriendos.faltan_publica:
 
 arriendos.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/DUPLI_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/arriendos/ARRIENDOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 arriendos.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/CVs_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/arriendos/CV's ARRIENDOS ${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
@@ -86,7 +86,7 @@ arriendos.var_atipico:
 
 arriendos.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/MENOR2_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/arriendos/ARRIENDOS_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ arriendos.anexos_meta:
 arriendos.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/arriendos/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+arriendos.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/arriendos/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

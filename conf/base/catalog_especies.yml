@@ -65,14 +65,14 @@ especies.faltan_publica:
 
 especies.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/especies/DUPLI_ESPECIES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/especies/ESPE_PRODUC_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 especies.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/especies/CVs_ESPECIES_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/especies/CV's_ESPECIES_${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
@@ -86,7 +86,7 @@ especies.var_atipico:
 
 especies.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/especies/MENOR2_ESPECIES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/especies/ESPE_PRODUC_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ especies.anexos_meta:
 especies.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/especies/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+especies.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/especies/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

@@ -65,14 +65,14 @@ servicios.faltan_publica:
 
 servicios.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/DUPLI_SERVICIOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/servicios/SERVICIOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "DUPLICADOS"
 
 servicios.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/CVs_SERVICIOS_${globals:periodo}.xlsx
+  filepath: "data/08_reporting/servicios/CV's SERVICIOS ${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CVs"
@@ -86,7 +86,7 @@ servicios.var_atipico:
 
 servicios.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/MENOR2_SERVICIOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/servicios/SERVICIOS_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
@@ -112,5 +112,23 @@ servicios.anexos_meta:
 servicios.cuadros_meta:
   type: pandas.ParquetDataset
   filepath: data/08_reporting/servicios/meta_cuadros_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.mayo_menores_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_mayo_menores_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.revision_hist_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_revision_hist_${globals:periodo}.parquet
+  save_args:
+    index: false
+
+servicios.revision_tematica_meta:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/servicios/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false
