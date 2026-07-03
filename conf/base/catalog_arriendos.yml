@@ -54,35 +54,35 @@ arriendos.faltan_grupo:
   filepath: data/08_reporting/arriendos/FALTAN_GRUPO_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_ARRIENDOS"
 
 arriendos.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/arriendos/FALTAN_PUBLICA_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_ARRIENDOS"
 
 arriendos.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/arriendos/ARRIENDOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "ARRIENDOS_DUPLI"
 
 arriendos.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/arriendos/CV's ARRIENDOS ${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 arriendos.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/arriendos/VAR_ATIPICO_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_ARRIENDOS"
 
 arriendos.menor2_reporte:
   type: pandas.ExcelDataset

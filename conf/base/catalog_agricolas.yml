@@ -65,35 +65,35 @@ agricolas.faltan_grupo:
   filepath: data/08_reporting/agricolas/FALTAN_GRUPO_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_AGRICOLA"
 
 agricolas.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/agricolas/FALTAN_PUBLICA_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_AGRICOLA"
 
 agricolas.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/agricolas/INSUMOS_AGRICOLAS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "INSUMOS_AGRICOLAS_DUPLI"
 
 agricolas.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/agricolas/CV's INSUMOS AGRICOLAS ${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 agricolas.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/agricolas/VAR_ATIPICO_AGRICOLA_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_AGRICOLA"
 
 agricolas.menor2_reporte:
   type: pandas.ExcelDataset

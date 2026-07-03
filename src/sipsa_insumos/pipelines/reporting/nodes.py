@@ -93,15 +93,23 @@ def exportar_bases(
     ruta = Path(ruta_reporting) / modulo.lower() / nombre
     ruta.parent.mkdir(parents=True, exist_ok=True)
 
-    # Detectar columnas de precio actual y anterior (generadas en calcular_variacion_tendencia)
+    periodo_ant = _periodo_anterior_modulo(periodo, modulo)
+    m = modulo.upper()
+    col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
+
+    # Columnas de precio actual y anterior generadas en calcular_variacion_tendencia
     col_precio_actual = next(
-        (c for c in base_comparada.columns if c.startswith("PRECIO_") and "Abril" not in c
-         and c not in ("PRECIO_MIN", "PRECIO_MAX")), None
+        (c for c in base_comparada.columns if c.startswith("PRECIO_")
+         and c not in ("PRECIO_MIN", "PRECIO_MAX") and periodo_ant not in c
+         and not any(mes in c for mes in ["Abril","Enero","Febrero","Marzo","Mayo",
+                                           "Junio","Julio","Agosto","Septiembre",
+                                           "Octubre","Noviembre","Diciembre"])),
+        next((c for c in base_comparada.columns if c.startswith("PRECIO_")
+              and c not in ("PRECIO_MIN", "PRECIO_MAX")), None)
     )
     col_precio_anterior = next(
-        (c for c in base_comparada.columns if "Abril" in c or
-         (c.startswith("PRECIO_") and c != col_precio_actual
-          and c not in ("PRECIO_MIN", "PRECIO_MAX"))), None
+        (c for c in base_comparada.columns if c.startswith("PRECIO_")
+         and c != col_precio_actual and c not in ("PRECIO_MIN", "PRECIO_MAX")), None
     )
 
     hojas: dict[str, pd.DataFrame] = {}
@@ -111,32 +119,35 @@ def exportar_bases(
             hojas[grupo] = pd.DataFrame()
             continue
 
-        # Construir Mercado = "NombreMunicipio (NombreDepartamento)"
         if "NombreMunicipio" in df_grupo.columns and "NombreDepartamento" in df_grupo.columns:
             df_grupo["Mercado"] = (
                 df_grupo["NombreMunicipio"] + " (" + df_grupo["NombreDepartamento"] + ")"
             )
 
-        # Seleccionar y ordenar columnas equivalentes al SAS BASES
+        # Derivar CodigoDepto y CodigoMpio desde CÓDIGO DIVIPOLA
+        col_div = next((c for c in ["CÓDIGO DIVIPOLA", "CodigoMpio"] if c in df_grupo.columns), None)
+        if col_div and "CodigoDepto" not in df_grupo.columns:
+            df_grupo["CodigoDepto"] = df_grupo[col_div].astype(str).str[:2]
+
         col_map = {
-            "CodigoDepto":        next((c for c in ["CodigoDepto"] if c in df_grupo.columns), None),
-            "NombreDepartamento": "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
-            "CÓDIGO DIVIPOLA":    "CÓDIGO DIVIPOLA" if "CÓDIGO DIVIPOLA" in df_grupo.columns else None,
-            "NombreMunicipio":    "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
-            "Mercado":            "Mercado" if "Mercado" in df_grupo.columns else None,
-            "CÓDIGO CPC":         "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
-            "Nombre_Publica":     "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
-            "PRECIO_ANTERIOR":    col_precio_anterior,
-            "PRECIO_ACTUAL":      col_precio_actual,
-            "VARIACION(%)":       "VARIACION" if "VARIACION" in df_grupo.columns else None,
-            "Cuenta":             "N_ARTICULOS" if "N_ARTICULOS" in df_grupo.columns else None,
-            "Tendencia":          "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
+            "CodigoDepto":                   "CodigoDepto" if "CodigoDepto" in df_grupo.columns else None,
+            "NombreDepartamento":            "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
+            "CodigoMpio":                    col_div,
+            "NombreMunicipio":               "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
+            "Mercado":                       "Mercado" if "Mercado" in df_grupo.columns else None,
+            "Codigo CPC":                    "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
+            col_pub_sas:                     "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
+            f"PRECIO_PROMEDIO_{periodo_ant}": col_precio_anterior,
+            f"PRECIO_PROMEDIO_{periodo}":     col_precio_actual,
+            "Variacion(%)":                  "VARIACION" if "VARIACION" in df_grupo.columns else None,
+            "Cuenta":                        "N_FUENTE" if "N_FUENTE" in df_grupo.columns else None,
+            "Tendencia":                     "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
         }
         cols_sel = [v for v in col_map.values() if v and v in df_grupo.columns]
         rename_inv = {v: k for k, v in col_map.items() if v and v in df_grupo.columns}
         df_out = df_grupo[cols_sel].rename(columns=rename_inv)
         df_out = df_out.sort_values(
-            [c for c in ["NombreDepartamento", "NombreMunicipio", "Nombre_Publica"] if c in df_out.columns]
+            [c for c in ["NombreDepartamento", "NombreMunicipio", col_pub_sas] if c in df_out.columns]
         )
         hojas[grupo] = df_out
 
@@ -248,14 +259,22 @@ def exportar_anexos(
     ruta = Path(ruta_reporting) / modulo.lower() / nombre
     ruta.parent.mkdir(parents=True, exist_ok=True)
 
+    periodo_ant = _periodo_anterior_modulo(periodo, modulo)
+    m = modulo.upper()
+    col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
+
     col_precio_actual = next(
-        (c for c in base_comparada.columns if c.startswith("PRECIO_") and "Abril" not in c
-         and c not in ("PRECIO_MIN", "PRECIO_MAX")), None
+        (c for c in base_comparada.columns if c.startswith("PRECIO_")
+         and c not in ("PRECIO_MIN", "PRECIO_MAX") and periodo_ant not in c
+         and not any(mes in c for mes in ["Abril","Enero","Febrero","Marzo","Mayo",
+                                           "Junio","Julio","Agosto","Septiembre",
+                                           "Octubre","Noviembre","Diciembre"])),
+        next((c for c in base_comparada.columns if c.startswith("PRECIO_")
+              and c not in ("PRECIO_MIN", "PRECIO_MAX")), None)
     )
     col_precio_anterior = next(
-        (c for c in base_comparada.columns if "Abril" in c or
-         (c.startswith("PRECIO_") and c != col_precio_actual
-          and c not in ("PRECIO_MIN", "PRECIO_MAX"))), None
+        (c for c in base_comparada.columns if c.startswith("PRECIO_")
+         and c != col_precio_actual and c not in ("PRECIO_MIN", "PRECIO_MAX")), None
     )
 
     hojas: dict[str, pd.DataFrame] = {}
@@ -265,40 +284,41 @@ def exportar_anexos(
             hojas[grupo] = pd.DataFrame()
             continue
 
-        # Mercado = "NombreMunicipio (NombreDepartamento)"
         if "NombreMunicipio" in df_grupo.columns and "NombreDepartamento" in df_grupo.columns:
             df_grupo["Mercado"] = (
                 df_grupo["NombreMunicipio"] + " (" + df_grupo["NombreDepartamento"] + ")"
             )
 
-        # Desglosar Nombre_Publica en Nombre_insumo + Presentación_insumo
-        # Formato SAS: "Artículo, Presentación" → separar por la última coma
         if "Nombre_Publica" in df_grupo.columns:
             partes = df_grupo["Nombre_Publica"].str.rsplit(",", n=1, expand=True)
             df_grupo["Nombre_insumo"] = partes[0].str.strip()
             df_grupo["Presentación_insumo"] = partes[1].str.strip() if 1 in partes.columns else ""
 
+        col_div = next((c for c in ["CÓDIGO DIVIPOLA", "CodigoMpio"] if c in df_grupo.columns), None)
+        if col_div and "CodigoDepto" not in df_grupo.columns:
+            df_grupo["CodigoDepto"] = df_grupo[col_div].astype(str).str[:2]
+
         col_map = {
-            "CodigoDepto":         next((c for c in ["CodigoDepto"] if c in df_grupo.columns), None),
-            "NombreDepartamento":  "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
-            "CÓDIGO DIVIPOLA":     "CÓDIGO DIVIPOLA" if "CÓDIGO DIVIPOLA" in df_grupo.columns else None,
-            "NombreMunicipio":     "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
-            "CÓDIGO CPC":          "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
-            "Nombre_insumo":       "Nombre_insumo" if "Nombre_insumo" in df_grupo.columns else None,
-            "Presentación_insumo": "Presentación_insumo" if "Presentación_insumo" in df_grupo.columns else None,
-            "PRECIO_ANTERIOR":     col_precio_anterior,
-            "PRECIO_ACTUAL":       col_precio_actual,
-            "VARIACION(%)":        "VARIACION" if "VARIACION" in df_grupo.columns else None,
-            "Cuenta":              "N_ARTICULOS" if "N_ARTICULOS" in df_grupo.columns else None,
-            "Tendencia":           "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
-            "Mercado":             "Mercado" if "Mercado" in df_grupo.columns else None,
-            "Nombre_Publica":      "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
+            "CodigoDepto":                   "CodigoDepto" if "CodigoDepto" in df_grupo.columns else None,
+            "NombreDepartamento":            "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
+            "CodigoMpio":                    col_div,
+            "NombreMunicipio":               "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
+            "Codigo CPC":                    "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
+            "Nombre_insumo":                 "Nombre_insumo" if "Nombre_insumo" in df_grupo.columns else None,
+            "Presentación_insumo":           "Presentación_insumo" if "Presentación_insumo" in df_grupo.columns else None,
+            f"PRECIO_PROMEDIO_{periodo_ant}": col_precio_anterior,
+            f"PRECIO_PROMEDIO_{periodo}":     col_precio_actual,
+            "Variacion(%)":                  "VARIACION" if "VARIACION" in df_grupo.columns else None,
+            "Cuenta":                        "N_FUENTE" if "N_FUENTE" in df_grupo.columns else None,
+            "Tendencia":                     "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
+            "Mercado":                       "Mercado" if "Mercado" in df_grupo.columns else None,
+            col_pub_sas:                     "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
         }
         cols_sel = [v for v in col_map.values() if v and v in df_grupo.columns]
         rename_inv = {v: k for k, v in col_map.items() if v and v in df_grupo.columns}
         df_out = df_grupo[cols_sel].rename(columns=rename_inv)
         df_out = df_out.sort_values(
-            [c for c in ["NombreDepartamento", "NombreMunicipio", "Nombre_Publica"] if c in df_out.columns]
+            [c for c in ["NombreDepartamento", "NombreMunicipio", col_pub_sas] if c in df_out.columns]
         )
         hojas[grupo] = df_out
 
@@ -542,6 +562,19 @@ _SALTO_MESES: dict[str, int] = {
     "JORNALES": 3, "ESPECIES": 3,
 }
 
+# Nombre SAS de la columna Nombre_Publica según módulo (máx 31 chars para Excel)
+_NOMBRE_PUBLICA_SAS: dict[str, str] = {
+    "AGRICOLAS":   "Nombre_productos_agrícolas_publ",
+    "PECUARIOS":   "Nombre_insumos_pecuarios_publ",
+    "ELEMENTOS":   "Nombre_elementos_agropecuarios_publ",
+    "EMPAQUES":    "Nombre_empaques_agropecuarios_publ",
+    "ARRIENDOS":   "Nombre_arriendos_publ",
+    "SERVICIOS":   "Nombre_servicios_publ",
+    "PROPAGACION": "Nombre_material_propagacion_publ",
+    "JORNALES":    "Nombre_jornales_publ",
+    "ESPECIES":    "Nombre_especies_productivas_publ",
+}
+
 
 def _periodo_anterior_modulo(periodo: str, modulo: str) -> str:
     """Calcula el período anterior según la periodicidad del módulo."""
@@ -557,30 +590,32 @@ def _periodo_anterior_modulo(periodo: str, modulo: str) -> str:
     return f"{_NUM_A_MES[mes_ant]}{anio_ant}"
 
 
-def _col_mayor2(mayor2: pd.DataFrame) -> dict:
-    """Mapea columnas de mayor2/menor2 a columnas SAS de MAYORESQUE2."""
+def _col_mayor2(mayor2: pd.DataFrame, modulo: str = "", periodo: str = "") -> dict:
+    """Mapea columnas de mayor2/menor2 a columnas SAS de MAYORESQUE2 con sufijo de período."""
     col_divipola = next((c for c in ["CÓDIGO DIVIPOLA", "CodigoMpio"] if c in mayor2.columns), None)
+    m = modulo.upper()
+    col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
+    sfx = f"_{periodo}" if periodo else ""
     return {
-        "CodigoDepto":        "CodigoDepto" if "CodigoDepto" in mayor2.columns else None,
-        "NombreDepartamento": "NombreDepartamento" if "NombreDepartamento" in mayor2.columns else None,
-        "CodigoMpio":         col_divipola,
-        "NombreMunicipio":    "NombreMunicipio" if "NombreMunicipio" in mayor2.columns else None,
-        "Codigo CPC":         "CÓDIGO CPC" if "CÓDIGO CPC" in mayor2.columns else None,
-        "Nombre_Publica":     "Nombre_Publica" if "Nombre_Publica" in mayor2.columns else None,
-        "Grupo":              "Grupo" if "Grupo" in mayor2.columns else None,
-        "N_Fuente":           "N_FUENTE" if "N_FUENTE" in mayor2.columns else None,
-        "N_ARTICULOS":        "N_ARTICULOS" if "N_ARTICULOS" in mayor2.columns else None,
-        "PRECIO_PROMEDIO":    "PRECIO_PROMEDIO" if "PRECIO_PROMEDIO" in mayor2.columns else None,
+        "CodigoDepto":          "CodigoDepto" if "CodigoDepto" in mayor2.columns else None,
+        "NombreDepartamento":   "NombreDepartamento" if "NombreDepartamento" in mayor2.columns else None,
+        "CodigoMpio":           col_divipola,
+        "NombreMunicipio":      "NombreMunicipio" if "NombreMunicipio" in mayor2.columns else None,
+        "Codigo CPC":           "CÓDIGO CPC" if "CÓDIGO CPC" in mayor2.columns else None,
+        col_pub_sas:            "Nombre_Publica" if "Nombre_Publica" in mayor2.columns else None,
+        "Grupo":                "Grupo" if "Grupo" in mayor2.columns else None,
+        f"N_FUENTE{sfx}":       "N_FUENTE" if "N_FUENTE" in mayor2.columns else None,
+        f"N_ARTICULOS{sfx}":    "N_ARTICULOS" if "N_ARTICULOS" in mayor2.columns else None,
+        f"PRECIO_PROMEDIO{sfx}":"PRECIO_PROMEDIO" if "PRECIO_PROMEDIO" in mayor2.columns else None,
     }
 
 
-def _preparar_mayor_menor(df: pd.DataFrame) -> pd.DataFrame:
+def _preparar_mayor_menor(df: pd.DataFrame, modulo: str = "", periodo: str = "") -> pd.DataFrame:
     """Prepara un DataFrame mayor2/menor2 para exportación SAS."""
-    col_map = _col_mayor2(df)
+    col_map = _col_mayor2(df, modulo=modulo, periodo=periodo)
     rename = {v: k for k, v in col_map.items() if v and v in df.columns}
     cols_sel = [v for v in col_map.values() if v and v in df.columns]
     result = df[cols_sel].rename(columns=rename).copy()
-    # Derivar CodigoDepto si no existe
     if "CodigoDepto" not in result.columns and "CodigoMpio" in result.columns:
         result.insert(0, "CodigoDepto", result["CodigoMpio"].astype(str).str[:2])
     return result
@@ -621,25 +656,34 @@ def exportar_mayo_menores(
     carpeta = Path(ruta_reporting) / modulo.lower()
     carpeta.mkdir(parents=True, exist_ok=True)
 
+    periodo_ant = _periodo_anterior_modulo(periodo, modulo)
+    col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
+
     # --- MAYORESQUE2 ---
-    df_mayor = _preparar_mayor_menor(mayor2)
+    df_mayor = _preparar_mayor_menor(mayor2, modulo=modulo, periodo=periodo)
     ruta_mayor = carpeta / f"{_MAYOR2_NOMBRES.get(m, f'{m}_MAYORESQUE2')}_{periodo}.xlsx"
     sheet_mayor = _MAYOR2_SHEET.get(m, "MAYORESOIGUALES2")
     with pd.ExcelWriter(str(ruta_mayor), engine="openpyxl") as w:
         df_mayor.to_excel(w, sheet_name=sheet_mayor[:31], index=False)
 
     # --- MENORESQUE2 ---
-    df_menor = _preparar_mayor_menor(menor2)
+    df_menor = _preparar_mayor_menor(menor2, modulo=modulo, periodo=periodo)
     ruta_menor = carpeta / f"{_MENOR2_NOMBRES.get(m, f'{m}_MENORESQUE2')}_{periodo}.xlsx"
     sheet_menor = _MENOR2_SHEET.get(m, "MENORESQUE2")
     with pd.ExcelWriter(str(ruta_menor), engine="openpyxl") as w:
         df_menor.to_excel(w, sheet_name=sheet_menor[:31], index=False)
 
-    # --- MAY_MEN3: unión mayor+menor con precio anterior ---
+    # --- MAY_MEN3: unión mayor+menor con precio anterior + N por período ---
     union = pd.concat([mayor2, menor2], ignore_index=True)
 
     col_div = next((c for c in ["CÓDIGO DIVIPOLA", "CodigoMpio"] if c in union.columns), None)
     llave_join = [c for c in [col_div, "Nombre_Publica"] if c]
+
+    # Renombrar N del período actual antes del join para separar ambos períodos
+    union = union.rename(columns={
+        "N_FUENTE":    f"N_FUENTE_{periodo}",
+        "N_ARTICULOS": f"N_ARTICULOS_{periodo}",
+    })
 
     if mayor2_anterior is not None and len(mayor2_anterior) > 0 and llave_join:
         col_div_ant = next(
@@ -647,53 +691,58 @@ def exportar_mayo_menores(
         )
         llave_ant = [c for c in [col_div_ant, "Nombre_Publica"] if c]
         if set(llave_ant) == set(llave_join):
-            ant = mayor2_anterior[llave_ant + ["PRECIO_PROMEDIO"]].rename(
-                columns={"PRECIO_PROMEDIO": f"PRECIO_PROMEDIO_{mes_anterior}"}
-            )
+            cols_ant = llave_ant + ["PRECIO_PROMEDIO"]
+            if "N_FUENTE" in mayor2_anterior.columns:
+                cols_ant.append("N_FUENTE")
+            if "N_ARTICULOS" in mayor2_anterior.columns:
+                cols_ant.append("N_ARTICULOS")
+            ant = mayor2_anterior[cols_ant].rename(columns={
+                "PRECIO_PROMEDIO": f"PRECIO_PROMEDIO_{periodo_ant}",
+                "N_FUENTE":        f"N_FUENTE_{periodo_ant}",
+                "N_ARTICULOS":     f"N_ARTICULOS_{periodo_ant}",
+            })
             union = union.merge(ant, left_on=llave_join, right_on=llave_ant, how="left")
 
-    col_precio_actual = "PRECIO_PROMEDIO"
-    col_precio_anterior = f"PRECIO_PROMEDIO_{mes_anterior}"
+    col_precio_actual   = "PRECIO_PROMEDIO"
+    col_precio_anterior = f"PRECIO_PROMEDIO_{periodo_ant}"
 
     if col_precio_anterior in union.columns:
-        union["Variacion(%)"] = (
-            (union[col_precio_actual] / union[col_precio_anterior] - 1) * 100
+        mask_valido = union[col_precio_anterior].notna() & (union[col_precio_anterior] != 0)
+        union["Variacion(%)"] = np.where(
+            mask_valido,
+            (union[col_precio_actual] / union[col_precio_anterior] - 1) * 100,
+            np.nan,
         )
-        def _tendencia(v):
-            if pd.isna(v):
-                return "n.d."
-            return "Positiva" if v > 0 else "Negativa" if v < 0 else "Estable"
-        union["Tendencia"] = union["Variacion(%)"].apply(_tendencia)
     else:
         union["Variacion(%)"] = float("nan")
-        union["Tendencia"] = "n.d."
+
+    def _tendencia(v):
+        if pd.isna(v):
+            return "n.d."
+        return "Positiva" if v > 0 else "Negativa" if v < 0 else "Estable"
+    union["Tendencia"] = union["Variacion(%)"].apply(_tendencia)
 
     if "NombreMunicipio" in union.columns and "NombreDepartamento" in union.columns:
         union["Mercado"] = union["NombreMunicipio"] + " (" + union["NombreDepartamento"] + ")"
 
-    # Derivar CodigoDepto
     if "CodigoDepto" not in union.columns and col_div and col_div in union.columns:
         union.insert(0, "CodigoDepto", union[col_div].astype(str).str[:2])
 
-    rename_union = {
-        col_div: "CodigoMpio",
-        "CÓDIGO CPC": "Codigo CPC",
-        "N_FUENTE": "N_Fuente",
-    }
+    rename_union = {col_div: "CodigoMpio", "CÓDIGO CPC": "Codigo CPC"}
     union = union.rename(columns={k: v for k, v in rename_union.items() if k in union.columns})
+    union = union.rename(columns={"Nombre_Publica": col_pub_sas})
 
     cols_maymen = [
         "CodigoDepto", "NombreDepartamento", "CodigoMpio", "NombreMunicipio", "Mercado",
-        "Codigo CPC", "Nombre_Publica", "Grupo",
-        f"N_Fuente", "N_ARTICULOS", col_precio_actual,
-        "N_Fuente", "N_ARTICULOS",
-        col_precio_anterior if col_precio_anterior in union.columns else None,
+        "Codigo CPC", col_pub_sas, "Grupo",
+        f"N_FUENTE_{periodo_ant}", f"N_ARTICULOS_{periodo_ant}",
+        f"PRECIO_PROMEDIO_{periodo_ant}",
+        f"N_FUENTE_{periodo}", f"N_ARTICULOS_{periodo}",
+        col_precio_actual,
         "Variacion(%)", "Tendencia",
     ]
     cols_sel = list(dict.fromkeys(c for c in cols_maymen if c and c in union.columns))
-    df_maymen = union[cols_sel].rename(columns={
-        col_precio_actual: f"PRECIO_PROMEDIO_{mes_actual}",
-    })
+    df_maymen = union[cols_sel].rename(columns={col_precio_actual: f"PRECIO_PROMEDIO_{periodo}"})
 
     ruta_maymen = carpeta / f"{_MAYMEN_NOMBRES.get(m, f'{m}_MAYMEN')}_{periodo}.xlsx"
     with pd.ExcelWriter(str(ruta_maymen), engine="openpyxl") as w:
@@ -746,26 +795,26 @@ def exportar_revision_historica(
     carpeta = Path(ruta_reporting) / modulo.lower()
     carpeta.mkdir(parents=True, exist_ok=True)
 
-    # Columna de nombre publicado (puede variar por módulo pero se estandariza)
     col_pub = next(
         (c for c in ["Nombre_Publica", "Nombre_productos_agr_publ"] if c in base_enriquecida.columns),
         None,
     )
     col_cpc = next((c for c in ["CÓDIGO CPC"] if c in base_enriquecida.columns), None)
     col_precio = "PRECIO" if "PRECIO" in base_enriquecida.columns else None
+    col_fuente = "FUENTE" if "FUENTE" in base_enriquecida.columns else None
+    col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
 
     if not (col_pub and col_precio):
         log.warning("exportar_revision_historica [%s] | sin columnas requeridas — omitiendo", modulo)
         return pd.DataFrame([{"modulo": modulo, "periodo": periodo, "omitido": True}])
 
     # Construir registros del período actual
-    cols_sel = [c for c in [col_cpc, col_pub, col_precio] if c]
+    cols_sel = [c for c in [col_cpc, col_fuente, col_pub, col_precio] if c]
     precio_actual = base_enriquecida[cols_sel].dropna(subset=[col_precio]).copy()
-    precio_actual = precio_actual.rename(columns={
-        col_pub: "Nombre_Publica",
-        col_cpc: "Codigo CPC",
-        col_precio: "Precio actual",
-    })
+    rename_base: dict[str, str] = {col_pub: "Nombre_Publica", col_precio: "Precio actual"}
+    if col_cpc:
+        rename_base[col_cpc] = "Codigo CPC"
+    precio_actual = precio_actual.rename(columns=rename_base)
     precio_actual["MES_NUM"] = mes_num_actual
     precio_actual["PERIODO"] = periodo
 
@@ -782,7 +831,6 @@ def exportar_revision_historica(
     if "PERIODO" in hist_curr.columns:
         periodos_unicos = hist_curr["PERIODO"].dropna().unique()
         if len(periodos_unicos) > 4:
-            # Mantener solo los 4 más recientes
             orden = sorted(periodos_unicos, key=lambda p: (_MES_A_NUM.get(p[:3].upper(), 0), int(p[3:])))
             periodos_keep = orden[-4:]
             hist_curr = hist_curr[hist_curr["PERIODO"].isin(periodos_keep)]
@@ -798,20 +846,30 @@ def exportar_revision_historica(
 
     # ---- Hoja rodante root "Revisión" ----
     root_nombre = _REVISION_ROOT.get(m, f"Revisión {modulo.lower()}")
-    periodo_lower = periodo.lower()
-    ruta_root = carpeta / f"{root_nombre} {periodo_lower}.xlsx"
+    ruta_root = carpeta / f"{root_nombre} {periodo.lower()}.xlsx"
     with pd.ExcelWriter(str(ruta_root), engine="openpyxl") as w:
         hist_curr.to_excel(w, sheet_name="1.base", index=False)
 
-    # ---- TABREV: resumen estadístico por (Nombre_Publica, MES_NUM) ----
-    if "Nombre_Publica" in hist_curr.columns and "MES_NUM" in hist_curr.columns:
+    # ---- TABREV: pivot por (FUENTE, Nombre_Publica) × período → MES_2..MES_5 ----
+    if "Nombre_Publica" in hist_curr.columns and "PERIODO" in hist_curr.columns:
+        # Mapear períodos a índices secuenciales (más antiguo → MES_2, más reciente → MES_5)
+        periodos_ord = sorted(
+            hist_curr["PERIODO"].dropna().unique(),
+            key=lambda p: (_MES_A_NUM.get(p[:3].upper(), 0), int(p[3:])),
+        )
+        n_per = len(periodos_ord)
+        # MES_2 = el más antiguo, MES_{2+n-1} = el más reciente (hasta MES_5)
+        mes_idx_start = max(2, 6 - n_per)
+        periodo_a_mes = {p: f"MES_{mes_idx_start + i}" for i, p in enumerate(periodos_ord)}
+        hist_curr["MES_IDX"] = hist_curr["PERIODO"].map(periodo_a_mes)
+
+        grp_cols = ["Nombre_Publica"]
+        if col_fuente and "FUENTE" in hist_curr.columns:
+            grp_cols = ["FUENTE"] + grp_cols
+
         compara = (
-            hist_curr.groupby(["Nombre_Publica", "MES_NUM"], dropna=False)["Precio actual"]
-            .agg(
-                N="count",
-                PRECIO_PROMEDIO="mean",
-                STD="std",
-            )
+            hist_curr.groupby(grp_cols + ["MES_IDX"], dropna=False)["Precio actual"]
+            .agg(N="count", PRECIO_PROMEDIO="mean", STD="std")
             .reset_index()
         )
         if "Codigo CPC" in hist_curr.columns:
@@ -826,29 +884,35 @@ def exportar_revision_historica(
             compara["N"] >= 2
         )
 
-        # Pivot: una columna por MES_NUM
-        def _pivot_stat(stat_col: str) -> pd.DataFrame:
-            piv = compara.pivot_table(
-                index="Nombre_Publica", columns="MES_NUM", values=stat_col, aggfunc="first"
-            ).reset_index()
-            piv.columns = [
-                "Nombre_Publica" if c == "Nombre_Publica" else f"MES_{c}"
-                for c in piv.columns
-            ]
-            if "Codigo CPC" in compara.columns:
-                cpc_map = compara.drop_duplicates("Nombre_Publica").set_index("Nombre_Publica")["Codigo CPC"]
-                piv.insert(0, "Codigo CPC", piv["Nombre_Publica"].map(cpc_map))
-            return piv
+        cpc_col = "Codigo CPC" if "Codigo CPC" in compara.columns else None
+        idx_cols_tabrev = (
+            (["Codigo CPC"] if cpc_col else [])
+            + (["FUENTE"] if "FUENTE" in compara.columns else [])
+            + ["Nombre_Publica"]
+        )
+        idx_present = [c for c in idx_cols_tabrev if c in compara.columns]
 
-        piv_n = _pivot_stat("N")
-        piv_precio = _pivot_stat("PRECIO_PROMEDIO")
-        piv_cv = _pivot_stat("COEFIC_VARIACION")
+        def _pivot_tabrev_stat(stat_col: str) -> pd.DataFrame:
+            piv = compara.pivot_table(
+                index=idx_present, columns="MES_IDX", values=stat_col, aggfunc="first"
+            ).reset_index()
+            piv.columns = [str(c) for c in piv.columns]
+            mes_cols = [f"MES_{i}" for i in range(2, 7) if f"MES_{i}" in piv.columns]
+            piv = piv[idx_present + mes_cols]
+            if stat_col == "PRECIO_PROMEDIO":
+                for j in range(1, len(mes_cols)):
+                    newer, older = mes_cols[j], mes_cols[j - 1]
+                    ni = int(newer.split("_")[1])
+                    oi = int(older.split("_")[1])
+                    piv[f"VAR_{ni}_{oi}"] = ((piv[newer] / piv[older]) - 1) * 100
+            piv = piv.rename(columns={"Nombre_Publica": col_pub_sas})
+            return piv
 
         ruta_tabrev = carpeta / f"{_TABREV_NOMBRES.get(m, f'TABREV_{m}')}_{periodo}.xlsx"
         with pd.ExcelWriter(str(ruta_tabrev), engine="openpyxl") as w:
-            piv_n.to_excel(w, sheet_name="N", index=False)
-            piv_precio.to_excel(w, sheet_name="PRECIO_PROMEDIO", index=False)
-            piv_cv.to_excel(w, sheet_name="COEFIC_VARIACIÓN", index=False)
+            _pivot_tabrev_stat("N").to_excel(w, sheet_name="N", index=False)
+            _pivot_tabrev_stat("PRECIO_PROMEDIO").to_excel(w, sheet_name="PRECIO_PROMEDIO", index=False)
+            _pivot_tabrev_stat("COEFIC_VARIACION").to_excel(w, sheet_name="COEFIC_VARIACIÓN", index=False)
     else:
         log.warning("exportar_revision_historica [%s] | historial vacío — TABREV omitido", modulo)
 
@@ -906,9 +970,8 @@ def exportar_revision_tematica(
 
     df = base_enriquecida.copy()
 
-    col_pub = next(
-        (c for c in ["Nombre_Publica"] if c in df.columns), None
-    )
+    col_pub = next((c for c in ["Nombre_Publica"] if c in df.columns), None)
+    col_art = "ARTÍCULO" if "ARTÍCULO" in df.columns else None
     col_div = next((c for c in ["CÓDIGO DIVIPOLA", "CodigoMpio"] if c in df.columns), None)
     col_precio = "PRECIO" if "PRECIO" in df.columns else None
 
@@ -916,84 +979,94 @@ def exportar_revision_tematica(
         log.warning("exportar_revision_tematica [%s] | sin columnas requeridas — omitiendo", modulo)
         return pd.DataFrame([{"modulo": modulo, "periodo": periodo, "omitido": True}])
 
-    # Derivar CodigoDepto si no existe
     if "CodigoDepto" not in df.columns and col_div:
         df["CodigoDepto"] = df[col_div].astype(str).str[:2]
 
-    # ---- Agregaciones nacionales por Nombre_Publica ----
-    agg_nal_pub = (
-        df.groupby(col_pub, dropna=False)[col_precio]
-        .agg(
-            conteo_nal_publica="count",
-            prom_nal_publica="mean",
-            min_nal_publica="min",
-            max_nal_publica="max",
-        )
-        .reset_index()
-    )
-    # Precio anterior nacional por Nombre_Publica (de mayor2_anterior)
-    if mayor2_anterior is not None and len(mayor2_anterior) > 0 and col_pub in mayor2_anterior.columns:
-        ant_nal = (
-            mayor2_anterior.groupby(col_pub)["PRECIO_PROMEDIO"]
-            .agg(
-                prom_ant_nal_publica="mean",
-                min_ant_nal_publica="min",
-                max_ant_nal_publica="max",
-            )
+    def _agg_nivel(grp_keys: list[str], prefix: str) -> pd.DataFrame:
+        keys = [k for k in grp_keys if k in df.columns]
+        if not keys:
+            return pd.DataFrame()
+        return (
+            df.groupby(keys, dropna=False)[col_precio]
+            .agg(**{
+                f"conteo_{prefix}": "count",
+                f"prom_{prefix}": "mean",
+                f"min_{prefix}": "min",
+                f"max_{prefix}": "max",
+            })
             .reset_index()
         )
-        agg_nal_pub = agg_nal_pub.merge(ant_nal, on=col_pub, how="left")
-    else:
-        for col in ["prom_ant_nal_publica", "min_ant_nal_publica", "max_ant_nal_publica"]:
-            agg_nal_pub[col] = float("nan")
 
-    # ---- Agregaciones departamentales por Nombre_Publica ----
-    agg_depto_pub = (
-        df.groupby(["CodigoDepto", col_pub], dropna=False)[col_precio]
-        .agg(
-            conteo_depto_publica="count",
-            prom_depto_publica="mean",
-            min_depto_publica="min",
-            max_depto_publica="max",
-        )
-        .reset_index()
-    )
-
-    # ---- Agregaciones municipales por Nombre_Publica ----
-    if col_div:
-        agg_mpio_pub = (
-            df.groupby(["CodigoDepto", col_div, col_pub], dropna=False)[col_precio]
-            .agg(
-                conteo_mpio_publica="count",
-                prom_mpio_publica="mean",
-                min_mpio_publica="min",
-                max_mpio_publica="max",
-            )
+    def _agg_ant_nivel(grp_keys: list[str], prefix: str) -> pd.DataFrame:
+        if mayor2_anterior is None or len(mayor2_anterior) == 0:
+            return pd.DataFrame()
+        keys = [k for k in grp_keys if k in mayor2_anterior.columns]
+        if not keys or "PRECIO_PROMEDIO" not in mayor2_anterior.columns:
+            return pd.DataFrame()
+        return (
+            mayor2_anterior.groupby(keys, dropna=False)["PRECIO_PROMEDIO"]
+            .agg(**{
+                f"prom_ant_{prefix}": "mean",
+                f"min_ant_{prefix}": "min",
+                f"max_ant_{prefix}": "max",
+            })
             .reset_index()
         )
-    else:
-        agg_mpio_pub = pd.DataFrame()
 
-    # ---- Join de vuelta al nivel de registro individual ----
+    # ---- Agregaciones Nombre_Publica ----
+    agg_nal_pub   = _agg_nivel([col_pub],                            "nal_publica")
+    agg_depto_pub = _agg_nivel(["CodigoDepto", col_pub],             "depto_publica")
+    agg_mpio_pub  = _agg_nivel(["CodigoDepto", col_div, col_pub],    "mpio_publica") if col_div else pd.DataFrame()
+    ant_nal_pub   = _agg_ant_nivel([col_pub],                        "nal_publica")
+
+    if not ant_nal_pub.empty:
+        agg_nal_pub = agg_nal_pub.merge(ant_nal_pub, on=col_pub, how="left")
+    else:
+        for c in [f"prom_ant_nal_publica", f"min_ant_nal_publica", f"max_ant_nal_publica"]:
+            agg_nal_pub[c] = float("nan")
+
+    # ---- Agregaciones ARTÍCULO ----
+    agg_nal_art   = _agg_nivel([col_art],                            "nal_articulo")   if col_art else pd.DataFrame()
+    agg_depto_art = _agg_nivel(["CodigoDepto", col_art],             "depto_articulo") if col_art else pd.DataFrame()
+    agg_mpio_art  = _agg_nivel(["CodigoDepto", col_div, col_art],    "mpio_articulo")  if (col_art and col_div) else pd.DataFrame()
+    ant_nal_art   = _agg_ant_nivel([col_art],                        "nal_articulo")   if col_art else pd.DataFrame()
+
+    if col_art and not ant_nal_art.empty:
+        agg_nal_art = agg_nal_art.merge(ant_nal_art, on=col_art, how="left")
+    elif col_art and not agg_nal_art.empty:
+        for c in ["prom_ant_nal_articulo", "min_ant_nal_articulo", "max_ant_nal_articulo"]:
+            agg_nal_art[c] = float("nan")
+
+    # ---- Join al nivel de registro individual ----
     result = df.merge(agg_nal_pub, on=col_pub, how="left")
     result = result.merge(agg_depto_pub, on=["CodigoDepto", col_pub], how="left")
     if not agg_mpio_pub.empty:
-        result = result.merge(
-            agg_mpio_pub, on=["CodigoDepto", col_div, col_pub], how="left"
-        )
+        result = result.merge(agg_mpio_pub, on=["CodigoDepto", col_div, col_pub], how="left")
+    if col_art and not agg_nal_art.empty:
+        result = result.merge(agg_nal_art, on=col_art, how="left")
+    if col_art and not agg_depto_art.empty:
+        result = result.merge(agg_depto_art, on=["CodigoDepto", col_art], how="left")
+    if col_art and not agg_mpio_art.empty:
+        result = result.merge(agg_mpio_art, on=["CodigoDepto", col_div, col_art], how="left")
 
     # ---- Variaciones porcentuales ----
-    for pref, ref in [
-        ("varporc_prom_nal_publica", "prom_nal_publica"),
-        ("varporc_min_nal_publica",  "min_nal_publica"),
-        ("varporc_max_nal_publica",  "max_nal_publica"),
-        ("varporc_prom_depto_publica", "prom_depto_publica"),
-        ("varporc_prom_mpio_publica",  "prom_mpio_publica"),
-    ]:
+    varporc_pairs = [
+        ("varporc_prom_nal_publica",    "prom_nal_publica"),
+        ("varporc_min_nal_publica",     "min_nal_publica"),
+        ("varporc_max_nal_publica",     "max_nal_publica"),
+        ("varporc_prom_depto_publica",  "prom_depto_publica"),
+        ("varporc_prom_mpio_publica",   "prom_mpio_publica"),
+        ("varporc_prom_nal_articulo",   "prom_nal_articulo"),
+        ("varporc_min_nal_articulo",    "min_nal_articulo"),
+        ("varporc_max_nal_articulo",    "max_nal_articulo"),
+        ("varporc_prom_depto_articulo", "prom_depto_articulo"),
+        ("varporc_prom_mpio_articulo",  "prom_mpio_articulo"),
+    ]
+    for new_col, ref in varporc_pairs:
         if ref in result.columns:
-            result[pref] = (result[col_precio] / result[ref] - 1) * 100
+            result[new_col] = (result[col_precio] / result[ref] - 1) * 100
 
-    # ---- Flag Revisa ----
+    # ---- Flag Revisa (basado en rango nacional de Nombre_Publica) ----
     if "min_ant_nal_publica" in result.columns and "max_ant_nal_publica" in result.columns:
         varporc_min = (result[col_precio] / result["min_ant_nal_publica"] - 1) * 100
         varporc_max = (result[col_precio] / result["max_ant_nal_publica"] - 1) * 100
@@ -1001,21 +1074,68 @@ def exportar_revision_tematica(
             result[col_precio].isna(), "OK",
             np.where(
                 (result["min_ant_nal_publica"].isna()) | (result["max_ant_nal_publica"].isna()), "OK",
-                np.where(
-                    varporc_min < -10, "Revisar",
-                    np.where(varporc_max > 10, "Revisar", "OK"),
-                ),
+                np.where(varporc_min < -10, "Revisar", np.where(varporc_max > 10, "Revisar", "OK")),
             ),
         )
     else:
         result["Revisa"] = "OK"
 
-    # ---- Renombrar columnas para que coincidan con el estilo SAS ----
+    # ---- Renombrar columnas para que coincidan con SAS ----
     rename_map = {
-        col_div: "CodigoMpio",
-        col_pub: "Nombre_Publica",
-        col_precio: f"Precio {mes_actual}",
+        col_div:      "CodigoMpio",
+        col_pub:      "Nombre_Publica",
+        col_precio:   f"Precio {mes_actual}",
         "CÓDIGO CPC": "Codigo CPC",
+        # Agregaciones Nombre_Publica — nombres de display SAS
+        "conteo_nal_publica":            "Conteo nacional publica",
+        "prom_nal_publica":              "Prom nacional publica",
+        "min_nal_publica":               "Mínimo nacional publica",
+        "max_nal_publica":               "Máximo nacional publica",
+        "prom_ant_nal_publica":          "Prom ant nacional publica",
+        "min_ant_nal_publica":           "Mínimo ant nacional publica",
+        "max_ant_nal_publica":           "Máximo ant nacional publica",
+        "conteo_depto_publica":          "Conteo depto publica",
+        "prom_depto_publica":            "Prom depto publica",
+        "min_depto_publica":             "Mínimo depto publica",
+        "max_depto_publica":             "Máximo depto publica",
+        "conteo_mpio_publica":           "Conteo mpio publica",
+        "prom_mpio_publica":             "Prom mpio publica",
+        "min_mpio_publica":              "Mínimo mpio publica",
+        "max_mpio_publica":              "Máximo mpio publica",
+        "varporc_prom_nal_publica":      "Varporc prec prom nal publica",
+        "varporc_min_nal_publica":       "Varporc prec mín nal publica",
+        "varporc_max_nal_publica":       "Varporc prec máx nal publica",
+        "varporc_prom_depto_publica":    "Varporc prec prom depto publica",
+        "varporc_prom_mpio_publica":     "Varporc prec prom mpio publica",
+        "varporc_min_depto_publica":     "Varporc prec mín depto publica",
+        "varporc_max_depto_publica":     "Varporc prec máx depto publica",
+        "varporc_min_mpio_publica":      "Varporc prec mín mpio publica",
+        "varporc_max_mpio_publica":      "Varporc prec máx mpio publica",
+        # Agregaciones ARTÍCULO — nombres de display SAS
+        "conteo_nal_articulo":           "Conteo nacional artículo",
+        "prom_nal_articulo":             "Prom nacional artículo",
+        "min_nal_articulo":              "Mínimo nacional artículo",
+        "max_nal_articulo":              "Máximo nacional artículo",
+        "prom_ant_nal_articulo":         "Prom ant nacional artículo",
+        "min_ant_nal_articulo":          "Mínimo ant nacional artículo",
+        "max_ant_nal_articulo":          "Máximo ant nacional artículo",
+        "conteo_depto_articulo":         "Conteo depto artículo",
+        "prom_depto_articulo":           "Prom depto artículo",
+        "min_depto_articulo":            "Mínimo depto artículo",
+        "max_depto_articulo":            "Máximo depto artículo",
+        "conteo_mpio_articulo":          "Conteo mpio artículo",
+        "prom_mpio_articulo":            "Prom mpio artículo",
+        "min_mpio_articulo":             "Mínimo mpio artículo",
+        "max_mpio_articulo":             "Máximo mpio artículo",
+        "varporc_prom_nal_articulo":     "Varporc prec prom nal art",
+        "varporc_min_nal_articulo":      "Varporc prec Mín ant nal art",
+        "varporc_max_nal_articulo":      "Varporc prec Máx ant nal art",
+        "varporc_prom_depto_articulo":   "Varporc prec prom depto art",
+        "varporc_prom_mpio_articulo":    "Varporc prec prom mpio art",
+        "varporc_min_depto_articulo":    "Varporc prec mín depto art",
+        "varporc_max_depto_articulo":    "Varporc prec máx depto art",
+        "varporc_min_mpio_articulo":     "Varporc prec mín mpio art",
+        "varporc_max_mpio_articulo":     "Varporc prec máx mpio art",
     }
     result = result.rename(columns={k: v for k, v in rename_map.items() if k and k in result.columns})
 

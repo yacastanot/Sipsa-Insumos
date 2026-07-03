@@ -54,35 +54,35 @@ elementos.faltan_grupo:
   filepath: data/08_reporting/elementos/FALTAN_GRUPO_ELEMENTOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_ELEMENTOS"
 
 elementos.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/elementos/FALTAN_PUBLICA_ELEMENTOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_ELEMENTOS"
 
 elementos.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/elementos/ELEM_AGROPE_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "ELEM_AGROPE_DUPLI"
 
 elementos.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/elementos/CV's_ELEMENTOS_${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 elementos.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/elementos/VAR_ATIPICO_ELEMENTOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_ELEMENTOS"
 
 elementos.menor2_reporte:
   type: pandas.ExcelDataset

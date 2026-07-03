@@ -15,7 +15,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=calcular_cv,
-                inputs=["base_sin_dupli"],
+                inputs=["base_sin_dupli", "params:modulo", "params:periodo"],
                 outputs=["base_con_cv", "cvs_reporte"],
                 name="calcular_cv",
             ),

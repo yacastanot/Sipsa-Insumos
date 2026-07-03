@@ -90,7 +90,7 @@ def _pipeline_modulo(nombre: str) -> Pipeline:
         + pipeline(
             quality(),
             namespace=nombre,
-            parameters={"umbral_var_alta", "umbral_var_baja", "umbral_var_extrema"},
+            parameters={"umbral_var_alta", "umbral_var_baja", "umbral_var_extrema", "periodo"},
             tags=[nombre],
           )
         + pipeline(aggregation(), namespace=nombre, tags=[nombre])

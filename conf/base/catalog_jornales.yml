@@ -54,35 +54,35 @@ jornales.faltan_grupo:
   filepath: data/08_reporting/jornales/FALTAN_GRUPO_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_JORNALES"
 
 jornales.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/jornales/FALTAN_PUBLICA_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_JORNALES"
 
 jornales.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/jornales/JORNALES_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "JORNALES_DUPLI"
 
 jornales.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/jornales/CV's_JORNALES_${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 jornales.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/jornales/VAR_ATIPICO_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_JORNALES"
 
 jornales.menor2_reporte:
   type: pandas.ExcelDataset

@@ -54,35 +54,35 @@ propagacion.faltan_grupo:
   filepath: data/08_reporting/propagacion/FALTAN_GRUPO_PROPAGACION_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_PROPAGACION"
 
 propagacion.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/propagacion/FALTAN_PUBLICA_MATERIAL_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_MATERIAL"
 
 propagacion.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/propagacion/MATERIAL_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "MATERIAL_DUPLI"
 
 propagacion.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/propagacion/CV's MATERIAL ${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 propagacion.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/propagacion/VAR_ATIPICO_MATERIAL_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_MATERIAL"
 
 propagacion.menor2_reporte:
   type: pandas.ExcelDataset

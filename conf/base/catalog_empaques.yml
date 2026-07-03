@@ -54,35 +54,35 @@ empaques.faltan_grupo:
   filepath: data/08_reporting/empaques/FALTAN_GRUPO_EMPAQUES_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_EMPAQUES"
 
 empaques.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/empaques/FALTAN_PUBLICA_EMPAQUES_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_EMPAQUES"
 
 empaques.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/empaques/EMPA_AGROPE_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "EMPA_AGROPE_DUPLI"
 
 empaques.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/empaques/CV's_EMPAQUES_${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 empaques.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/empaques/VAR_ATIPICO_EMPAQUES_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_EMPAQUES"
 
 empaques.menor2_reporte:
   type: pandas.ExcelDataset

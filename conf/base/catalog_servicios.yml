@@ -54,35 +54,35 @@ servicios.faltan_grupo:
   filepath: data/08_reporting/servicios/FALTAN_GRUPO_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_SERVICIOS"
 
 servicios.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/servicios/FALTAN_PUBLICA_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_SERVICIOS"
 
 servicios.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/servicios/SERVICIOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "SERVICIOS_DUPLI"
 
 servicios.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/servicios/CV's SERVICIOS ${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 servicios.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/servicios/VAR_ATIPICO_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_SERVICIOS"
 
 servicios.menor2_reporte:
   type: pandas.ExcelDataset

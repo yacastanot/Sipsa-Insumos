@@ -54,35 +54,35 @@ pecuarios.faltan_grupo:
   filepath: data/08_reporting/pecuarios/FALTAN_GRUPO_PECUARIO_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_GRUPO"
+    sheet_name: "FALTAN_GRUPO_PECUARIO"
 
 pecuarios.faltan_publica:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/pecuarios/FALTAN_PUBLICA_PECUARIO_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "FALTAN_PUBLICA"
+    sheet_name: "FALTAN_PUBLICA_PECUARIO"
 
 pecuarios.duplicados:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/pecuarios/INSUMOS_PECUARIOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "DUPLICADOS"
+    sheet_name: "INSUMOS_PECUARIOS_DUPLI"
 
 pecuarios.cvs_reporte:
   type: pandas.ExcelDataset
   filepath: "data/08_reporting/pecuarios/CV's INSUMOS PECUARIOS ${globals:periodo}.xlsx"
   save_args:
     index: false
-    sheet_name: "CVs"
+    sheet_name: "CV's"
 
 pecuarios.var_atipico:
   type: pandas.ExcelDataset
   filepath: data/08_reporting/pecuarios/VAR_ATIPICO_PECUARIO_${globals:periodo}.xlsx
   save_args:
     index: false
-    sheet_name: "VAR_ATIPICO"
+    sheet_name: "VAR_ATIPICO_PECUARIO"
 
 pecuarios.menor2_reporte:
   type: pandas.ExcelDataset

@@ -18,6 +18,19 @@ import pandas as pd
 
 log = logging.getLogger(__name__)
 
+# Nombre SAS de la columna Nombre_Publica según módulo (máx 31 chars para Excel)
+_NOMBRE_PUBLICA_SAS: dict[str, str] = {
+    "AGRICOLAS":   "Nombre_productos_agrícolas_publ",
+    "PECUARIOS":   "Nombre_insumos_pecuarios_publ",
+    "ELEMENTOS":   "Nombre_elementos_agropecuarios_publ",
+    "EMPAQUES":    "Nombre_empaques_agropecuarios_publ",
+    "ARRIENDOS":   "Nombre_arriendos_publ",
+    "SERVICIOS":   "Nombre_servicios_publ",
+    "PROPAGACION": "Nombre_material_propagacion_publ",
+    "JORNALES":    "Nombre_jornales_publ",
+    "ESPECIES":    "Nombre_especies_productivas_publ",
+}
+
 # Llave compuesta para detección de duplicados (equivale a SAS PROC SORT nodup)
 # FUENTE diferencia observaciones de distintos puntos de venta — dos fuentes distintas
 # que reportan el mismo producto al mismo precio son observaciones independientes válidas.
@@ -77,6 +90,8 @@ def detectar_duplicados(
 
 def calcular_cv(
     base_sin_dupli: pd.DataFrame,
+    modulo: str = "",
+    periodo: str = "",
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Calcula el Coeficiente de Variación por municipio-producto.
 
@@ -86,14 +101,15 @@ def calcular_cv(
 
     Args:
         base_sin_dupli: DataFrame sin duplicados con columna 'PRECIO'.
+        modulo: Nombre del módulo (para renombrar columnas según SAS).
+        periodo: ID del período actual (para sufijo de columnas).
 
     Returns:
         (base_con_cv, cvs_reporte): base original con columna 'CV' agregada +
-            DataFrame del reporte de CVs (N, MIN, MAX, MEAN, CV) por grupo.
+            DataFrame del reporte de CVs con nombres de columna SAS.
     """
     llave_cv = [c for c in _LLAVE_CV if c in base_sin_dupli.columns]
     cols_contexto = [c for c in _COLS_CV_CONTEXTO if c in base_sin_dupli.columns]
-    # Incluir columnas de contexto en el groupby para que aparezcan en el reporte
     llave_completa = llave_cv + [c for c in cols_contexto if c not in llave_cv]
 
     agg = (
@@ -102,6 +118,7 @@ def calcular_cv(
         .reset_index()
     )
     agg["CV"] = (agg["STD"] / agg["MEAN"] * 100).where(agg["N"] >= 2)
+    agg = agg.drop(columns=["STD"])
     agg = agg.rename(columns={"MEAN": "PRECIO_PROMEDIO_CV"})
 
     # Unir CV de vuelta al DataFrame original usando solo la llave principal
@@ -113,10 +130,7 @@ def calcular_cv(
 
     cvs_altos = agg[agg["CV"].notna() & (agg["CV"] > 30)]
     if len(cvs_altos) > 0:
-        log.warning(
-            "calcular_cv | %d grupos con CV > 30%%",
-            len(cvs_altos),
-        )
+        log.warning("calcular_cv | %d grupos con CV > 30%%", len(cvs_altos))
 
     log.info(
         "calcular_cv OK | grupos=%d | con_cv=%d | cv_max=%.1f",
@@ -124,7 +138,28 @@ def calcular_cv(
         agg["CV"].notna().sum(),
         agg["CV"].max() if agg["CV"].notna().any() else 0,
     )
-    return base_con_cv, agg
+
+    # Renombrar columnas del reporte para que coincidan con SAS
+    sfx = f"_{periodo}" if periodo else ""
+    m = modulo.upper()
+    col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
+    rename_agg: dict[str, str] = {}
+    if "CÓDIGO DIVIPOLA" in agg.columns:
+        rename_agg["CÓDIGO DIVIPOLA"] = "CodigoMpio"
+    if "Nombre_Publica" in agg.columns:
+        rename_agg["Nombre_Publica"] = col_pub_sas
+    if "CÓDIGO CPC" in agg.columns:
+        rename_agg["CÓDIGO CPC"] = "Codigo CPC"
+    rename_agg.update({
+        "N":               f"N{sfx}",
+        "MIN":             f"Min{sfx}",
+        "MAX":             f"Max{sfx}",
+        "PRECIO_PROMEDIO_CV": f"Promedio{sfx}",
+        "CV":              f"CV_Porcentaje{sfx}",
+    })
+    agg_out = agg.rename(columns=rename_agg)
+
+    return base_con_cv, agg_out
 
 
 def detectar_var_atipica(
