@@ -129,6 +129,13 @@ def exportar_bases(
         if col_div and "CodigoDepto" not in df_grupo.columns:
             df_grupo["CodigoDepto"] = df_grupo[col_div].astype(str).str[:2]
 
+        # Cuenta SAS = número de municipios (mercados) a nivel nacional que
+        # reportan este Nombre_Publica en el período — NO es N_FUENTE
+        # (fuentes de precio de un solo municipio). Se repite el mismo valor
+        # en todas las filas del mismo producto.
+        if "Nombre_Publica" in df_grupo.columns:
+            df_grupo["N_MUNICIPIOS_PUBLICA"] = df_grupo.groupby("Nombre_Publica")["Nombre_Publica"].transform("size")
+
         col_map = {
             "CodigoDepto":                   "CodigoDepto" if "CodigoDepto" in df_grupo.columns else None,
             "NombreDepartamento":            "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
@@ -140,7 +147,7 @@ def exportar_bases(
             f"PRECIO_PROMEDIO_{periodo_ant}": col_precio_anterior,
             f"PRECIO_PROMEDIO_{periodo}":     col_precio_actual,
             "Variacion(%)":                  "VARIACION" if "VARIACION" in df_grupo.columns else None,
-            "Cuenta":                        "N_FUENTE" if "N_FUENTE" in df_grupo.columns else None,
+            "Cuenta":                        "N_MUNICIPIOS_PUBLICA" if "N_MUNICIPIOS_PUBLICA" in df_grupo.columns else None,
             "Tendencia":                     "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
         }
         cols_sel = [v for v in col_map.values() if v and v in df_grupo.columns]
@@ -298,6 +305,13 @@ def exportar_anexos(
         if col_div and "CodigoDepto" not in df_grupo.columns:
             df_grupo["CodigoDepto"] = df_grupo[col_div].astype(str).str[:2]
 
+        # Cuenta SAS = número de municipios (mercados) a nivel nacional que
+        # reportan este Nombre_Publica en el período — NO es N_FUENTE
+        # (fuentes de precio de un solo municipio). Se repite el mismo valor
+        # en todas las filas del mismo producto.
+        if "Nombre_Publica" in df_grupo.columns:
+            df_grupo["N_MUNICIPIOS_PUBLICA"] = df_grupo.groupby("Nombre_Publica")["Nombre_Publica"].transform("size")
+
         col_map = {
             "CodigoDepto":                   "CodigoDepto" if "CodigoDepto" in df_grupo.columns else None,
             "NombreDepartamento":            "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
@@ -309,7 +323,7 @@ def exportar_anexos(
             f"PRECIO_PROMEDIO_{periodo_ant}": col_precio_anterior,
             f"PRECIO_PROMEDIO_{periodo}":     col_precio_actual,
             "Variacion(%)":                  "VARIACION" if "VARIACION" in df_grupo.columns else None,
-            "Cuenta":                        "N_FUENTE" if "N_FUENTE" in df_grupo.columns else None,
+            "Cuenta":                        "N_MUNICIPIOS_PUBLICA" if "N_MUNICIPIOS_PUBLICA" in df_grupo.columns else None,
             "Tendencia":                     "TENDENCIA" if "TENDENCIA" in df_grupo.columns else None,
             "Mercado":                       "Mercado" if "Mercado" in df_grupo.columns else None,
             col_pub_sas:                     "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
