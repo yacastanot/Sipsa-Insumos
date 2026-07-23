@@ -17,9 +17,9 @@ sin_precio_ant:
 
   # ─── Insumos Agrícolas (mensual) ───────────────────────────────────────────
   agricolas:
-    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/Ins_Agrícolas para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/Ins_Agrícolas para revisiones.xlsx"
     hoja_historico: "Agrícolas"
-    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/VAR_ATIPICO_AGRICOLA_MAY2026.XLSX"
+    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/VAR_ATIPICO_AGRICOLA_MAY2026.XLSX"
     hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."
@@ -31,9 +31,9 @@ sin_precio_ant:
 
   # ─── Insumos Pecuarios (mensual) ───────────────────────────────────────────
   pecuarios:
-    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/Ins_Pecuarios para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/Ins_Pecuarios para revisiones.xlsx"
     hoja_historico: "Pecuarios"
-    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/VAR_ATIPICO_PECUARIO_MAY2026.XLSX"
+    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/VAR_ATIPICO_PECUARIO_MAY2026.XLSX"
     hoja_var_atipico: "VAR_ATIPICO_PECUARIO"
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."
@@ -45,9 +45,9 @@ sin_precio_ant:
 
   # ─── Elementos Agropecuarios (bimestral impar: ENE, MAR, MAY, JUL, SEP, NOV)
   elementos:
-    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/Elementos para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/Elementos para revisiones.xlsx"
     hoja_historico: "Elementos"
-    ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260530/VAR_ATIPICO_ELEMENTOS_MAY2026.XLSX"
+    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/VAR_ATIPICO_ELEMENTOS_MAY2026.XLSX"
     hoja_var_atipico: "VAR_ATIPICO_ELEMENTOS"
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."

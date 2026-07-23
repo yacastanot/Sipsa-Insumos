@@ -12,7 +12,7 @@ mes_num_anterior: 4
 mes_num_menos2: 3       # Número mes t-2
 mes_num_menos3: 2       # Número mes t-3
 anio: 2026
-fecha_proceso: "20260615"   # YYYYMMDD para nombres de archivo de salida
+fecha_proceso: "20260723"   # YYYYMMDD para nombres de archivo de salida
 
 # Rutas de salida
 ruta_reporting: "data/08_reporting"

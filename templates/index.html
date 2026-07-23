@@ -220,11 +220,15 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
           <div class="module-label">{{ m.label }}</div>
           <div class="module-period">{{ m.period_label }}</div>
           <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}"
-                id="badge-{{ m.id }}">
+                id="badge-{{ m.id }}" style="cursor:pointer" title="Clic para activar/desactivar"
+                onclick="toggleModulo('{{ m.id }}')">
             {% if is_active %}ACTIVO{% else %}INACTIVO{% endif %}
           </span>
         </div>
         {% endfor %}
+      </div>
+      <div style="font-size:.72rem;color:#888;margin-top:.4rem">
+        💡 El estado sugerido según el mes se puede ajustar manualmente haciendo clic en cada etiqueta.
       </div>
 
       <div style="font-size:.82rem;font-weight:700;color:#555;margin:.9rem 0 .6rem">
@@ -238,26 +242,30 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
           <div class="module-label">{{ m.label }}</div>
           <div class="module-period">SPA</div>
           <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}"
-                id="spa-badge-{{ m.id }}">
+                id="spa-badge-{{ m.id }}" style="cursor:pointer" title="Clic para activar/desactivar"
+                onclick="toggleSpaModulo('{{ m.id }}')">
             {% if is_active %}ACTIVO{% else %}INACTIVO{% endif %}
           </span>
         </div>
         {% endfor %}
       </div>
+      <div style="font-size:.72rem;color:#888;margin-top:.4rem">
+        💡 El estado sugerido según el mes se puede ajustar manualmente haciendo clic en cada etiqueta.
+      </div>
     </div>
   </div>
 
-  <!-- ── 2. CUADROS – Cargar bases livianas ──────────────────────────── -->
+  <!-- ── 2. CUADROS – Cargar archivos de entrada ─────────────────────── -->
   <div class="step open" id="step-cuadros">
     <div class="step-header" onclick="toggleStep('step-cuadros')">
       <div class="step-num">2</div>
-      <span class="step-title">Cargar bases livianas</span>
+      <span class="step-title">Cargar archivos de entrada</span>
       <span class="step-tag tag-cuadros">CUADROS</span>
       <span class="step-arrow">▼</span>
     </div>
     <div class="step-body">
       <div class="upload-section-title">
-        📂 Archivos Excel — una base liviana por módulo activo
+        📂 Bases livianas — una por módulo activo
       </div>
       <div class="upload-grid" id="upload-grid-cuadros">
         {% for m in modulos %}
@@ -277,6 +285,69 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
                  accept=".xlsx,.xls" data-modulo="{{ m.id }}"
                  onchange="uploadCuadros(this)">
           <div class="upload-status" id="status-{{ m.id }}">Sin archivo cargado</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="upload-section-title">
+        🗺️ DIVIPOLA — municipios y departamentos
+      </div>
+      <div class="upload-grid" id="upload-grid-divipola">
+        <div class="upload-card" id="ucard-divipola-master" style="border-color:#52b788">
+          <div class="upload-card-title">
+            <span>DIVIPOLA maestro</span>
+            <span class="module-status status-active">OBLIGATORIO</span>
+          </div>
+          <label class="upload-label" for="file-divipola-master">
+            📎 Seleccionar DIVIPOLA.xlsx
+          </label>
+          <input type="file" class="upload-input" id="file-divipola-master"
+                 accept=".xlsx,.xls" data-tipo="master"
+                 onchange="uploadDivipola(this)">
+          <div class="upload-status" id="status-divipola-master">Sin archivo cargado</div>
+        </div>
+        {% for m in modulos %}
+        {% set is_active = m.id in activos %}
+        <div class="upload-card {% if not is_active %}inactive-module{% endif %}"
+             id="ucard-divipola-{{ m.id }}">
+          <div class="upload-card-title">
+            <span>{{ m.label }}</span>
+            <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}">
+              {% if is_active %}ACTIVO{% else %}INACT.{% endif %}
+            </span>
+          </div>
+          <label class="upload-label" for="file-divipola-{{ m.id }}">
+            📎 Seleccionar divipola {{ m.label|lower }}
+          </label>
+          <input type="file" class="upload-input" id="file-divipola-{{ m.id }}"
+                 accept=".xlsx,.xls" data-tipo="{{ m.id }}"
+                 onchange="uploadDivipola(this)">
+          <div class="upload-status" id="status-divipola-{{ m.id }}">Sin archivo cargado</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="upload-section-title">
+        📈 MAYORESQUE2 — referencia del período anterior
+      </div>
+      <div class="upload-grid" id="upload-grid-mayoresque2">
+        {% for m in modulos %}
+        {% set is_active = m.id in activos %}
+        <div class="upload-card {% if not is_active %}inactive-module{% endif %}"
+             id="ucard-mayoresque2-{{ m.id }}">
+          <div class="upload-card-title">
+            <span>{{ m.label }}</span>
+            <span class="module-status {% if is_active %}status-active{% else %}status-inactive{% endif %}">
+              {% if is_active %}ACTIVO{% else %}INACT.{% endif %}
+            </span>
+          </div>
+          <label class="upload-label" for="file-mayoresque2-{{ m.id }}">
+            📎 Seleccionar MAYORESQUE2
+          </label>
+          <input type="file" class="upload-input" id="file-mayoresque2-{{ m.id }}"
+                 accept=".xlsx,.xls" data-modulo="{{ m.id }}"
+                 onchange="uploadMayoresque2(this)">
+          <div class="upload-status" id="status-mayoresque2-{{ m.id }}">Sin archivo cargado</div>
         </div>
         {% endfor %}
       </div>
@@ -485,6 +556,28 @@ async function configurar() {
   } catch (e) { toast(`Error: ${e.message}`, 'error'); }
 }
 
+function toggleModulo(id) {
+  const idx = _currentActivos.indexOf(id);
+  if (idx === -1) _currentActivos.push(id); else _currentActivos.splice(idx, 1);
+  _updateModulosBadges(_currentActivos, _currentSpaActivos);
+}
+
+async function toggleSpaModulo(id) {
+  const activo = !_currentSpaActivos.includes(id);
+  try {
+    const r = await fetch('/configure/spa-activo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({modulo_id: id, activo}),
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+    if (activo) { if (!_currentSpaActivos.includes(id)) _currentSpaActivos.push(id); }
+    else { _currentSpaActivos = _currentSpaActivos.filter(x => x !== id); }
+    _updateModulosBadges(_currentActivos, _currentSpaActivos);
+    toast(`${id}: ${activo ? 'activado' : 'desactivado'}`, 'success');
+  } catch (e) { toast(`Error: ${e.message}`, 'error'); }
+}
+
 function _updateModulosBadges(activos, spaActivos) {
   const allMods = ['agricolas','pecuarios','elementos','empaques','propagacion',
                    'arriendos','servicios','jornales','especies'];
@@ -493,6 +586,8 @@ function _updateModulosBadges(activos, spaActivos) {
     const card  = document.getElementById(`card-${id}`);
     const badge = document.getElementById(`badge-${id}`);
     const ucard = document.getElementById(`ucard-${id}`);
+    const dcard = document.getElementById(`ucard-divipola-${id}`);
+    const mcard = document.getElementById(`ucard-mayoresque2-${id}`);
     const btn   = document.getElementById(`btn-mod-${id}`);
     if (card) {
       card.className = `module-card ${isActive ? 'active' : 'inactive'}`;
@@ -501,6 +596,12 @@ function _updateModulosBadges(activos, spaActivos) {
     }
     if (ucard) {
       ucard.className = `upload-card${isActive ? '' : ' inactive-module'}`;
+    }
+    if (dcard) {
+      dcard.className = `upload-card${isActive ? '' : ' inactive-module'}`;
+    }
+    if (mcard) {
+      mcard.className = `upload-card${isActive ? '' : ' inactive-module'}`;
     }
     if (btn) btn.disabled = !isActive;
   });
@@ -550,6 +651,54 @@ async function uploadCuadros(input) {
     statusEl.textContent = `❌ ${e.message}`;
     statusEl.className = 'upload-status upload-err';
     toast(`Error al cargar ${modulo}: ${e.message}`, 'error');
+  }
+}
+
+// ── Upload DIVIPOLA ───────────────────────────────────────────────────────────
+async function uploadDivipola(input) {
+  const tipo     = input.dataset.tipo;   // "master" | id de módulo
+  const file     = input.files[0];
+  const statusEl = document.getElementById(`status-divipola-${tipo}`);
+  if (!file) return;
+  statusEl.textContent = '⏳ Cargando…';
+  statusEl.className = 'upload-status';
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const r = await fetch(`/upload/divipola/${tipo}`, {method:'POST', body:fd});
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+    const data = await r.json();
+    statusEl.textContent = `✅ ${data.filename} (${data.size_kb} KB)`;
+    statusEl.className = 'upload-status upload-ok';
+    toast(`DIVIPOLA ${tipo}: cargado`, 'success');
+  } catch (e) {
+    statusEl.textContent = `❌ ${e.message}`;
+    statusEl.className = 'upload-status upload-err';
+    toast(`Error al cargar DIVIPOLA ${tipo}: ${e.message}`, 'error');
+  }
+}
+
+// ── Upload MAYORESQUE2 (referencia período anterior) ──────────────────────────
+async function uploadMayoresque2(input) {
+  const modulo   = input.dataset.modulo;
+  const file     = input.files[0];
+  const statusEl = document.getElementById(`status-mayoresque2-${modulo}`);
+  if (!file) return;
+  statusEl.textContent = '⏳ Cargando…';
+  statusEl.className = 'upload-status';
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const r = await fetch(`/upload/mayoresque2/${modulo}`, {method:'POST', body:fd});
+    if (!r.ok) { const e = await r.json(); throw new Error(e.detail); }
+    const data = await r.json();
+    statusEl.textContent = `✅ ${data.filename} (${data.size_kb} KB)`;
+    statusEl.className = 'upload-status upload-ok';
+    toast(`${modulo}: MAYORESQUE2 cargado`, 'success');
+  } catch (e) {
+    statusEl.textContent = `❌ ${e.message}`;
+    statusEl.className = 'upload-status upload-err';
+    toast(`Error al cargar MAYORESQUE2 ${modulo}: ${e.message}`, 'error');
   }
 }
 
@@ -626,6 +775,7 @@ async function runPipeline(name) {
 
   const fd = new FormData();
   fd.append('pipeline_name', name);
+  if (name === 'all_active') fd.append('modulos', _currentActivos.join(','));
 
   const resp = await fetch('/run', {method:'POST', body:fd});
   if (!resp.ok) {
@@ -686,14 +836,18 @@ function renderOutputList(elId, files, tipo) {
     el.innerHTML = '<div class="outputs-empty">Sin archivos</div>';
     return;
   }
-  el.innerHTML = files.map(f => `
+  el.innerHTML = files.map(f => {
+    const href = '/download/' + tipo + '/' + f.split('/').map(encodeURIComponent).join('/');
+    const base = f.split('/').pop();
+    return `
     <div class="output-item">
       <span class="output-name" title="${f}">${f}</span>
-      <a class="output-dl" href="/download/${tipo}/${encodeURIComponent(f)}" download="${f}">
+      <a class="output-dl" href="${href}" download="${base}">
         ⬇ Descargar
       </a>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

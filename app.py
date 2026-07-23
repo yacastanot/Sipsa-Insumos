@@ -38,6 +38,7 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Upload
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
+from markupsafe import Markup
 from pydantic import BaseModel
 
 # ── Rutas del proyecto ────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ REPORTING_DIR = PROJECT_ROOT / "data" / "08_reporting"
 
 app = FastAPI(title="SIPSA Insumos Agropecuarios", docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(PROJECT_ROOT / "templates"))
-templates.env.filters["tojson"] = lambda v: _json.dumps(v, ensure_ascii=False)
+templates.env.filters["tojson"] = lambda v: Markup(_json.dumps(v, ensure_ascii=False))
 security = HTTPBasic()
 
 _pipeline_running = False
@@ -267,6 +268,17 @@ def _update_spa_activos(mes_num: int) -> None:
     SPA_PARAMS.write_text(text, encoding="utf-8")
 
 
+def _set_spa_activo(modulo_id: str, activo: bool) -> None:
+    """Ajuste manual del flag 'activo' de un único sub-módulo SPA."""
+    if not SPA_PARAMS.exists():
+        return
+    nuevo = "true" if activo else "false"
+    text = SPA_PARAMS.read_text(encoding="utf-8")
+    pattern = rf'(  {re.escape(modulo_id)}:.*?activo:\s*)(true|false)'
+    text = re.sub(pattern, rf'\g<1>{nuevo}', text, count=1, flags=re.DOTALL)
+    SPA_PARAMS.write_text(text, encoding="utf-8")
+
+
 # ── Autenticación ─────────────────────────────────────────────────────────────
 
 def _check_auth(credentials: HTTPBasicCredentials = Depends(security)) -> str:
@@ -287,6 +299,11 @@ def _check_auth(credentials: HTTPBasicCredentials = Depends(security)) -> str:
 class ConfigRequest(BaseModel):
     mes_num: int
     anio: int
+
+
+class SpaActivoRequest(BaseModel):
+    modulo_id: str
+    activo: bool
 
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────
@@ -321,6 +338,15 @@ async def configure(body: ConfigRequest, _: str = Depends(_check_auth)) -> dict:
     return _write_config(body.mes_num, body.anio)
 
 
+@app.post("/configure/spa-activo")
+async def configure_spa_activo(body: SpaActivoRequest, _: str = Depends(_check_auth)) -> dict:
+    valid_ids = {m["id"] for m in SPA_MODULOS}
+    if body.modulo_id not in valid_ids:
+        raise HTTPException(400, f"Módulo SPA desconocido: {body.modulo_id}")
+    _set_spa_activo(body.modulo_id, body.activo)
+    return {"ok": True, "modulo_id": body.modulo_id, "activo": body.activo}
+
+
 @app.post("/upload/cuadros/{modulo_id}")
 async def upload_cuadros(
     modulo_id: str,
@@ -340,6 +366,53 @@ async def upload_cuadros(
     contents = await file.read()
     (dest_dir / file.filename).write_bytes(contents)
     _update_archivo_liviana(modulo_id, periodo, file.filename)
+    return {"ok": True, "filename": file.filename, "modulo": modulo_id,
+            "size_kb": round(len(contents) / 1024, 1)}
+
+
+@app.post("/upload/divipola/{tipo}")
+async def upload_divipola(
+    tipo: str,   # "master" | id de módulo en MODULOS
+    file: UploadFile = File(...),
+    _: str = Depends(_check_auth),
+) -> dict:
+    valid_ids = {"master"} | {m["id"] for m in MODULOS}
+    if tipo not in valid_ids:
+        raise HTTPException(400, f"Tipo de DIVIPOLA desconocido: {tipo}")
+    if not file.filename.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "Solo se aceptan archivos Excel (.xlsx, .xls)")
+
+    cfg     = _read_globals()
+    periodo = str(cfg.get("periodo", "MAY2026"))
+    dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"DIVIPOLA {periodo}"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    contents = await file.read()
+    # El maestro DIVIPOLA.xlsx tiene ruta fija en el catalog — se normaliza el nombre.
+    filename = "DIVIPOLA.xlsx" if tipo == "master" else file.filename
+    (dest_dir / filename).write_bytes(contents)
+    return {"ok": True, "filename": filename, "tipo": tipo,
+            "size_kb": round(len(contents) / 1024, 1)}
+
+
+@app.post("/upload/mayoresque2/{modulo_id}")
+async def upload_mayoresque2(
+    modulo_id: str,
+    file: UploadFile = File(...),
+    _: str = Depends(_check_auth),
+) -> dict:
+    valid_ids = {m["id"] for m in MODULOS}
+    if modulo_id not in valid_ids:
+        raise HTTPException(400, f"Módulo desconocido: {modulo_id}")
+    if not file.filename.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(400, "Solo se aceptan archivos Excel (.xlsx, .xls)")
+
+    cfg     = _read_globals()
+    periodo = str(cfg.get("periodo", "MAY2026"))
+    # Los MAYORESQUE2 de referencia van sueltos en la raíz del período (no en subcarpeta).
+    dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    contents = await file.read()
+    (dest_dir / file.filename).write_bytes(contents)
     return {"ok": True, "filename": file.filename, "modulo": modulo_id,
             "size_kb": round(len(contents) / 1024, 1)}
 
@@ -383,29 +456,29 @@ async def list_outputs(_: str = Depends(_check_auth)) -> dict:
     if not REPORTING_DIR.exists():
         return {"cuadros": [], "spa": []}
 
+    spa_dir = REPORTING_DIR / "sin_precio_ant"
     cuadros = sorted(
-        [f for f in REPORTING_DIR.glob("*.xlsx")],
+        [f for f in REPORTING_DIR.rglob("*.xlsx") if spa_dir not in f.parents],
         key=lambda f: f.stat().st_mtime, reverse=True,
     )
-    spa_dir = REPORTING_DIR / "sin_precio_ant"
     spa = sorted(
         [f for f in spa_dir.glob("*.xlsx")] if spa_dir.exists() else [],
         key=lambda f: f.stat().st_mtime, reverse=True,
     )
     return {
-        "cuadros": [f.name for f in cuadros],
+        "cuadros": [str(f.relative_to(REPORTING_DIR)).replace("\\", "/") for f in cuadros],
         "spa":     [f.name for f in spa],
     }
 
 
-@app.get("/download/cuadros/{filename}")
+@app.get("/download/cuadros/{filename:path}")
 async def download_cuadros(filename: str, _: str = Depends(_check_auth)) -> FileResponse:
     path = (REPORTING_DIR / filename).resolve()
     if not str(path).startswith(str(REPORTING_DIR.resolve())):
         raise HTTPException(403, "Acceso denegado")
     if not path.exists():
         raise HTTPException(404, "Archivo no encontrado")
-    return FileResponse(str(path), filename=filename,
+    return FileResponse(str(path), filename=path.name,
                         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
@@ -424,6 +497,7 @@ async def download_spa(filename: str, _: str = Depends(_check_auth)) -> FileResp
 @app.post("/run")
 async def run_pipeline(
     pipeline_name: str = Form("__default__"),
+    modulos: str = Form(""),
     _: str = Depends(_check_auth),
 ) -> StreamingResponse:
     global _pipeline_running
@@ -447,9 +521,15 @@ async def run_pipeline(
     def _run_worker() -> None:
         try:
             if pipeline_name == "all_active":
-                cfg     = _read_globals()
-                mes_num = int(cfg.get("mes_num_actual", 5))
-                activos = modulos_activos(mes_num)
+                # Respeta el ajuste manual del usuario si se envía; si no, usa el
+                # calendario sugerido según el mes configurado.
+                if modulos.strip():
+                    valid_ids = {m["id"] for m in MODULOS}
+                    activos = [m.strip() for m in modulos.split(",") if m.strip() in valid_ids]
+                else:
+                    cfg     = _read_globals()
+                    mes_num = int(cfg.get("mes_num_actual", 5))
+                    activos = modulos_activos(mes_num)
                 for mod in activos:
                     rc = _run_one(
                         [sys.executable, "-m", "kedro", "run", "--pipeline", mod],
