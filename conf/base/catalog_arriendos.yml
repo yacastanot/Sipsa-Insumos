@@ -4,131 +4,131 @@
 
 arriendos.base_bronze:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/arriendos/base_bronze_${globals:periodo}.parquet
+  filepath: data/02_intermediate/${globals:periodo}/arriendos/base_bronze_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.base_enriquecida:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/arriendos/base_enriquecida_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/arriendos/base_enriquecida_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.precio_promedio:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/arriendos/precio_promedio_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/arriendos/precio_promedio_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.mayor2:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/arriendos/mayor2_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/arriendos/mayor2_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.menor2:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/arriendos/menor2_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/arriendos/menor2_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/arriendos/mayor2_${globals:periodo_anterior_trimestral}.parquet
+  filepath: data/03_primary/${globals:periodo_anterior_trimestral}/arriendos/mayor2_${globals:periodo_anterior_trimestral}.parquet
 
 arriendos.base_comparada:
   type: pandas.ParquetDataset
-  filepath: data/04_feature/arriendos/base_comparada_${globals:periodo}.parquet
+  filepath: data/04_feature/${globals:periodo}/arriendos/base_comparada_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.faltan_divipola:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/FALTAN_DIVIPOLA_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/arriendos/FALTAN_DIVIPOLA_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_DIVIPOLA"
 
 arriendos.faltan_grupo:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/FALTAN_GRUPO_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/arriendos/FALTAN_GRUPO_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_GRUPO_ARRIENDOS"
 
 arriendos.faltan_publica:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/FALTAN_PUBLICA_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/arriendos/FALTAN_PUBLICA_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_PUBLICA_ARRIENDOS"
 
 arriendos.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/ARRIENDOS_DUPLI_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/arriendos/ARRIENDOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "ARRIENDOS_DUPLI"
 
 arriendos.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: "data/08_reporting/arriendos/CV's ARRIENDOS ${globals:periodo}.xlsx"
+  filepath: "data/08_reporting/${globals:periodo}/arriendos/CV's ARRIENDOS ${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CV's"
 
 arriendos.var_atipico:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/VAR_ATIPICO_ARRIENDOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/arriendos/VAR_ATIPICO_ARRIENDOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "VAR_ATIPICO_ARRIENDOS"
 
 arriendos.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/arriendos/ARRIENDOS_MENORESQUE2_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/arriendos/ARRIENDOS_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
 
 arriendos.bases_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_bases_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_bases_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.tablas_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_tablas_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_tablas_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.anexos_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_anexos_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_anexos_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.cuadros_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_cuadros_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_cuadros_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.mayo_menores_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_mayo_menores_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_mayo_menores_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.revision_hist_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_revision_hist_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_revision_hist_${globals:periodo}.parquet
   save_args:
     index: false
 
 arriendos.revision_tematica_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/arriendos/meta_revision_tematica_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/arriendos/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

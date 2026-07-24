@@ -4,131 +4,131 @@
 
 servicios.base_bronze:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/servicios/base_bronze_${globals:periodo}.parquet
+  filepath: data/02_intermediate/${globals:periodo}/servicios/base_bronze_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.base_enriquecida:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/servicios/base_enriquecida_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/servicios/base_enriquecida_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.precio_promedio:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/servicios/precio_promedio_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/servicios/precio_promedio_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.mayor2:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/servicios/mayor2_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/servicios/mayor2_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.menor2:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/servicios/menor2_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/servicios/menor2_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/servicios/mayor2_${globals:periodo_anterior_trimestral}.parquet
+  filepath: data/03_primary/${globals:periodo_anterior_trimestral}/servicios/mayor2_${globals:periodo_anterior_trimestral}.parquet
 
 servicios.base_comparada:
   type: pandas.ParquetDataset
-  filepath: data/04_feature/servicios/base_comparada_${globals:periodo}.parquet
+  filepath: data/04_feature/${globals:periodo}/servicios/base_comparada_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.faltan_divipola:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/FALTAN_DIVIPOLA_SERVICIOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/servicios/FALTAN_DIVIPOLA_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_DIVIPOLA"
 
 servicios.faltan_grupo:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/FALTAN_GRUPO_SERVICIOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/servicios/FALTAN_GRUPO_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_GRUPO_SERVICIOS"
 
 servicios.faltan_publica:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/FALTAN_PUBLICA_SERVICIOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/servicios/FALTAN_PUBLICA_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_PUBLICA_SERVICIOS"
 
 servicios.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/SERVICIOS_DUPLI_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/servicios/SERVICIOS_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "SERVICIOS_DUPLI"
 
 servicios.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: "data/08_reporting/servicios/CV's SERVICIOS ${globals:periodo}.xlsx"
+  filepath: "data/08_reporting/${globals:periodo}/servicios/CV's SERVICIOS ${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CV's"
 
 servicios.var_atipico:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/VAR_ATIPICO_SERVICIOS_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/servicios/VAR_ATIPICO_SERVICIOS_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "VAR_ATIPICO_SERVICIOS"
 
 servicios.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/servicios/SERVICIOS_MENORESQUE2_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/servicios/SERVICIOS_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
 
 servicios.bases_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_bases_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_bases_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.tablas_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_tablas_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_tablas_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.anexos_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_anexos_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_anexos_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.cuadros_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_cuadros_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_cuadros_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.mayo_menores_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_mayo_menores_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_mayo_menores_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.revision_hist_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_revision_hist_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_revision_hist_${globals:periodo}.parquet
   save_args:
     index: false
 
 servicios.revision_tematica_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/servicios/meta_revision_tematica_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/servicios/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false

@@ -2,9 +2,9 @@
 
 Dos flujos de procesamiento:
   CUADROS          : base liviana por módulo → kedro run --pipeline {modulo}
-                     Salida: BASES_*.xlsx en data/08_reporting/
+                     Salida: BASES_*.xlsx en data/08_reporting/{periodo}/{modulo}/
   SIN_PRECIO_ANT   : historico + var_atipico → kedro run --pipeline sin_precio_ant
-                     Salida: REV_SIN_PRECIO_ANTE_*.xlsx en data/08_reporting/sin_precio_ant/
+                     Salida: REV_SIN_PRECIO_ANTE_*.xlsx en data/08_reporting/{periodo}/sin_precio_ant/
 
 Calendario de módulos:
   Mensual (1-12)            : Agrícolas, Pecuarios

@@ -7,7 +7,7 @@
 # Leído por el nodo merge_divipola. Se usa el mismo archivo para todos los módulos.
 divipola_raw:
   type: pandas.ExcelDataset
-  filepath: "data/01_raw/MAY2026/DIVIPOLA MAY2026/DIVIPOLA.xlsx"
+  filepath: "data/01_raw/${globals:periodo}/DIVIPOLA ${globals:periodo}/DIVIPOLA.xlsx"
   load_args:
     sheet_name: "Dep_Mun"
     dtype:

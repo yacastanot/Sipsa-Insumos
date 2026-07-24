@@ -1,6 +1,6 @@
 pecuarios:
   modulo: "PECUARIOS"
-  archivo_liviana: "data/01_raw/MAY2026/BASES LIVIANAS MAY2026/Insumos pecuarios may 2026.xlsx"
+  archivo_liviana: "data/01_raw/JUN2026/BASES LIVIANAS JUN2026/Insumos pecuarios jun 2026.xlsx"
   hoja_liviana: "Información Insumos"
   tipo_modulo: "estandar"
   tipo_llave: "casacom_ica_unmed"

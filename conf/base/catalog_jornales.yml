@@ -4,131 +4,131 @@
 
 jornales.base_bronze:
   type: pandas.ParquetDataset
-  filepath: data/02_intermediate/jornales/base_bronze_${globals:periodo}.parquet
+  filepath: data/02_intermediate/${globals:periodo}/jornales/base_bronze_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.base_enriquecida:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/jornales/base_enriquecida_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/jornales/base_enriquecida_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.precio_promedio:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/jornales/precio_promedio_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/jornales/precio_promedio_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.mayor2:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/jornales/mayor2_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/jornales/mayor2_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.menor2:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/jornales/menor2_${globals:periodo}.parquet
+  filepath: data/03_primary/${globals:periodo}/jornales/menor2_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.mayor2_anterior:
   type: pandas.ParquetDataset
-  filepath: data/03_primary/jornales/mayor2_${globals:periodo_anterior_trimestral}.parquet
+  filepath: data/03_primary/${globals:periodo_anterior_trimestral}/jornales/mayor2_${globals:periodo_anterior_trimestral}.parquet
 
 jornales.base_comparada:
   type: pandas.ParquetDataset
-  filepath: data/04_feature/jornales/base_comparada_${globals:periodo}.parquet
+  filepath: data/04_feature/${globals:periodo}/jornales/base_comparada_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.faltan_divipola:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/FALTAN_DIVIPOLA_JORNALES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/jornales/FALTAN_DIVIPOLA_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_DIVIPOLA"
 
 jornales.faltan_grupo:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/FALTAN_GRUPO_JORNALES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/jornales/FALTAN_GRUPO_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_GRUPO_JORNALES"
 
 jornales.faltan_publica:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/FALTAN_PUBLICA_JORNALES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/jornales/FALTAN_PUBLICA_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "FALTAN_PUBLICA_JORNALES"
 
 jornales.duplicados:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/JORNALES_DUPLI_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/jornales/JORNALES_DUPLI_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "JORNALES_DUPLI"
 
 jornales.cvs_reporte:
   type: pandas.ExcelDataset
-  filepath: "data/08_reporting/jornales/CV's_JORNALES_${globals:periodo}.xlsx"
+  filepath: "data/08_reporting/${globals:periodo}/jornales/CV's_JORNALES_${globals:periodo}.xlsx"
   save_args:
     index: false
     sheet_name: "CV's"
 
 jornales.var_atipico:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/VAR_ATIPICO_JORNALES_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/jornales/VAR_ATIPICO_JORNALES_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "VAR_ATIPICO_JORNALES"
 
 jornales.menor2_reporte:
   type: pandas.ExcelDataset
-  filepath: data/08_reporting/jornales/JORNALES_MENORESQUE2_${globals:periodo}.xlsx
+  filepath: data/08_reporting/${globals:periodo}/jornales/JORNALES_MENORESQUE2_${globals:periodo}.xlsx
   save_args:
     index: false
     sheet_name: "MENOR2"
 
 jornales.bases_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_bases_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_bases_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.tablas_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_tablas_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_tablas_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.anexos_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_anexos_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_anexos_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.cuadros_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_cuadros_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_cuadros_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.mayo_menores_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_mayo_menores_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_mayo_menores_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.revision_hist_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_revision_hist_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_revision_hist_${globals:periodo}.parquet
   save_args:
     index: false
 
 jornales.revision_tematica_meta:
   type: pandas.ParquetDataset
-  filepath: data/08_reporting/jornales/meta_revision_tematica_${globals:periodo}.parquet
+  filepath: data/08_reporting/${globals:periodo}/jornales/meta_revision_tematica_${globals:periodo}.parquet
   save_args:
     index: false
