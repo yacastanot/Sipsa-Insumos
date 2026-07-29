@@ -17,8 +17,11 @@ sin_precio_ant:
 
   # ─── Insumos Agrícolas (mensual) ───────────────────────────────────────────
   agricolas:
-    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/Ins_Agrícolas para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/JUN2026/SIN_PRECIO_ANT JUN2026/Ins_Agrícolas para revisiones.xlsx"
     hoja_historico: "Agrícolas"
+    # PENDIENTE JUN2026: falta VAR_ATIPICO_AGRICOLA_JUN2026 (analista DANE, con
+    # columna "Junio"). Mientras no llegue, se deja MAY2026 — el nodo falla con
+    # KeyError claro ("Junio" no existe en ese archivo) si se intenta ejecutar.
     ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/VAR_ATIPICO_AGRICOLA_MAY2026.XLSX"
     hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"
     casacom_col_hist: "CasaCom."
@@ -31,8 +34,11 @@ sin_precio_ant:
 
   # ─── Insumos Pecuarios (mensual) ───────────────────────────────────────────
   pecuarios:
-    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/Ins_Pecuarios para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/JUN2026/SIN_PRECIO_ANT JUN2026/Ins_Pecuarios para revisiones.xlsx"
     hoja_historico: "Pecuarios"
+    # PENDIENTE JUN2026: falta VAR_ATIPICO_PECUARIO_JUN2026 (analista DANE, con
+    # columna "Junio"). Mientras no llegue, se deja MAY2026 — el nodo falla con
+    # KeyError claro ("Junio" no existe en ese archivo) si se intenta ejecutar.
     ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/MAY2026/SIN_PRECIO_ANT/VAR_ATIPICO_PECUARIO_MAY2026.XLSX"
     hoja_var_atipico: "VAR_ATIPICO_PECUARIO"
     casacom_col_hist: "CasaCom."
@@ -55,13 +61,15 @@ sin_precio_ant:
     unmed_col_var:    "UnMed."
     nov_col:          "Nov."
     modulo:           "ELEMENTOS"
-    activo:           true        # MAY es bimestral impar → activo
+    activo:           false        # MAY es bimestral impar → activo
 
   # ─── Material de Propagación (bimestral par: FEB, ABR, JUN, AGO, OCT, DIC)
   propagacion:
-    # Actualizar rutas cuando corresponda al bimestral par siguiente (JUN2026)
-    ruta_historico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260430/Material_propag para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/JUN2026/SIN_PRECIO_ANT JUN2026/Material_propag para revisiones.xlsx"
     hoja_historico: "Material"
+    # PENDIENTE JUN2026: falta VAR_ATIPICO_MATERIAL_JUN2026 (analista DANE, con
+    # columna "Junio"). Mientras no llegue, se deja ABR2026 — el nodo falla con
+    # KeyError claro ("Junio" no existe en ese archivo) si se intenta ejecutar.
     ruta_var_atipico: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA_I/SIN_PRECIO_ANT/2026/01Entrada/01Entrada/20260430/VAR_ATIPICO_MATERIAL_ABR2026.XLSX"
     hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"   # nombre de hoja en el archivo fuente
     casacom_col_hist: "CasaCom."   # el histórico usa punto
@@ -70,4 +78,4 @@ sin_precio_ant:
     unmed_col_var:    "UnMed#"
     nov_col:          "Nov#"
     modulo:           "MATERIAL"
-    activo:           false       # MAY no es bimestral par; activar en JUN2026
+    activo:           true       # MAY no es bimestral par; activar en JUN2026
