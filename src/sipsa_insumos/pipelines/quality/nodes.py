@@ -18,14 +18,14 @@ import pandas as pd
 
 log = logging.getLogger(__name__)
 
-# Nombre SAS de la columna Nombre_Publica según módulo (máx 31 chars para Excel)
+# Nombre SAS de la columna Nombre_Publica según módulo (máx 32 bytes para Excel/SAS)
 _NOMBRE_PUBLICA_SAS: dict[str, str] = {
     "AGRICOLAS":   "Nombre_productos_agrícolas_publ",
-    "PECUARIOS":   "Nombre_insumos_pecuarios_publ",
-    "ELEMENTOS":   "Nombre_elementos_agropecuarios_publ",
-    "EMPAQUES":    "Nombre_empaques_agropecuarios_publ",
-    "ARRIENDOS":   "Nombre_arriendos_publ",
-    "SERVICIOS":   "Nombre_servicios_publ",
+    "PECUARIOS":   "Nombre_productos_pecuarios_publi",
+    "ELEMENTOS":   "Nombre_productos_elementos_publi",
+    "EMPAQUES":    "Nombre_productos_empaques_publi",
+    "ARRIENDOS":   "Nombre_productos_arriendos_publi",
+    "SERVICIOS":   "Nombre_productos_servicios_publi",
     "PROPAGACION": "Nombre_material_propagacion_publ",
     "JORNALES":    "Nombre_jornales_publ",
     "ESPECIES":    "Nombre_especies_productivas_publ",

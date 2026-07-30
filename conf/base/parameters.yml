@@ -3,16 +3,16 @@
 # Actualizar junto con globals.yml al inicio de cada período mensual.
 # =============================================================================
 
-periodo: "JUN2026"
-periodo_anterior: "MAY2026"
-mes_actual: "Junio"
-mes_anterior: "Mayo"
-mes_num_actual: 6
-mes_num_anterior: 5
-mes_num_menos2: 4       # Número mes t-2
-mes_num_menos3: 3       # Número mes t-3
+periodo: "JUL2026"
+periodo_anterior: "JUN2026"
+mes_actual: "Julio"
+mes_anterior: "Junio"
+mes_num_actual: 7
+mes_num_anterior: 6
+mes_num_menos2: 5       # Número mes t-2
+mes_num_menos3: 4       # Número mes t-3
 anio: 2026
-fecha_proceso: "20260724"   # YYYYMMDD para nombres de archivo de salida
+fecha_proceso: "20260729"   # YYYYMMDD para nombres de archivo de salida
 
 # Rutas de salida
 ruta_reporting: "data/08_reporting/${globals:periodo}"

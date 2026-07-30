@@ -42,33 +42,6 @@ arriendos.base_comparada:
   save_args:
     index: false
 
-arriendos.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/arriendos/FALTAN_DIVIPOLA_ARRIENDOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
-
-arriendos.faltan_grupo:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/arriendos/FALTAN_GRUPO_ARRIENDOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_GRUPO_ARRIENDOS"
-
-arriendos.faltan_publica:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/arriendos/FALTAN_PUBLICA_ARRIENDOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_PUBLICA_ARRIENDOS"
-
-arriendos.duplicados:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/arriendos/ARRIENDOS_DUPLI_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "ARRIENDOS_DUPLI"
 
 arriendos.cvs_reporte:
   type: pandas.ExcelDataset
@@ -76,13 +49,6 @@ arriendos.cvs_reporte:
   save_args:
     index: false
     sheet_name: "CV's"
-
-arriendos.var_atipico:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/arriendos/VAR_ATIPICO_ARRIENDOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "VAR_ATIPICO_ARRIENDOS"
 
 arriendos.menor2_reporte:
   type: pandas.ExcelDataset

@@ -42,12 +42,6 @@ propagacion.base_comparada:
   save_args:
     index: false
 
-propagacion.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/propagacion/FALTAN_DIVIPOLA_PROPAGACION_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
 
 propagacion.faltan_grupo:
   type: pandas.ExcelDataset

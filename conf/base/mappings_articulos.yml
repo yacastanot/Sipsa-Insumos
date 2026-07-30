@@ -6,6 +6,7 @@ articulos_publicacion:
   2,4-D AMINA 720 SL MEZFER_GARRAFA|LITRO|4|0|0: 2,4-D Amina 720 Sl, 4 litros
   2,4-D AMINA 720 SL_FRASCO|LITRO|1|0|0: 2,4-D Amina 720 Sl, 1 litro
   2,4-D AMINA 720 SL_GARRAFA|LITRO|4|0|0: 2,4-D Amina 720 Sl, 4 litros
+  2,4-D AMINA ARAMA 720 SL_FRASCO|LITRO|1|0|0: 2,4-D Amina 720 Sl, 1 litro
   2,4-D AMINA JEGO 720 SL_FRASCO|LITRO|1|0|0: 2,4-D Amina 720 Sl, 1 litro
   2,4-D AMINA JEGO 720 SL_GARRAFA|LITRO|4|0|0: 2,4-D Amina 720 Sl, 4 litros
   25-4-24_BULTO|KILOGRAMO|50|0|0: 25-4-24, 50 kilogramos
@@ -16,6 +17,7 @@ articulos_publicacion:
   ABAMECTINA 1,8 EC DVA_FRASCO|LITRO|1|0|0: Abamectina 1,8 Ec, 1 litro
   ABAMECTINA RAINBOW 18 EC_FRASCO|LITRO|1|0|0: Abamectina 1,8 Ec, 1 litro
   ABAMEX 1,8 EC_FRASCO|LITRO|1|0|0: Abamectina 1,8 Ec, 1 litro
+  ABAX 480 SC_FRASCO|CC|200|0|0: Abax 480 Sc, 200 centímetros cúbicos
   ABAX 480 SC_FRASCO|LITRO|1|0|0: Abax 480 Sc, 1 litro
   ABOCOL CAFETERO 17-6-18-2_BULTO|KILOGRAMO|50|0|0: 17-6-18-2(Mg), 50 kilogramos
   ABONAZA_BULTO|KILOGRAMO|50|0|0: Abono Orgánico, 50 kilogramos
@@ -214,6 +216,7 @@ articulos_publicacion:
   AGROSAL CEBA 4%_PRODUGAN_7021_BULTO|KILOGRAMO|40|0|0: Sales del 4%, 40 kilogramos
   AGROSAL LECHE 15 AL 8%_BLOQUE|KILOGRAMO|20|0|0: Sales del 8%, 20 kilogramos
   AGROSAL LECHE 15 AL 8%_PRODUGAN_7020_BLOQUE|KILOGRAMO|20|0|0: Sales del 8%, 20 kilogramos
+  AGROSAL PRODUCCIÓN 6%_PRODUGAN_7025_BULTO|KILOGRAMO|40|0|0: Sales del 6%, 40 kilogramos
   AGROTIN SL_FRASCO|LITRO|1|0|0: Agrotin Sl, 1 litro
   AGROTIN SL_GARRAFA|LITRO|5|0|0: Agrotin Sl, 5 litros
   AGROUNIVERSALES CALCILECHE 8%_AGROMARSALES S.A.S._17734_BULTO|KILOGRAMO|40|0|0: Sales
@@ -279,6 +282,8 @@ articulos_publicacion:
   AISLADORES OVALADOS_DISTRICAMPO_NA_BOLSA|UNIDAD|25|0|0: Aisladores ovalados, bolsa
     por 25 unidades
   AISLADORES PIVOTE PUNTILLA_AGROSER S.A.S._NA_UNIDAD|UNIDAD|1|0|0: Aisladores pivote
+    puntilla, unidad
+  AISLADORES PIVOTE PUNTILLA_AGROSER S.A._NA_UNIDAD|UNIDAD|1|0|0: Aisladores pivote
     puntilla, unidad
   AISLADORES PIVOTE PUNTILLA_SUPER FOX_NA_BOLSA|UNIDAD|100|0|0: Aisladores pivote
     puntilla, bolsa por 100 unidades
@@ -413,7 +418,7 @@ articulos_publicacion:
     nro. 14, rollo por 350 metros
   ALAMBRE DE PÚAS NO. 14_PROALCO BEKAERT_IOWA_ROLLO|METRO|500|0|0: Alambre de púas
     nro. 14, rollo por 500 metros
-  ALAMBRE DE PÚAS NO. 14_TREFIALAMBRES S.A.S_N/A_ROLLO|METRO|200|0|0: Alambre de púas
+  ALAMBRE DE PÚAS NO. 14_TREFIALAMBRES S.A.S_NA_ROLLO|METRO|200|0|0: Alambre de púas
     nro. 14, rollo por 200 metros
   ALAMBRE DE PÚAS NO. 14_TREFILADOS DE COLOMBIA S.A._VAQUERO_ROLLO|METRO|350|0|0: Alambre
     de púas nro. 14, rollo por 350 metros
@@ -800,6 +805,8 @@ articulos_publicacion:
   AQUATILAPIA 32_BULTO|KILOGRAMO|40|0|0: Mojarra o Tilapia Levante, 40 kilogramos
   AQUATILAPIA 32_ITALCOL S.A._12040_BULTO|KILOGRAMO|40|0|0: Mojarra o Tilapia Levante,
     40 kilogramos
+  AQUATILAPIA 32_ITALCOL_12040_BULTO|KILOGRAMO|40|0|0: Mojarra o Tilapia Levante,
+    40 kilogramos
   AQUATILAPIA 34_BULTO|KILOGRAMO|40|0|0: Mojarra o Tilapia Levante, 40 kilogramos
   AQUATILAPIA 34_ITALCOL_10634_BULTO|KILOGRAMO|40|0|0: Mojarra o Tilapia Levante,
     40 kilogramos
@@ -863,6 +870,7 @@ articulos_publicacion:
   ATRAZINA 500 SC_FRASCO|LITRO|1|0|0: Atrazina 500 Sc, 1 litro
   ATRAZINA 500 SC_GARRAFA|LITRO|4|0|0: Atrazina 500 Sc, 4 litros
   ATRAZINA 80 WP_BOLSA|KILOGRAMO|1|0|0: Atrazina 80% Wp, 1 kilogramo
+  ATRAZINA 90 WG_BOLSA|KILOGRAMO|1|0|0: Atrazina 90 Wg, 1 kilogramo
   ATROPINA SULFATO_FRASCO|CC|10|0|0: Atropina Sulfato, 10 centímetros cúbicos
   ATROPINA SULFATO_FRASCO|CC|50|0|0: Atropina Sulfato, 50 centímetros cúbicos
   ATROPINA SULFATO_LABORATORIOS ERMA S.A._2017_FRASCO|CC|10|0|0: Atropina Sulfato,
@@ -883,6 +891,8 @@ articulos_publicacion:
     cúbicos
   ATROPINA_LABORATORIOS BLASKOVET LTDA._6014_FRASCO|CC|50|0|0: Atropina, 50 centímetros
     cúbicos
+  AUROVITEL_LABORATORIOS AUROFARMA S.A._23410_SOBRE / PAPELETA|GRAMO|10|0|0: Aurovitel,
+    10 gramos
   AVENA CAJICÁ_SACO|KILOGRAMO|25|0|0: Avena Cajicá, 25 kilogramos
   AVENA EVER LEAF_SACO|KILOGRAMO|25|0|0: Avena Ever Leaf, 25 kilogramos
   AVENA FORRAJERA ALTOANDINA_BOLSA|KILOGRAMO|1|0|0: Avena Forrajera Altoandina, 1
@@ -1126,6 +1136,7 @@ articulos_publicacion:
   BENOMYL 50 WP_SOBRE / PAPELETA|GRAMO|100|0|0: Benomyl 50 Wp, 100 gramos
   BENOPOINT 50 WP_SOBRE / PAPELETA|GRAMO|100|0|0: Benomyl 50 Wp, 100 gramos
   BENTAGRAN 480 SL_FRASCO|LITRO|1|0|0: Bentagran 480 Sl, 1 litro
+  BENTAZON 480 SL DVA_FRASCO|LITRO|1|0|0: Bentazon 480 Sl, 1 litro
   BENZETACIL LA 15 M.U.I._ELANCO COLOMBIA S.A.S_6138_FRASCO|CC|42|0|0: Benzetacil
     LA 15 M.U.I., 42 centímetros cúbicos
   BENZETACIL LA 15 M.U.I._FRASCO|CC|42|0|0: Benzetacil LA 15 M.U.I., 42 centímetros
@@ -1933,7 +1944,9 @@ articulos_publicacion:
   CEROSTRESS_FRASCO|CC|500|0|0: Cerostress, 500 centímetros cúbicos
   CEROSTRESS_FRASCO|LITRO|1|0|0: Cerostress, 1 litro
   CERRERO 200 SL_FRASCO|LITRO|1|0|0: Cerrero 200 Sl, 1 litro
+  CERRERO 200 SL_GALÓN|LITRO|20|0|0: Cerrero 200 Sl, 20 litros
   CERRERO 200 SL_GARRAFA|LITRO|4|0|0: Cerrero 200 Sl, 4 litros
+  CHAKAL 250 SC_FRASCO|CC|250|0|0: Azoxystrobin 250 Sc, 250 centímetros cúbicos
   CHAKAL 250 SC_FRASCO|LITRO|1|0|0: Azoxystrobin 250 Sc, 1 litro
   CHANCHITOS GP_BULTO|KILOGRAMO|40|0|0: Cerdos Levante, 40 kilogramos
   CHANCHITOS GP_SOLLA_8181_BULTO|KILOGRAMO|40|0|0: Cerdos Levante, 40 kilogramos
@@ -2067,6 +2080,8 @@ articulos_publicacion:
     50 kilogramos
   CLOSER 240 SC_FRASCO|CC|200|0|0: Closer 240 Sc, 200 centímetros cúbicos
   CLOSER 240 SC_FRASCO|LITRO|1|0|0: Closer 240 Sc, 1 litro
+  CLOXACUM_LABORATORIOS CALIER DE LOS ANDES S.A._2942_CAJA DE CARTÓN|JERINGA|4|CC|10: Cloxacum,
+    4 jeringas/10 centímetros cúbicos
   COBACTAN LA_FRASCO|CC|100|0|0: Cobactan LA, 100 centímetros cúbicos
   COBACTAN LA_MSD SALUD ANIMAL S.A.S._4035_FRASCO|CC|100|0|0: Cobactan LA, 100 centímetros
     cúbicos
@@ -2142,6 +2157,7 @@ articulos_publicacion:
   'COMBINADA ORUGA (BULTO)_CULTIVO: NA|UNIDAD: BULTO|': Combinada oruga (Bulto), bulto
   'COMBINADA ORUGA (GRANEL) + GONDOLA_CULTIVO: NA|UNIDAD: TONELADA|': Combinada oruga
     (Granel) + Góndola, tonelada
+  COMBIT_COLVET S.A._8404_FRASCO|CC|100|0|0: Combit, 100 centímetros cúbicos
   COMEDERO BOVINO ESTACA DOBLE_MUSEO DE LA HERRADURA_NA_UNIDAD|UNIDAD|1|0|0: Comedero
     bovino estaca doble, unidad
   COMEDERO BOVINO ESTACA DOBLE_TORNICABOS_NA_UNIDAD|UNIDAD|1|0|0: Comedero bovino
@@ -2304,6 +2320,7 @@ articulos_publicacion:
   CONNECT DUO_FRASCO|CC|200|0|0: Connect Duo, 200 centímetros cúbicos
   CONNECT DUO_FRASCO|LITRO|1|0|0: Connect Duo, 1 litro
   CONSENTO 450 SC_FRASCO|CC|500|0|0: Consento 450 Sc, 500 centímetros cúbicos
+  CONSENTO SC_FRASCO|CC|500|0|0: Consento 450 Sc, 500 centímetros cúbicos
   CONTEGRAL BROILER_BULTO|KILOGRAMO|40|0|0: Pollo Engorde, 40 kilogramos
   CONTEGRAL BROILER_CONTEGRAL_5964_BULTO|KILOGRAMO|40|0|0: Pollo Engorde, 40 kilogramos
   CONTEGRAL CERDAS LACTANCIA PRIMERIZAS_BULTO|KILOGRAMO|40|0|0: Cerdas Lactancia,
@@ -2571,6 +2588,8 @@ articulos_publicacion:
     UNIDAD 1 UNIDAD|TIPO: BLANCO|'
   : Costal blanco plástico (80 kilogramos), unidad
   CRECEBEST_FRASCO|CC|500|0|0: Crecebest, 500 centímetros cúbicos
+  CRECEBEST_LABORATORIOS CALLBEST LTDA._8322_FRASCO|CC|100|0|0: Crecebest, 100 centímetros
+    cúbicos
   CRECEBEST_LABORATORIOS CALLBEST LTDA._8322_FRASCO|CC|500|0|0: Crecebest, 500 centímetros
     cúbicos
   CRECEDOR_FRASCO|CC|100|0|0: Crecedor, 100 centímetros cúbicos
@@ -2695,11 +2714,13 @@ articulos_publicacion:
   CURATHANE_BOLSA|GRAMO|500|0|0: Curathane, 500 gramos
   CURAXIL_BOLSA|GRAMO|500|0|0: Curaxil, 500 gramos
   CURBIX FUSIÓN_FRASCO|LITRO|1|0|0: Curbix Fusión, 1 litro
+  CURBIX SC 200_FRASCO|CC|500|0|0: Curbix Sc 200, 500 centímetros cúbicos
   CURBIX SC 200_FRASCO|LITRO|1|0|0: Curbix Sc 200, 1 litro
   CURUBA_BOLSA|KILOGRAMO|1|0|0: Curuba, 1 kilogramo
   CURZATE 60_BOLSA|GRAMO|100|0|0: Curzate 60, 100 gramos
   CURZATE 60_SOBRE / PAPELETA|GRAMO|100|0|0: Curzate 60, 100 gramos
   CURZATE M-8_BOLSA|GRAMO|500|0|0: Curzate M-8, 500 gramos
+  CURZATE M-8_SOBRE / PAPELETA|GRAMO|100|0|0: Curzate M-8, 100 gramos
   CUSPIDE 480 SL_FRASCO|LITRO|1|0|0: Glifosato 480 Sl, 1 litro
   CUSPIDE 480 SL_GALÓN|LITRO|20|0|0: Glifosato 480 Sl, 20 litros
   CUSPIDE 480 SL_GARRAFA|LITRO|4|0|0: Glifosato 480 Sl, 4 litros
@@ -2717,6 +2738,7 @@ articulos_publicacion:
   CUTAMYCON VF_TUBO|GRAMO|35|0|0: Cutamycon VF, 35 gramos
   CYMOZEB_BOLSA|GRAMO|500|0|0: Cymozeb, 500 gramos
   CYPERWEST 200 EC_FRASCO|LITRO|1|0|0: Cipermetrina 20 Ec, 1 litro
+  CÍCLOPE 500 EC_FRASCO|CC|250|0|0: Cíclope 500 Ec, 250 centímetros cúbicos
   CÍCLOPE 500 EC_FRASCO|LITRO|1|0|0: Cíclope 500 Ec, 1 litro
   DACONIL 720 SC_FRASCO|CC|250|0|0: Daconil 720 Sc, 250 centímetros cúbicos
   DACONIL 720 SC_FRASCO|LITRO|1|0|0: Daconil 720 Sc, 1 litro
@@ -2724,6 +2746,7 @@ articulos_publicacion:
   DACONIL_FRASCO|LITRO|1|0|0: Daconil 720 Sc, 1 litro
   DACONIL_GALÓN|LITRO|20|0|0: Daconil 720 Sc, 20 litros
   DACONIL_GARRAFA|LITRO|5|0|0: Daconil 720 Sc, 5 litros
+  DAKOTA 48 EC_FRASCO|LITRO|1|0|0: Clomazone 480 Ec, 1 litro
   DALIPEN 8 M.U.I._FRASCO|CC|21|0|0: Dalipen 8 M.U.I., 21 centímetros cúbicos
   DALIPEN 8 M.U.I._VIRBAC COLOMBIA LTDA._1701_FRASCO|CC|21|0|0: Dalipen 8 M.U.I.,
     21 centímetros cúbicos
@@ -3280,6 +3303,8 @@ articulos_publicacion:
   ETHIOKILL_FRASCO|LITRO|1|0|0: Ethiokill, 1 litro
   ETHIOKILL_LABORATORIOS SERVINSUMOS S.A._7238_FRASCO|CC|125|0|0: Ethiokill, 125 centímetros
     cúbicos
+  ETHIOKILL_LABORATORIOS SERVINSUMOS S.A._7238_FRASCO|CC|250|0|0: Ethiokill, 250 centímetros
+    cúbicos
   ETHIOKILL_LABORATORIOS SERVINSUMOS S.A._7238_FRASCO|CC|30|0|0: Ethiokill, 30 centímetros
     cúbicos
   ETHIOKILL_LABORATORIOS SERVINSUMOS S.A._7238_FRASCO|CC|500|0|0: Ethiokill, 500 centímetros
@@ -3293,6 +3318,7 @@ articulos_publicacion:
   ETHREL 48 SL_FRASCO|CC|200|0|0: Ethrel 48 Sl, 200 centímetros cúbicos
   ETHREL 48 SL_FRASCO|LITRO|1|0|0: Ethrel 48 Sl, 1 litro
   ETOFIN 10 SC_FRASCO|CC|250|0|0: Etofin 10 Sc, 250 centímetros cúbicos
+  ETOFIN 10 SC_FRASCO|LITRO|1|0|0: Etofin 10 Sc, 1 litro
   EUREKA 60 WG_SOBRE / PAPELETA|GRAMO|20|0|0: Metsulfuron Metil 600 Wg, 20 gramos
   EVISECT S_SOBRE / PAPELETA|GRAMO|100|0|0: Evisect S, 100 gramos
   EVITO-T_FRASCO|LITRO|1|0|0: Evito-T, 1 litro
@@ -3344,6 +3370,7 @@ articulos_publicacion:
     mensual para pastoreo, terreno inclinado/ondulado con agua
   FASTAC 10 EC_FRASCO|CC|250|0|0: Fastac 10 Ec, 250 centímetros cúbicos
   FASTAC 10 EC_FRASCO|LITRO|1|0|0: Fastac 10 Ec, 1 litro
+  FASTEN SL_FRASCO|LITRO|1|0|0: Fasten Sl, 1 litro
   FASYHIT SUSPENSIÓN ORAL_COLVET S.A.S._7278_JERINGA|CC|30|0|0: Fasyhit Suspensión
     Oral, 30 centímetros cúbicos
   FASYHIT SUSPENSIÓN ORAL_COLVET S.A._7278_JERINGA|CC|30|0|0: Fasyhit Suspensión Oral,
@@ -3377,12 +3404,15 @@ articulos_publicacion:
   FENBENDAZOL 15%_FRASCO|LITRO|1|0|0: Fenbendazol 15%, 1 litro
   FENBENDAZOL 15%_KYROVET LABORATORIES S.A._6828_FRASCO|LITRO|1|0|0: Fenbendazol 15%,
     1 litro
+  FENBENDAZOL 25%_REPRESENTACIONES MONTSERRAT S.A.S._5561_FRASCO|LITRO|1|0|0: Fenbendazol
+    25%, 1 litro
   FENLAK_FRASCO|CC|120|0|0: Fenlak, 120 centímetros cúbicos
   FENLAK_FRASCO|CC|500|0|0: Fenlak, 500 centímetros cúbicos
   FENLAK_FRASCO|LITRO|1|0|0: Fenlak, 1 litro
   FENLAK_VICAR FARMACEUTICA S.A._5815_FRASCO|CC|120|0|0: Fenlak, 120 centímetros cúbicos
   FENLAK_VICAR FARMACEUTICA S.A._5815_FRASCO|CC|500|0|0: Fenlak, 500 centímetros cúbicos
   FENLAK_VICAR FARMACEUTICA S.A._5815_FRASCO|LITRO|1|0|0: Fenlak, 1 litro
+  FENLAK_VICAR FARMACEUTICA S.A._5815_GARRAFA|LITRO|2|0|0: Fenlak, 2 litros
   FENNEL MK_FRASCO|CC|100|0|0: Fennel, 100 centímetros cúbicos
   FENNEL MK_FRASCO|CC|500|0|0: Fennel, 500 centímetros cúbicos
   FENNEL MK_FRASCO|LITRO|1|0|0: Fennel, 1 litro
@@ -3703,6 +3733,7 @@ articulos_publicacion:
   FLUMEVET_FRASCO|CC|100|0|0: Flumevet, 100 centímetros cúbicos
   FLUNIXINA_FRASCO|CC|10|0|0: Flunixina, 10 centímetros cúbicos
   FLUNIXINA_FRASCO|CC|50|0|0: Flunixina, 50 centímetros cúbicos
+  FLUNIXINA_VECOL S.A._4003_FRASCO|CC|100|0|0: Flunixina, 100 centímetros cúbicos
   FLUNIXINA_VECOL S.A._4003_FRASCO|CC|10|0|0: Flunixina, 10 centímetros cúbicos
   FLUNIXINA_VECOL S.A._4003_FRASCO|CC|50|0|0: Flunixina, 50 centímetros cúbicos
   FLUVIPEN LA 3 M.U.I._FRASCO|CC|8.5|0|0: Fluvipen LA 3 M.U.I., 8.5 centímetros cúbicos
@@ -3725,6 +3756,10 @@ articulos_publicacion:
   FORMADOR 2000_FRASCO|CC|500|0|0: Formador 2000, 500 centímetros cúbicos
   FORMADOR 2000_FRASCO|LITRO|1|0|0: Formador 2000, 1 litro
   FORMADOR 2000_GARRAFA|LITRO|4|0|0: Formador 2000, 4 litros
+  FORTAVES - E_FARMATEC LTDA._7194_SOBRE / PAPELETA|GRAMO|20|0|0: Fortaves - E, 20
+    gramos
+  FORTAVES L-M_FARMATEC LTDA._7200_SOBRE / PAPELETA|GRAMO|20|0|0: Fortaves L-M, 20
+    gramos
   FORTEL_FRASCO|CC|250|0|0: Fortel, 250 centímetros cúbicos
   FORTEL_FRASCO|CC|500|0|0: Fortel, 500 centímetros cúbicos
   FORTEL_LABORATORIOS ROLDY VETERINARIA LTDA._4209_FRASCO|CC|250|0|0: Fortel, 250
@@ -3741,6 +3776,10 @@ articulos_publicacion:
   'FOSFACEL 800: 20-53-0_BOLSA|KILOGRAMO|1|0|0': 'Fosfacel 800: 20-53-0, 1 kilogramo'
   FOSFATO DIAMÓNICO (DAP) 18-46-0_BULTO|KILOGRAMO|50|0|0: Fosfato Diamónico (DAP)
     18-46-0, 50 kilogramos
+  FOSFOBEST SELENIO_LABORATORIOS CALLBEST LTDA._6371_FRASCO|CC|100|0|0: Fosfobest
+    Selenio, 100 centímetros cúbicos
+  FOSFOBEST SELENIO_LABORATORIOS CALLBEST LTDA._6371_FRASCO|CC|50|0|0: Fosfobest Selenio,
+    100 centímetros cúbicos
   FOSFOLAND A + B12_FRASCO|CC|100|0|0: Fosfoland A + B12, 100 centímetros cúbicos
   FOSFOLAND A + B12_FRASCO|CC|20|0|0: Fosfoland A + B12, 20 centímetros cúbicos
   FOSFOLAND A + B12_FRASCO|CC|250|0|0: Fosfoland A + B12, 250 centímetros cúbicos
@@ -4339,6 +4378,8 @@ articulos_publicacion:
     centímetros cúbicos
   HEMOPAR B12_LABORATORIOS SERVINSUMOS S.A._4652_FRASCO|CC|500|0|0: Hemopar B12, 500
     centímetros cúbicos
+  HEMOPAR B12_LABORATORIOS SERVINSUMOS S.A._4652_FRASCO|CC|50|0|0: Hemopar B12, 50
+    centímetros cúbicos
   HERBIMEX 720 SL_FRASCO|LITRO|1|0|0: 2,4-D Amina 720 Sl, 1 litro
   HERBIMEX 720 SL_GARRAFA|LITRO|4|0|0: 2,4-D Amina 720 Sl, 4 litros
   HERBINA 720 SL_FRASCO|LITRO|1|0|0: 2,4-D Amina 720 Sl, 1 litro
@@ -4779,6 +4820,8 @@ articulos_publicacion:
     500 centímetros cúbicos
   IVERMECTINA 1%_LABORATORIOS TIERWELT S.A.S_6802_FRASCO|CC|500|0|0: Ivermectina 1%,
     500 centímetros cúbicos
+  IVERMECTINA 1%_REPRESENTACIONES MONTSERRAT S.A.S._5297_FRASCO|CC|250|0|0: Ivermectina
+    1%, 250 centímetros cúbicos
   IVERMECTINA 1%_VECOL S.A._3907_FRASCO|CC|250|0|0: Ivermectina 1%, 250 centímetros
     cúbicos
   IVERMECTINA 1%_VECOL S.A._3907_FRASCO|CC|500|0|0: Ivermectina 1%, 500 centímetros
@@ -5095,6 +5138,8 @@ articulos_publicacion:
     500 centímetros cúbicos
   LEVAMISOL 15%_MERCAVET LTDA._3532_FRASCO|CC|500|0|0: Levamisol 15%, 500 centímetros
     cúbicos
+  LEVAMISOL 15%_REPRESENTACIONES MONTSERRAT S.A.S._2501_FRASCO|CC|500|0|0: Levamisol
+    15%, 500 centímetros cúbicos
   LEVAMISOL 15%_VICAR FARMACEUTICA S.A._2695_FRASCO|CC|100|0|0: Levamisol 15%, 100
     centímetros cúbicos
   LEVAMISOL 15%_VICAR FARMACEUTICA S.A._2695_FRASCO|CC|250|0|0: Levamisol 15%, 250
@@ -5164,6 +5209,7 @@ articulos_publicacion:
   LINCOCELIN SECADO_WEISS PHARMA S.A.S._5941_CAJA DE CARTÓN|JERINGA|4|CC|10: Lincocelin
     Secado, 4 jeringas/10 centímetros cúbicos
   LINDERO 200 EC_FRASCO|LITRO|1|0|0: Lindero 200 Ec, 1 litro
+  LINDERO 200 EC_GARRAFA|LITRO|4|0|0: Lindero 200 Ec, 4 litros
   LINEAR 20 SL_FRASCO|LITRO|1|0|0: Linear 20 Sl, 1 litro
   LIPTOL REGULADOR L_FRASCO|CC|500|0|0: Liptol Regulador L, 500 centímetros cúbicos
   LIPTOL REGULADOR L_ITAGRO S.A.S._10992_FRASCO|CC|500|0|0: Liptol Regulador L, 500
@@ -5185,6 +5231,7 @@ articulos_publicacion:
   LLANO SAL SOMEX CRÍA 9-60-7,5_BULTO|KILOGRAMO|40|0|0: Sales del 9%, 40 kilogramos
   LLANO SAL SOMEX CRÍA 9-60-7,5_SOMEX_9567_BULTO|KILOGRAMO|40|0|0: Sales del 9%, 40
     kilogramos
+  LLENADO K-500_FRASCO|LITRO|1|0|0: Llenado K-500, 1 litro
   LONGIVER_FRASCO|CC|100|0|0: Ivermectina 3,15%, 100 centímetros cúbicos
   LONGIVER_FRASCO|CC|200|0|0: Ivermectina 3,15%, 200 centímetros cúbicos
   LONGIVER_FRASCO|CC|50|0|0: Ivermectina 3,15%, 50 centímetros cúbicos
@@ -5309,6 +5356,7 @@ articulos_publicacion:
   MAMILAND_TARRO|GRAMO|60|0|0: Mamiland, 60 gramos
   MAMITOLINA_FRASCO|GRAMO|250|0|0: Mamitolina, 250 gramos
   MAMITOLINA_FRASCO|GRAMO|60|0|0: Mamitolina, 60 gramos
+  MAMITOLINA_LABORATORIOS VELOX LTDA._688_FRASCO|GRAMO|20|0|0: Mamitolina, 20 gramos
   MAMITOLINA_LABORATORIOS VELOX LTDA._688_FRASCO|GRAMO|250|0|0: Mamitolina, 250 gramos
   MAMITOLINA_LABORATORIOS VELOX LTDA._688_FRASCO|GRAMO|60|0|0: Mamitolina, 60 gramos
   MAMITOLINA_LABORATORIOS VELOX LTDA._688_TUBO|GRAMO|20|0|0: Mamitolina, 20 gramos
@@ -5399,9 +5447,12 @@ articulos_publicacion:
   MATCH 50 EC_FRASCO|LITRO|1|0|0: Match 50 Ec, 1 litro
   MATRERO 240 SL_FRASCO|LITRO|1|0|0: Picloram 240 Sl, 1 litro
   MATRERO 240 SL_GARRAFA|LITRO|4|0|0: Picloram 240 Sl, 4 litros
+  MAUZER 50 WP_SOBRE / PAPELETA|GRAMO|120|0|0: Mauzer 50 Wp, 120 gramos
   MAXI CERDOS FINALIZADOR 337_BULTO|KILOGRAMO|40|0|0: Cerdos Ceba, 40 kilogramos
   MAXI CERDOS FINALIZADOR 337_CONTEGRAL S.A.S._21304_BULTO|KILOGRAMO|40|0|0: Cerdos
     Ceba, 40 kilogramos
+  MAXI CERDOS FINALIZADOR 337_CONTEGRAL_21304_BULTO|KILOGRAMO|40|0|0: Cerdos Ceba,
+    40 kilogramos
   MAXISAL 6%_BULTO|KILOGRAMO|40|0|0: Sales del 6%, 40 kilogramos
   MAXISAL 6%_MAXISALES 3C_6960_BULTO|KILOGRAMO|40|0|0: Sales del 6%, 40 kilogramos
   MAXISAL 8%_BULTO|KILOGRAMO|40|0|0: Sales del 8%, 40 kilogramos
@@ -5520,6 +5571,7 @@ articulos_publicacion:
   MF ALGAS 500_FRASCO|LITRO|1|0|0: Algas 500, 1 litro
   MF REDUX_FRASCO|LITRO|1|0|0: Redux, 1 litro
   MICORRIZAR_BOLSA|KILOGRAMO|1|0|0: Micorrizar, 1 kilogramo
+  MICORRIZAR_BULTO|KILOGRAMO|50|0|0: Micorrizar, 50 kilogramos
   MICORRIZAS ABS_FRASCO|LITRO|1|0|0: Micorrizas ABS, 1 litro
   MICOSIS WP_BOLSA|KILOGRAMO|1|0|0: Micosis Wp, 1 kilogramo
   MICROFERTIL_BULTO|KILOGRAMO|46|0|0: Microfertil, 46 kilogramos
@@ -6054,6 +6106,8 @@ articulos_publicacion:
     centímetros cúbicos
   OXITETRACICLINA 50_VITAGRO LTDA._4069_FRASCO|CC|50|0|0: Oxitetraciclina 50, 50 centímetros
     cúbicos
+  OXITETRACICLINA HCL 10%_REPRESENTACIONES MONTSERRAT S.A.S._2436_FRASCO|CC|500|0|0: Oxitetraciclina
+    100, 500 centímetros cúbicos
   OXITETRACICLINA HCL 5%_FRASCO|CC|100|0|0: Oxitetraciclina 50, 100 centímetros cúbicos
   OXITETRACICLINA HCL 5%_FRASCO|CC|500|0|0: Oxitetraciclina 50, 500 centímetros cúbicos
   OXITETRACICLINA HCL 5%_FRASCO|CC|50|0|0: Oxitetraciclina 50, 50 centímetros cúbicos
@@ -6150,6 +6204,8 @@ articulos_publicacion:
   PALA CUADRADA NO. 4_BELLOTA_5583-4_UNIDAD|UNIDAD|1|0|0: Pala cuadrada nro. 4, unidad
   PALA CUADRADA NO. 4_COLLINS_NA_UNIDAD|UNIDAD|1|0|0: Pala cuadrada nro. 4, unidad
   PALA CUADRADA NO. 4_FORTE_NA_UNIDAD|UNIDAD|1|0|0: Pala cuadrada nro. 4, unidad
+  PALA CUADRADA NO. 4_HERRAGRO_4303-4 CON CABO_UNIDAD|UNIDAD|1|0|0: Pala cuadrada
+    nro. 4, unidad
   PALA CUADRADA NO. 4_HERRAGRO_4303-4_UNIDAD|UNIDAD|1|0|0: Pala cuadrada nro. 4, unidad
   PALA CUADRADA NO. 4_INCOLMA_COLIMA_UNIDAD|UNIDAD|1|0|0: Pala cuadrada nro. 4, unidad
   PALA CUADRADA NO. 4_MASSO_NA_UNIDAD|UNIDAD|1|0|0: Pala cuadrada nro. 4, unidad
@@ -6178,6 +6234,8 @@ articulos_publicacion:
   PALA REDONDA NO. 4_BELLOTA_5582-4_UNIDAD|UNIDAD|1|0|0: Pala redonda nro. 4, unidad
   PALA REDONDA NO. 4_DISTRIBUCIONES ARAMA LTDA._NA_UNIDAD|UNIDAD|1|0|0: Pala redonda
     nro. 4, unidad
+  PALA REDONDA NO. 4_HERRAGRO_6056-40 CON CABO_UNIDAD|UNIDAD|1|0|0: Pala redonda nro.
+    4, unidad
   PALA REDONDA NO. 4_HERRAGRO_6056-40_UNIDAD|UNIDAD|1|0|0: Pala redonda nro. 4, unidad
   PALA REDONDA NO. 4_INCOLMA_COLIMA_UNIDAD|UNIDAD|1|0|0: Pala redonda nro. 4, unidad
   PALA REDONDA NO. 4_MASSO_NA_UNIDAD|UNIDAD|1|0|0: Pala redonda nro. 4, unidad
@@ -6187,6 +6245,8 @@ articulos_publicacion:
   PALA SANTANDER_BELLOTA_NA_UNIDAD|UNIDAD|1|0|0: Pala Santander, unidad
   PALA SANTANDER_HERRAGRO_3567_UNIDAD|UNIDAD|1|0|0: Pala Santander, unidad
   PALA SANTANDER_INCOLMA_COLIMA_UNIDAD|UNIDAD|1|0|0: Pala Santander, unidad
+  PALA SANTANDER_TREFILADOS DE COLOMBIA S.A._NA_UNIDAD|UNIDAD|1|0|0: Pala Santander,
+    unidad
   PALÍN HOYADOR_AGROTEK_NA_UNIDAD|UNIDAD|1|0|0: Palín hoyador, unidad
   PALÍN HOYADOR_BELLOTA_5505-H_UNIDAD|UNIDAD|1|0|0: Palín hoyador, unidad
   PALÍN HOYADOR_DISTRIBUCIONES ARAMA LTDA._NA_UNIDAD|UNIDAD|1|0|0: Palín hoyador,
@@ -6433,6 +6493,7 @@ articulos_publicacion:
   PICLORAM 240 SL DIABONOS_FRASCO|LITRO|1|0|0: Picloram 240 Sl, 1 litro
   PICLORAM 240 SL DIABONOS_GARRAFA|LITRO|4|0|0: Picloram 240 Sl, 4 litros
   PICLORAM 240 SL DVA_FRASCO|LITRO|1|0|0: Picloram 240 Sl, 1 litro
+  PICLORAM 240 SL JEGO_FRASCO|LITRO|1|0|0: Picloram 240 Sl, 1 litro
   PIEGAN 722 SL_FRASCO|LITRO|1|0|0: Propamocarb 722 Sl, 1 litro
   PIEGAN 722 SL_GALÓN|LITRO|20|0|0: Propamocarb 722 Sl, 20 litros
   PIESUKIL 112,5 SE_FRASCO|LITRO|1|0|0: Piesukil 112,5 Se, 1 litro
@@ -6461,6 +6522,7 @@ articulos_publicacion:
   PLASVIT_FRASCO|CC|50|0|0: Plasvit, 50 centímetros cúbicos
   PLASVIT_ICOFARMA S.A._8040_FRASCO|CC|100|0|0: Plasvit, 100 centímetros cúbicos
   PLASVIT_ICOFARMA S.A._8040_FRASCO|CC|20|0|0: Plasvit, 20 centímetros cúbicos
+  PLASVIT_ICOFARMA S.A._8040_FRASCO|CC|250|0|0: Plasvit, 250 centímetros cúbicos
   PLASVIT_ICOFARMA S.A._8040_FRASCO|CC|500|0|0: Plasvit, 500 centímetros cúbicos
   PLASVIT_ICOFARMA S.A._8040_FRASCO|CC|50|0|0: Plasvit, 50 centímetros cúbicos
   PLUSGAN_FRASCO|CC|250|0|0: Plusgan, 250 centímetros cúbicos
@@ -6615,6 +6677,7 @@ articulos_publicacion:
   POTRERON 101_FRASCO|LITRO|1|0|0: Potreron 101, 1 litro
   POTRERON 101_GALÓN|LITRO|20|0|0: Potreron 101, 20 litros
   POTRERON 101_GARRAFA|LITRO|4|0|0: Potreron 101, 4 litros
+  POTRERON 212_FRASCO|LITRO|1|0|0: Potreron 212, 1 litro
   PRADERA 16-4-4_BULTO|KILOGRAMO|50|0|0: 16-4-4, 50 kilogramos
   PRECURAR WP_BOLSA|GRAMO|500|0|0: Precurar Wp, 500 gramos
   PREDOM 800 WG_BOLSA|GRAMO|250|0|0: Predom 800 Wg, 250 gramos
@@ -6693,6 +6756,7 @@ articulos_publicacion:
   PROPICAL_FRASCO|LITRO|1|0|0: Propiconazol 250 Ec, 1 litro
   PROPITAL 25 EC_FRASCO|CC|250|0|0: Propiconazol 250 Ec, 250 centímetros cúbicos
   PROPITAL 25 EC_FRASCO|LITRO|1|0|0: Propiconazol 250 Ec, 1 litro
+  PROPIXANIL VECOL 76% WP_BOLSA|GRAMO|500|0|0: Propixanil 76% Wp, 500 gramos
   PROSAMIN 11%_BULTO|KILOGRAMO|40|0|0: Sales del 11%, 40 kilogramos
   PROSAMIN 11%_PROSAMIN_9175_BULTO|KILOGRAMO|40|0|0: Sales del 11%, 40 kilogramos
   PROSAMIN 6%_BULTO|KILOGRAMO|40|0|0: Sales del 6%, 40 kilogramos
@@ -6728,6 +6792,8 @@ articulos_publicacion:
   PURGANTOL_COASPHARMA S.A.S._7449_COJÍN|CC|30|0|0: Levamisol 3,2% Oral, 30 centímetros
     cúbicos
   PURGANTOL_COJÍN|CC|30|0|0: Levamisol 3,2% Oral, 30 centímetros cúbicos
+  PYRAZOSULFURON ETHYL 10 WP_BOLSA|GRAMO|500|0|0: Pyrazosulfuron Ethyl 10 Wp, 500
+    gramos
   Q-IDA LEVANTE POLLITO_AGRINAL_9103_BULTO|KILOGRAMO|40|0|0: Pollito Iniciación, 40
     kilogramos
   Q-IDA LEVANTE POLLITO_BULTO|KILOGRAMO|40|0|0: Pollito Iniciación, 40 kilogramos
@@ -6779,6 +6845,7 @@ articulos_publicacion:
     cúbicos
   QUINOCALF 5% INYECTABLE_FRASCO|CC|50|0|0: Quinocalf 5% Inyectable, 50 centímetros
     cúbicos
+  R-LLENITO_FRASCO|LITRO|1|0|0: R-Llenito, 1 litro
   RAFOS 12-24-12-2_BULTO|KILOGRAMO|50|0|0: Rafos 12-24-12-2, 50 kilogramos
   RAFOXANIDE_FRASCO|CC|120|0|0: Rafoxanide, 120 centímetros cúbicos
   RAFOXANIDE_LABORATORIOS AUROFARMA S.A._3678_FRASCO|CC|120|0|0: Rafoxanide, 120 centímetros
@@ -7126,6 +7193,7 @@ articulos_publicacion:
   SOGA NO. 8_TRENZADOS DE COLOMBIA_NA_ROLLO|METRO|1|0|0: Soga nro. 8, rollo por 1
     metro
   SOIL_SACO|KILOGRAMO|20|0|0: Soil, 20 kilogramos
+  SOLARIS 500 SC_FRASCO|LITRO|1|0|0: Solaris 500 Sc, 1 litro
   SOLLA LECHE 18%_BULTO|KILOGRAMO|40|0|0: Vacas Leche, 40 kilogramos
   SOLLA LECHE 18%_SOLLA_5140_BULTO|KILOGRAMO|40|0|0: Vacas Leche, 40 kilogramos
   SOLLA LECHE 20%_BULTO|KILOGRAMO|40|0|0: Vacas Leche, 40 kilogramos
@@ -7147,8 +7215,10 @@ articulos_publicacion:
   SOLOVIT B12_MERCAVET LTDA._3647_FRASCO|CC|50|0|0: Solovit B12, 50 centímetros cúbicos
   SOLU ACTIVE INICIO 15-45-10_BULTO|KILOGRAMO|9.5|0|0: 15-45-10, 9.5 kilogramos
   'SOLU@GRO: 40-3-3_BOLSA|KILOGRAMO|1|0|0': 'Solu@Gro: 40-3-3, 1 kilogramo'
+  SOLUACTIVE DESARROLLO 18-18-18_BULTO|KILOGRAMO|9.5|0|0: 18-18-18, 50 kilogramos
   SOLUACTIVE PRODUCCIÓN-S 13-3-43-2(S)_BULTO|KILOGRAMO|9.5|0|0: Soluactive Producción-S
     13-3-43-2(S), 9.5 kilogramos
+  SOLUPLANT B - ACTIVER_FRASCO|LITRO|1|0|0: SoluPlant B - Activer, 1 litro
   SOLUPLANT CABOK_FRASCO|LITRO|1|0|0: Soluplant CaBoK, 1 litro
   SOLUPLANT HUMIN_FRASCO|LITRO|1|0|0: Soluplant Humin, 1 litro
   SOLUPLANT K-LLENADO_FRASCO|LITRO|1|0|0: Soluplant K-Llenado, 1 litro
@@ -7268,6 +7338,8 @@ articulos_publicacion:
     (SAM) 21-0-0-24(S), 50 kilogramos
   SULFATO DE AMONIO GRANULADO 21-0-0-24(S)_BULTO|KILOGRAMO|50|0|0: Sulfato de Amonio
     (SAM) 21-0-0-24(S), 50 kilogramos
+  SULFATO DE MAGNESIO HEPTAHIDRATADO 0-0-0-16 (MGO)_BULTO|KILOGRAMO|25|0|0: Sulfato
+    de Magnesio Heptahidratado 0-0-0-16 (MgO), 25 kilogramos
   SULFATO DE POTASIO BEDIS 0-0-50_BOLSA|KILOGRAMO|1|0|0: Sulfato de Potasio 0-0-50,
     1 kilogramo
   SULFATRIMAR INYECTABLE_FRASCO|CC|50|0|0: Sulfadiazina Trimetoprim, 50 centímetros
@@ -7341,8 +7413,10 @@ articulos_publicacion:
   SÚPERLECHE EXPOSICIÓN 12%_BULTO|KILOGRAMO|40|0|0: Sales del 12%, 40 kilogramos
   SÚPERLECHE EXPOSICIÓN 12%_COLOMBOSALES_11949_BULTO|KILOGRAMO|40|0|0: Sales del 12%,
     40 kilogramos
+  T-15 COMBATE 15-15-15_BULTO|KILOGRAMO|50|0|0: 15-15-15, 50 kilogramos
   TALAMINA 720 SL_FRASCO|LITRO|1|0|0: 2,4-D Amina 720 Sl, 1 litro
   TALAMINA 720 SL_GARRAFA|LITRO|4|0|0: 2,4-D Amina 720 Sl, 4 litros
+  TAMIZ_FRASCO|LITRO|1|0|0: Tamiz, 1 litro
   TARGET 247 SC_FRASCO|CC|100|0|0: Target 247 Sc, 100 centímetros cúbicos
   TARGET 247 SC_FRASCO|CC|250|0|0: Target 247 Sc, 250 centímetros cúbicos
   TARGET 247 SC_FRASCO|LITRO|1|0|0: Target 247 Sc, 1 litro
@@ -7420,6 +7494,7 @@ articulos_publicacion:
   TILT 250 EC_FRASCO|LITRO|1|0|0: Tilt 250 Ec, 1 litro
   TIMEROLE 247 SC_FRASCO|LITRO|1|0|0: Timerole 247 Sc, 1 litro
   TIMOREX GOLD_FRASCO|LITRO|1|0|0: Timorex Gold, 1 litro
+  TIMOREX PRO_FRASCO|LITRO|1|0|0: Timorex Pro, 1 litro
   TINO_FRASCO|CC|20|0|0: Tino, 20 centímetros cúbicos
   TINO_LABORATORIOS PROVET S.A.S._5918_FRASCO|CC|20|0|0: Tino, 20 centímetros cúbicos
   TINTURA DE YODO_FRASCO|CC|120|0|0: Tintura de Yodo, 120 centímetros cúbicos
@@ -7618,6 +7693,7 @@ articulos_publicacion:
   TYLOVIC INYECTABLE_FRASCO|CC|100|0|0: Tilosina 200, 100 centímetros cúbicos
   TYLOVIC INYECTABLE_FRASCO|CC|250|0|0: Tilosina 200, 250 centímetros cúbicos
   TYLOX_FRASCO|CC|250|0|0: Tilosina 200, 250 centímetros cúbicos
+  TYLOX_ICOFARMA S.A._6829_FRASCO|CC|100|0|0: Tilosina 200, 100 centímetros cúbicos
   TYLOX_ICOFARMA S.A._6829_FRASCO|CC|250|0|0: Tilosina 200, 250 centímetros cúbicos
   UBREVET_FRASCO|GRAMO|100|0|0: Ubrevet, 100 gramos
   UBREVET_FRASCO|GRAMO|30|0|0: Ubrevet, 30 gramos
@@ -7637,6 +7713,7 @@ articulos_publicacion:
     cúbicos
   UNIVERSAL F_BOLSA|KILOGRAMO|1|0|0: Universal F, 1 kilogramo
   UNIVERSAL F_BULTO|KILOGRAMO|40|0|0: Universal F, 40 kilogramos
+  UNIVERSAL F_FINCA S.A.S._21268_SACO|KILOGRAMO|10|0|0: Universal F, 10 kilogramos
   UNIVERSAL F_FINCA S.A.S._7395_BOLSA|KILOGRAMO|1|0|0: Universal F, 1 kilogramo
   UNIVERSAL F_FINCA S.A.S._7395_BULTO|KILOGRAMO|40|0|0: Universal F, 40 kilogramos
   UNOAGRO 41-3-3_BOLSA|KILOGRAMO|1|0|0: Unoagro 41-3-3, 1 kilogramo

@@ -63,7 +63,7 @@ def construir_llave_articulo(articulo: str, unidad_medida: str) -> str:
 def _clean(value: str) -> str:
     """Normaliza un componente de la llave: uppercase, sin NaN."""
     s = str(value).strip().upper()
-    return "NA" if s in ("NAN", "NONE", "") else s
+    return "NA" if s in ("NAN", "NONE", "", "N/A") else s
 
 
 def construir_llave_casacom_ica_unmed(
@@ -86,6 +86,42 @@ def construir_llave_casacom_ica_unmed(
         _clean(unidad_medida),
     ]
     return "_".join(parts)
+
+
+def parsear_llave_divipola(valor: str, tipo_llave: str = "unmed") -> str:
+    """Reconstruye la LLAVE_ARTICULO canónica a partir de la clave compuesta
+    de un archivo DIVIPOLA de módulo (columna Art_Unmed_Casacomer_ICA o
+    Art_Casacomer_ICA_Unmed — el orden varía por módulo).
+
+    No asume una posición fija: localiza el segmento con '|' (Unidad de
+    Medida, siempre pipe-delimitado) y usa los segmentos restantes en su
+    orden relativo — el primero es siempre el Artículo; si sigue Casa
+    Comercial y Registro ICA, van en ese orden en ambas variantes observadas.
+
+    Args:
+        valor: Valor de la columna compuesta del DIVIPOLA.
+        tipo_llave: "unmed" (Agricolas, Propagación) o "casacom_ica_unmed"
+                    (Pecuarios, Elementos) — igual que agregar_columnas_unidad_medida.
+
+    Returns:
+        LLAVE_ARTICULO en el mismo formato que produce el pipeline al leer
+        la base liviana, lista para usarse como clave en los mappings.
+    """
+    partes = str(valor).strip().split("_")
+    idx_unidad = next((i for i, p in enumerate(partes) if "|" in p), None)
+    if idx_unidad is None:
+        return str(valor).strip().upper()
+
+    unidad = partes[idx_unidad]
+    resto = partes[:idx_unidad] + partes[idx_unidad + 1:]
+    articulo = resto[0] if resto else ""
+    extra = resto[1:]
+
+    if tipo_llave == "casacom_ica_unmed":
+        casacom = extra[0] if len(extra) > 0 else ""
+        regica = extra[1] if len(extra) > 1 else ""
+        return construir_llave_casacom_ica_unmed(articulo, casacom, regica, unidad)
+    return construir_llave_articulo(articulo, unidad)
 
 
 def agregar_columnas_unidad_medida(

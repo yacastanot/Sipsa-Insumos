@@ -2,6 +2,7 @@ especies:
   modulo: "ESPECIES"
   archivo_liviana: "data/01_raw/JUN2026/BASES LIVIANAS JUN2026/Especies jun 2026.xlsx"
   hoja_liviana: "Información Insumos"
+  archivo_divipola_grupos: ""   # tipo_modulo=caracte, no soportado aún por actualizar_mappings_divipola
   tipo_modulo: "caracte"
   tipo_llave: "unmed"
   min_n: 2

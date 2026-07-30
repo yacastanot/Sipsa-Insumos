@@ -1,18 +1,19 @@
 """Nodos del pipeline Sin Precio Anterior — SIPSA Insumos.
 
-SAS equivalente:
-  PROGRAMA REVISIÓN SIN PRECIO INSUMOS AGRÍCOLAS [PERIODO].sas
-  PROGRAMA REVISIÓN SIN PRECIO INSUMOS PECUARIOS [PERIODO].sas
-  PROGRAMA REVISIÓN SIN PRECIO ELEMENTOS [PERIODO].sas
-  PROGRAMA REVISIÓN SIN PRECIO MATERIAL PROPAGA [PERIODO].sas
+Se ejecuta DESPUÉS del procesamiento principal de cada módulo, porque el
+VAR_ATIPICO que consume es una salida propia del pipeline (paso reporting),
+no un archivo externo revisado por un analista.
 
 Flujo por módulo:
-  1. Leer serie histórica "para revisiones" (formato largo)
+  1. Leer serie histórica "para revisiones" (formato largo, insumo externo
+     en data/01_raw/{periodo}/SIN_PRECIO_ANT {periodo}/)
   2. Construir clave ID compuesta y convertir Mes-año a código MMMYYYY
   3. Pivotar largo → ancho: una columna Precio_MMMYYYY por período
-  4. Leer VAR_ATIPICO del período (ya revisado por los analistas)
-  5. Filtrar: REVISA=2, Nov. no en {IA, IN}, precio mes actual no nulo
-  6. Construir misma clave ID en VAR_ATIPICO
+  4. Leer VAR_ATIPICO_{MODULO}_{PERIODO}.xlsx generado por el propio
+     pipeline (data/08_reporting/{periodo}/{modulo}/)
+  5. Filtrar: REVISA=2 (sin precio anterior) y precio actual no nulo
+  6. Construir la misma clave ID en VAR_ATIPICO (a partir de sus columnas
+     CÓDIGO DIVIPOLA/FUENTE/ARTÍCULO/CASA COMERCIAL/REGISTRO ICA/UNIDAD DE MEDIDA)
   7. Left-join por ID: registros VAR_ATIPICO + columnas históricas de precio
   8. Calcular variaciones % vs cada período de referencia histórico
   9. Exportar REV_SIN_PRECIO_ANTE_[MODULO]_[PERIODO].xlsx
@@ -116,33 +117,35 @@ def revisar_sin_precio(
     hoja_var_atipico: str,
     casacom_col_hist: str,
     unmed_col_hist: str,
-    casacom_col_var: str,
-    unmed_col_var: str,
-    nov_col: str,
-    mes_actual: str,
     periodo: str,
     modulo: str,
     ruta_reporting: str,
+    mes_actual: str = "",
     activo: bool = True,
 ) -> pd.DataFrame:
     """Genera REV_SIN_PRECIO_ANTE_[MODULO]_[PERIODO].xlsx para un módulo SIPSA.
 
-    Replica fielmente los programas SAS de revisión sin precio anterior.
-
     Args:
-        ruta_historico:   Ruta al Excel "para revisiones" (serie histórica larga).
+        ruta_historico:   Ruta al Excel "para revisiones" (serie histórica larga,
+                           insumo externo — no lo genera este pipeline).
         hoja_historico:   Hoja dentro de ese archivo (ej: 'Agrícolas').
-        ruta_var_atipico: Ruta al Excel VAR_ATIPICO del período (revisado por analistas).
+        ruta_var_atipico: Ruta al VAR_ATIPICO_{MODULO}_{PERIODO}.xlsx que genera
+                           el propio pipeline en el paso reporting. Admite dos
+                           formatos (se detecta automáticamente):
+                           - "nuevo" (exportar_diagnosticos, fila por fila, con
+                             nombres SAS): CodigoMpio, Fuente, Articulo, RegICA,
+                             CasaCom., UnMed., {mes_actual}, REVISA.
+                           - "viejo" (comparación agregada por municipio):
+                             CÓDIGO DIVIPOLA, FUENTE, ARTÍCULO, CASA COMERCIAL,
+                             REGISTRO ICA, UNIDAD DE MEDIDA, PRECIO, REVISA.
         hoja_var_atipico: Hoja dentro de ese archivo (ej: 'VAR_ATIPICO_AGRICOLA').
         casacom_col_hist: Columna CasaCom en el histórico (ej: 'CasaCom.').
         unmed_col_hist:   Columna UnMed en el histórico (ej: 'UnMed.').
-        casacom_col_var:  Columna CasaCom en VAR_ATIPICO (ej: 'CasaCom.' o 'CasaCom#').
-        unmed_col_var:    Columna UnMed en VAR_ATIPICO (ej: 'UnMed.' o 'UnMed#').
-        nov_col:          Columna novedad en VAR_ATIPICO (ej: 'Nov.' o 'Nov#').
-        mes_actual:       Nombre del mes actual en español (ej: 'Mayo').
         periodo:          Código del período MMMYYYY (ej: 'MAY2026').
         modulo:           Nombre del módulo en mayúsculas (ej: 'AGRICOLAS').
         ruta_reporting:   Directorio raíz de reportes Kedro.
+        mes_actual:       Nombre del mes actual en español (ej: 'Mayo') — columna
+                          de precio actual en el formato "nuevo" de VAR_ATIPICO.
         activo:           False = módulo no aplica este período (omite procesamiento).
 
     Returns:
@@ -208,27 +211,23 @@ def revisar_sin_precio(
         modulo, len(wide), len(wide.columns) - 1,
     )
 
-    # ── 4. Cargar VAR_ATIPICO ──────────────────────────────────────────────────
+    # ── 4. Cargar VAR_ATIPICO (salida propia del pipeline, paso reporting) ────
     log.info(
         "[%s] Leyendo VAR_ATIPICO: %s | hoja='%s'", modulo, ruta_var_atipico, hoja_var_atipico
     )
     var_at = pd.read_excel(ruta_var_atipico, sheet_name=hoja_var_atipico)
     log.info("[%s] VAR_ATIPICO cargado | filas_raw=%d", modulo, len(var_at))
 
-    # ── 5. Filtrar VAR_ATIPICO ─────────────────────────────────────────────────
-    # SAS: where REVISA = 2 and 'Nov.'n not in ('IA','IN') and &Mes. NE .
-    if mes_actual not in var_at.columns:
-        raise KeyError(
-            f"[{modulo}] Columna '{mes_actual}' no encontrada en VAR_ATIPICO. "
-            f"Columnas disponibles: {list(var_at.columns)}"
-        )
-    mask = (
-        (var_at["REVISA"] == 2)
-        & (~var_at[nov_col].fillna("").isin(["IA", "IN"]))
-        & var_at[mes_actual].notna()
-    )
+    # ── 5. Filtrar VAR_ATIPICO: sin precio anterior (REVISA=2) y precio no nulo
+    # Formato "nuevo" (exportar_diagnosticos): columnas SAS directas, precio
+    # actual en la columna con el nombre del mes. Formato "viejo" (comparación
+    # agregada por municipio): columnas internas, precio en "PRECIO".
+    formato_nuevo = "CÓDIGO DIVIPOLA" not in var_at.columns
+    precio_col_origen = mes_actual if formato_nuevo else "PRECIO"
+
+    mask = (var_at["REVISA"] == 2) & var_at[precio_col_origen].notna()
     var_at1 = var_at[mask].copy()
-    log.info("[%s] VAR_ATIPICO filtrado (REVISA=2, Nov valida, precio no nulo) | filas=%d", modulo, len(var_at1))
+    log.info("[%s] VAR_ATIPICO filtrado (REVISA=2, precio no nulo) | filas=%d", modulo, len(var_at1))
 
     if var_at1.empty:
         log.warning("[%s] Sin registros con REVISA=2 para el período %s.", modulo, periodo)
@@ -237,13 +236,23 @@ def revisar_sin_precio(
             "archivo": f"REV_SIN_PRECIO_ANTE_{modulo}_{periodo}.xlsx (vacío)",
         }])
 
-    # Renombrar columna del mes actual → Precio_{periodo}
-    # SAS: rename &Mes.=Precio_&Mesc.
+    # Renombrar a las columnas que espera _construir_id y el precio actual
     precio_actual_col = f"Precio_{periodo}"
-    var_at1 = var_at1.rename(columns={mes_actual: precio_actual_col})
-
-    # Construir ID en VAR_ATIPICO
-    var_at1["_ID"] = _construir_id(var_at1, "CodigoMpio", casacom_col_var, unmed_col_var)
+    if formato_nuevo:
+        var_at1 = var_at1.rename(columns={precio_col_origen: precio_actual_col})
+        # Construir ID en VAR_ATIPICO (columnas SAS ya con los nombres finales)
+        var_at1["_ID"] = _construir_id(var_at1, "CodigoMpio", "CasaCom.", "UnMed.")
+    else:
+        var_at1 = var_at1.rename(columns={
+            "CÓDIGO DIVIPOLA": "CodigoMpio",
+            "FUENTE": "Fuente",
+            "ARTÍCULO": "Articulo",
+            "REGISTRO ICA": "RegICA",
+            "PRECIO": precio_actual_col,
+        })
+        # Construir ID en VAR_ATIPICO (mismas columnas base que el histórico, con
+        # los nombres propios de nuestro pipeline: CASA COMERCIAL / UNIDAD DE MEDIDA)
+        var_at1["_ID"] = _construir_id(var_at1, "CodigoMpio", "CASA COMERCIAL", "UNIDAD DE MEDIDA")
 
     # ── 6. Left-join por ID (equiv. SAS MERGE con if a) ───────────────────────
     # El Precio_{periodo} del VAR_ATIPICO prevalece; si el histórico también lo tiene se descarta

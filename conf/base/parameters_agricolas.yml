@@ -1,7 +1,8 @@
 agricolas:
   modulo: "AGRICOLAS"
-  archivo_liviana: "data/01_raw/JUN2026/BASES LIVIANAS JUN2026/Insumos agrícolas jun 2026.xlsx"
+  archivo_liviana: "data/01_raw/JUL2026/BASES LIVIANAS JUL2026/Insumos agrícolas jul 2026.xlsx"
   hoja_liviana: "Información Insumos"
+  archivo_divipola_grupos: "data/01_raw/JUL2026/DIVIPOLA JUL2026/divipola insumos agrícolas jul 2026.xlsx"
   tipo_modulo: "estandar"
   tipo_llave: "unmed"
   min_n: 2

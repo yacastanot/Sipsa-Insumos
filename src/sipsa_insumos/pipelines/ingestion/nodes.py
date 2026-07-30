@@ -129,15 +129,86 @@ def _ica_fix(v: str) -> str:
     return v
 
 
+def _limpiar_registro_ica(serie: pd.Series) -> pd.Series:
+    """Limpia REGISTRO ICA quitando el ".0" que agrega Excel a códigos
+    puramente numéricos (ej. '3119.0' → '3119'), SIN truncar códigos
+    alfanuméricos que sí incluyen un decimal legítimo (ej. '3167-3.5').
+
+    OJO: no usar str.split(".").str[0] aquí — corta cualquier código con
+    punto, incluyendo esos sufijos legítimos, y rompe el cruce contra
+    Art_Casacomer_ICA_Unmed en mappings_grupos/mappings_articulos.
+    """
+    return serie.astype(str).str.strip().str.replace(r"\.0$", "", regex=True)
+
+
+_RENAME_QA_EXTRA: dict[str, str] = {
+    "Precio Ante.":  "PRECIO_ANTERIOR_RAW",
+    "Nov.":          "NOV",
+    "Estado":        "ESTADO",
+    "Observación":   "OBSERVACION",
+}
+
+
+def leer_base_completa(
+    archivo_liviana: str,
+    hoja_liviana: str,
+    periodo: str,
+    tipo_modulo: str = "estandar",
+    tipo_llave: str = "unmed",
+) -> pd.DataFrame:
+    """Lee la base liviana SIN filtrar por Estado/Precio, conservando las
+    columnas de control de calidad (Precio Ante., Nov., Estado, Observación)
+    que el filtro estándar de leer_base_liviana descarta.
+
+    Necesario para reproducir BASE_INSUMOS_{MODULO}_{PERIODO}.xlsx y los
+    archivos de diagnóstico (FALTAN_GRUPO/FALTAN_PUBLICA/DUPLI/VAR_ATIPICO)
+    tal como los genera el programa SAS: ahí "Precio Ante." (precio del mes
+    anterior) ya viene embebido por fila en el archivo del mes actual — no
+    se cruza con un archivo de período anterior aparte.
+
+    Args:
+        archivo_liviana: Ruta relativa al Excel de entrada.
+        hoja_liviana: Nombre de la hoja ("Información Insumos").
+        periodo: Período mensual (ej: "MAY2026"). Se usa como valor de MES_AÑO.
+        tipo_modulo: "estandar" (UnMed./CasaCom./RegICA) o "caracte" (Caracte.,
+                     Informante — Arriendos/Servicios/Empaques).
+        tipo_llave: "unmed" o "casacom_ica_unmed" — igual que leer_base_liviana,
+                    para construir LLAVE_ARTICULO y poder cruzar Grupo/Nombre_Publica.
+    """
+    df = pd.read_excel(
+        archivo_liviana, sheet_name=hoja_liviana, header=0, dtype=_DTYPE_EXCEL,
+    )
+    rename_map = _RENAME_CARACTE if tipo_modulo == "caracte" else _RENAME_ESTANDAR
+    df = df.rename(columns={**rename_map, **_RENAME_QA_EXTRA})
+    df["CÓDIGO DIVIPOLA"] = df["CÓDIGO DIVIPOLA"].astype(str).str.strip().str.zfill(5)
+    df["CÓDIGO CPC"] = df["CÓDIGO CPC"].astype(str).str.strip().str.split(".").str[0]
+    df["MES_AÑO"] = periodo
+    df["PRECIO"] = pd.to_numeric(df["PRECIO"], errors="coerce")
+    df["PRECIO_ANTERIOR_RAW"] = pd.to_numeric(df["PRECIO_ANTERIOR_RAW"], errors="coerce")
+
+    if tipo_modulo == "caracte":
+        df["CARACTERÍSTICA"] = df["CARACTERÍSTICA"].astype(str).str.strip()
+        df["LLAVE_ARTICULO"] = (
+            df["ARTÍCULO"].str.strip().str.upper() + "_" + df["CARACTERÍSTICA"].str.upper()
+        )
+        df["UNIDAD DE MEDIDA"] = df["CARACTERÍSTICA"]
+    else:
+        df["REGISTRO ICA"] = _limpiar_registro_ica(df["REGISTRO ICA"]).map(_ica_fix)
+        df = agregar_columnas_unidad_medida(df, tipo_llave=tipo_llave)
+
+    log.info(
+        "leer_base_completa OK | filas=%d (sin filtrar Estado/Precio)", len(df),
+    )
+    return df
+
+
 def _procesar_estandar(df: pd.DataFrame, periodo: str, tipo_llave: str) -> pd.DataFrame:
     """Procesa módulos con columnas UnMed./CasaCom./RegICA."""
     df = df.rename(columns=_RENAME_ESTANDAR)
     df["CÓDIGO DIVIPOLA"] = df["CÓDIGO DIVIPOLA"].str.strip().str.zfill(5)
     df["CÓDIGO CPC"] = df["CÓDIGO CPC"].astype(str).str.strip().str.split(".").str[0]
     df["MES_AÑO"] = periodo
-    df["REGISTRO ICA"] = (
-        df["REGISTRO ICA"].astype(str).str.strip().str.split(".").str[0].map(_ica_fix)
-    )
+    df["REGISTRO ICA"] = _limpiar_registro_ica(df["REGISTRO ICA"]).map(_ica_fix)
 
     cols_canon = list(_RENAME_ESTANDAR.values()) + ["MES_AÑO"]
     df = df[[c for c in cols_canon if c in df.columns]].copy()

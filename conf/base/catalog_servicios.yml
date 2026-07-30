@@ -42,33 +42,6 @@ servicios.base_comparada:
   save_args:
     index: false
 
-servicios.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/servicios/FALTAN_DIVIPOLA_SERVICIOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
-
-servicios.faltan_grupo:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/servicios/FALTAN_GRUPO_SERVICIOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_GRUPO_SERVICIOS"
-
-servicios.faltan_publica:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/servicios/FALTAN_PUBLICA_SERVICIOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_PUBLICA_SERVICIOS"
-
-servicios.duplicados:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/servicios/SERVICIOS_DUPLI_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "SERVICIOS_DUPLI"
 
 servicios.cvs_reporte:
   type: pandas.ExcelDataset
@@ -76,13 +49,6 @@ servicios.cvs_reporte:
   save_args:
     index: false
     sheet_name: "CV's"
-
-servicios.var_atipico:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/servicios/VAR_ATIPICO_SERVICIOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "VAR_ATIPICO_SERVICIOS"
 
 servicios.menor2_reporte:
   type: pandas.ExcelDataset

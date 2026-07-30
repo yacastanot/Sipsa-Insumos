@@ -27,8 +27,8 @@ def _inputs_modulo(mod: str) -> list[str]:
 
     Orden de argumentos de revisar_sin_precio():
       ruta_historico, hoja_historico, ruta_var_atipico, hoja_var_atipico,
-      casacom_col_hist, unmed_col_hist, casacom_col_var, unmed_col_var, nov_col,
-      mes_actual (global), periodo (global), modulo, ruta_reporting (global), activo
+      casacom_col_hist, unmed_col_hist,
+      periodo (global), modulo, ruta_reporting (global), mes_actual (global), activo
     """
     p = f"params:sin_precio_ant.{mod}"
     return [
@@ -38,14 +38,11 @@ def _inputs_modulo(mod: str) -> list[str]:
         f"{p}.hoja_var_atipico",
         f"{p}.casacom_col_hist",
         f"{p}.unmed_col_hist",
-        f"{p}.casacom_col_var",
-        f"{p}.unmed_col_var",
-        f"{p}.nov_col",
+        "params:periodo",           # argumento 7: periodo
+        f"{p}.modulo",              # argumento 8: modulo
+        "params:ruta_reporting",    # argumento 9: ruta_reporting
         "params:mes_actual",        # argumento 10: mes_actual
-        "params:periodo",           # argumento 11: periodo
-        f"{p}.modulo",              # argumento 12: modulo
-        "params:ruta_reporting",    # argumento 13: ruta_reporting
-        f"{p}.activo",              # argumento 14: activo (default=True)
+        f"{p}.activo",              # argumento 11: activo (default=True)
     ]
 
 

@@ -42,33 +42,6 @@ elementos.base_comparada:
   save_args:
     index: false
 
-elementos.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/elementos/FALTAN_DIVIPOLA_ELEMENTOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
-
-elementos.faltan_grupo:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/elementos/FALTAN_GRUPO_ELEMENTOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_GRUPO_ELEMENTOS"
-
-elementos.faltan_publica:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/elementos/FALTAN_PUBLICA_ELEMENTOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_PUBLICA_ELEMENTOS"
-
-elementos.duplicados:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/elementos/ELEM_AGROPE_DUPLI_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "ELEM_AGROPE_DUPLI"
 
 elementos.cvs_reporte:
   type: pandas.ExcelDataset
@@ -76,13 +49,6 @@ elementos.cvs_reporte:
   save_args:
     index: false
     sheet_name: "CV's"
-
-elementos.var_atipico:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/elementos/VAR_ATIPICO_ELEMENTOS_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "VAR_ATIPICO_ELEMENTOS"
 
 elementos.menor2_reporte:
   type: pandas.ExcelDataset

@@ -34,14 +34,16 @@ Uso frecuente:
 """
 from __future__ import annotations
 
-from kedro.pipeline import Pipeline, pipeline
+from kedro.pipeline import Pipeline, node, pipeline
 
 from .pipelines.ingestion.pipeline import create_pipeline as ingestion
+from .pipelines.ingestion.nodes import leer_base_completa
 from .pipelines.enrichment.pipeline import create_pipeline as enrichment
 from .pipelines.quality.pipeline import create_pipeline as quality
 from .pipelines.aggregation.pipeline import create_pipeline as aggregation
 from .pipelines.comparison.pipeline import create_pipeline as comparison
 from .pipelines.reporting.pipeline import create_pipeline as reporting
+from .pipelines.reporting.nodes import exportar_base_insumos, exportar_diagnosticos
 from .pipelines.sin_precio_ant.pipeline import (
     create_pipeline as sin_precio_ant,
     create_pipeline_agricolas as sin_precio_ant_agricolas,
@@ -49,6 +51,14 @@ from .pipelines.sin_precio_ant.pipeline import (
     create_pipeline_elementos as sin_precio_ant_elementos,
     create_pipeline_propagacion as sin_precio_ant_propagacion,
 )
+
+# Módulos con BASE_INSUMOS_{MODULO}_{PERIODO}.xlsx implementado (réplica SAS
+# con Precio Ante. embebido por fila). Se amplía módulo por módulo tras validar.
+MODULOS_BASE_INSUMOS = ["agricolas"]
+
+# Módulos con FALTAN_GRUPO/FALTAN_PUBLICA/DUPLI/VAR_ATIPICO implementados con
+# la misma lógica fila-por-fila que BASE_INSUMOS (ver exportar_diagnosticos).
+MODULOS_DIAGNOSTICOS = ["agricolas", "pecuarios", "elementos", "empaques", "arriendos", "servicios"]
 
 MODULOS = [
     "agricolas",
@@ -63,6 +73,79 @@ MODULOS = [
 ]
 
 
+def _pipeline_leer_completa(nombre: str) -> Pipeline:
+    """Lee la base liviana sin filtrar (fila por fila, con Precio Ante./Nov./
+    Estado/Observación) — insumo compartido de BASE_INSUMOS y de los archivos
+    de diagnóstico (FALTAN_*/DUPLI/VAR_ATIPICO).
+    """
+    return pipeline(
+        Pipeline([
+            node(
+                func=leer_base_completa,
+                inputs=["params:archivo_liviana", "params:hoja_liviana", "params:periodo",
+                        "params:tipo_modulo", "params:tipo_llave"],
+                outputs="base_completa",
+                name="leer_base_completa",
+            ),
+        ]),
+        namespace=nombre,
+        parameters={"periodo"},
+        tags=[nombre],
+    )
+
+
+def _pipeline_base_insumos(nombre: str) -> Pipeline:
+    """BASE_INSUMOS_{MODULO}_{PERIODO}.xlsx — réplica SAS con Precio Ante.
+    embebido por fila (ver exportar_base_insumos). Requiere mappings_*_actualizado,
+    producidos por el nodo actualizar_mappings_divipola de enrichment().
+    """
+    return pipeline(
+        Pipeline([
+            node(
+                func=exportar_base_insumos,
+                inputs=[
+                    "base_completa", "divipola_raw",
+                    "mappings_grupos_actualizado", "mappings_articulos_actualizado",
+                    "params:modulo", "params:periodo", "params:mes_actual", "params:mes_anterior",
+                    "params:ruta_reporting",
+                ],
+                outputs="base_insumos_meta",
+                name="exportar_base_insumos",
+            ),
+        ]),
+        namespace=nombre,
+        inputs={"divipola_raw"},
+        parameters={"periodo", "mes_actual", "mes_anterior", "ruta_reporting"},
+        tags=[nombre],
+    )
+
+
+def _pipeline_diagnosticos(nombre: str) -> Pipeline:
+    """FALTAN_GRUPO/FALTAN_PUBLICA/DUPLI/VAR_ATIPICO — réplica SAS fila por
+    fila (ver exportar_diagnosticos). Requiere mappings_*_actualizado,
+    producidos por el nodo actualizar_mappings_divipola de enrichment().
+    """
+    return pipeline(
+        Pipeline([
+            node(
+                func=exportar_diagnosticos,
+                inputs=[
+                    "base_completa", "divipola_raw",
+                    "mappings_grupos_actualizado", "mappings_articulos_actualizado",
+                    "params:modulo", "params:periodo", "params:mes_actual", "params:mes_anterior",
+                    "params:tipo_modulo", "params:ruta_reporting",
+                ],
+                outputs="diagnosticos_meta",
+                name="exportar_diagnosticos",
+            ),
+        ]),
+        namespace=nombre,
+        inputs={"divipola_raw"},
+        parameters={"periodo", "mes_actual", "mes_anterior", "ruta_reporting"},
+        tags=[nombre],
+    )
+
+
 def _pipeline_modulo(nombre: str) -> Pipeline:
     """Construye el pipeline completo de un módulo vía namespace.
 
@@ -74,7 +157,7 @@ def _pipeline_modulo(nombre: str) -> Pipeline:
     Parámetros de módulo (CON prefijo de namespace, vienen de parameters_<modulo>.yml):
       params:modulo, params:grupos, params:archivo_liviana, params:hoja_liviana
     """
-    return (
+    resultado = (
         pipeline(
             ingestion(),
             namespace=nombre,
@@ -107,6 +190,13 @@ def _pipeline_modulo(nombre: str) -> Pipeline:
             tags=[nombre],
           )
     )
+    if nombre in MODULOS_BASE_INSUMOS or nombre in MODULOS_DIAGNOSTICOS:
+        resultado = resultado + _pipeline_leer_completa(nombre)
+    if nombre in MODULOS_BASE_INSUMOS:
+        resultado = resultado + _pipeline_base_insumos(nombre)
+    if nombre in MODULOS_DIAGNOSTICOS:
+        resultado = resultado + _pipeline_diagnosticos(nombre)
+    return resultado
 
 
 def register_pipelines() -> dict[str, Pipeline]:

@@ -53,33 +53,6 @@ agricolas.base_comparada:
     index: false
 
 # ── DIAGNÓSTICO: archivos Excel de control (1 hoja cada uno) ─────────────────
-agricolas.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/agricolas/FALTAN_DIVIPOLA_AGRICOLA_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
-
-agricolas.faltan_grupo:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/agricolas/FALTAN_GRUPO_AGRICOLA_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_GRUPO_AGRICOLA"
-
-agricolas.faltan_publica:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/agricolas/FALTAN_PUBLICA_AGRICOLA_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_PUBLICA_AGRICOLA"
-
-agricolas.duplicados:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/agricolas/INSUMOS_AGRICOLAS_DUPLI_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "INSUMOS_AGRICOLAS_DUPLI"
 
 agricolas.cvs_reporte:
   type: pandas.ExcelDataset
@@ -87,13 +60,6 @@ agricolas.cvs_reporte:
   save_args:
     index: false
     sheet_name: "CV's"
-
-agricolas.var_atipico:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/agricolas/VAR_ATIPICO_AGRICOLA_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "VAR_ATIPICO_AGRICOLA"
 
 agricolas.menor2_reporte:
   type: pandas.ExcelDataset

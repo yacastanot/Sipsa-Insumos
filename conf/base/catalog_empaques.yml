@@ -42,33 +42,6 @@ empaques.base_comparada:
   save_args:
     index: false
 
-empaques.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/empaques/FALTAN_DIVIPOLA_EMPAQUES_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
-
-empaques.faltan_grupo:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/empaques/FALTAN_GRUPO_EMPAQUES_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_GRUPO_EMPAQUES"
-
-empaques.faltan_publica:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/empaques/FALTAN_PUBLICA_EMPAQUES_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_PUBLICA_EMPAQUES"
-
-empaques.duplicados:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/empaques/EMPA_AGROPE_DUPLI_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "EMPA_AGROPE_DUPLI"
 
 empaques.cvs_reporte:
   type: pandas.ExcelDataset
@@ -76,13 +49,6 @@ empaques.cvs_reporte:
   save_args:
     index: false
     sheet_name: "CV's"
-
-empaques.var_atipico:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/empaques/VAR_ATIPICO_EMPAQUES_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "VAR_ATIPICO_EMPAQUES"
 
 empaques.menor2_reporte:
   type: pandas.ExcelDataset

@@ -23,6 +23,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from sipsa_insumos.pipelines.quality.nodes import _LLAVE_DUPLICADOS
 from sipsa_insumos.utils.excel_writer import aplicar_formato_numerico_precio, escribir_excel_multisheet
 
 log = logging.getLogger(__name__)
@@ -142,7 +143,7 @@ def exportar_bases(
             "CodigoMpio":                    col_div,
             "NombreMunicipio":               "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
             "Mercado":                       "Mercado" if "Mercado" in df_grupo.columns else None,
-            "Codigo CPC":                    "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
+            "Codigo CPC":                    "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns and m not in _SIN_CODIGO_CPC else None,
             col_pub_sas:                     "Nombre_Publica" if "Nombre_Publica" in df_grupo.columns else None,
             f"PRECIO_PROMEDIO_{periodo_ant}": col_precio_anterior,
             f"PRECIO_PROMEDIO_{periodo}":     col_precio_actual,
@@ -317,7 +318,7 @@ def exportar_anexos(
             "NombreDepartamento":            "NombreDepartamento" if "NombreDepartamento" in df_grupo.columns else None,
             "CodigoMpio":                    col_div,
             "NombreMunicipio":               "NombreMunicipio" if "NombreMunicipio" in df_grupo.columns else None,
-            "Codigo CPC":                    "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns else None,
+            "Codigo CPC":                    "CÓDIGO CPC" if "CÓDIGO CPC" in df_grupo.columns and m not in _SIN_CODIGO_CPC else None,
             "Nombre_insumo":                 "Nombre_insumo" if "Nombre_insumo" in df_grupo.columns else None,
             "Presentación_insumo":           "Presentación_insumo" if "Presentación_insumo" in df_grupo.columns else None,
             f"PRECIO_PROMEDIO_{periodo_ant}": col_precio_anterior,
@@ -349,6 +350,377 @@ def exportar_anexos(
         "hojas": len(hojas),
         "filas_totales": filas_totales,
     }])
+
+
+def _construir_base_diagnostico(
+    base_completa: pd.DataFrame,
+    divipola_raw: pd.DataFrame,
+    mappings_grupos: dict,
+    mappings_articulos: dict,
+) -> pd.DataFrame:
+    """Enriquece base_completa (fila por fila, sin filtrar) con DIVIPOLA,
+    Grupo y Nombre_Publica, y calcula VAR con el mismo criterio SAS: precio
+    en 0 → nulo, y si Nov. IN ('IA','IN') el precio anterior también se anula.
+
+    Insumo común para BASE_INSUMOS y los archivos de diagnóstico
+    (FALTAN_GRUPO/FALTAN_PUBLICA/DUPLI/VAR_ATIPICO).
+    """
+    divipola = divipola_raw.copy()
+    if "CódigoMunicipio" in divipola.columns:
+        divipola = divipola.rename(columns={"CódigoMunicipio": "CÓDIGO DIVIPOLA"})
+        divipola["CÓDIGO DIVIPOLA"] = divipola["CÓDIGO DIVIPOLA"].str.zfill(5)
+    elif "CodigoMpio" in divipola.columns:
+        divipola = divipola.rename(columns={"CodigoMpio": "CÓDIGO DIVIPOLA"})
+
+    df = base_completa.merge(divipola, on="CÓDIGO DIVIPOLA", how="left")
+
+    grupos_dict: dict[str, str] = mappings_grupos.get("grupos", mappings_grupos)
+    articulos_dict: dict[str, str] = mappings_articulos.get("articulos_publicacion", mappings_articulos)
+    df["Grupo"] = df["LLAVE_ARTICULO"].map(grupos_dict)
+    df["Nombre_Publica"] = df["LLAVE_ARTICULO"].map(articulos_dict)
+
+    # Recalcular variación fila por fila (equiv. SAS): precio en 0 → nulo, y
+    # si Nov. in (IA, IN) el precio anterior también se anula. Se sobreescriben
+    # las columnas de precio (no solo un cálculo auxiliar) para que Abril/Mayo
+    # en la salida coincidan exactamente con SAS.
+    df["PRECIO"] = df["PRECIO"].where(df["PRECIO"] != 0)
+    df["PRECIO_ANTERIOR_RAW"] = df["PRECIO_ANTERIOR_RAW"].where(df["PRECIO_ANTERIOR_RAW"] != 0)
+    df["PRECIO_ANTERIOR_RAW"] = df["PRECIO_ANTERIOR_RAW"].where(~df["NOV"].isin(["IA", "IN"]))
+    df["VAR"] = (df["PRECIO"] - df["PRECIO_ANTERIOR_RAW"]) / df["PRECIO_ANTERIOR_RAW"] * 100
+
+    df["CodigoDepto"] = df["CÓDIGO DIVIPOLA"].str[:2]
+    return df
+
+
+def exportar_base_insumos(
+    base_completa: pd.DataFrame,
+    divipola_raw: pd.DataFrame,
+    mappings_grupos: dict,
+    mappings_articulos: dict,
+    modulo: str,
+    periodo: str,
+    mes_actual: str,
+    mes_anterior: str,
+    ruta_reporting: str,
+) -> pd.DataFrame:
+    """Exporta BASE_INSUMOS_{MODULO}_{PERIODO}.xlsx — réplica exacta del
+    equivalente SAS: la base completa (sin filtrar por Estado ni Precio,
+    a diferencia del flujo principal) enriquecida con DIVIPOLA/Grupo/
+    Nombre_Publica, con la variación calculada fila por fila usando el
+    precio anterior embebido en el propio archivo del mes (columna
+    "Precio Ante."), no el promedio agregado del período anterior.
+
+    SAS (paso final del programa de CUADROS):
+      MERGE DIVIPOLA base; BY CodigoMpio; IF B;             (conserva sin cruce)
+      MERGE base grupos/articulos; BY LLAVE; IF A;          (conserva sin cruce)
+      IF Precio Ante./Actual = 0 THEN falta;
+      IF Nov. IN ('IA','IN') THEN Precio Ante. = falta;
+      VAR = (Actual - Ante) / Ante * 100;
+
+    Args:
+        base_completa: Salida de leer_base_completa (sin filtrar).
+        divipola_raw: DIVIPOLA maestro (municipios/departamentos).
+        mappings_grupos: Dict {"grupos": {...}}.
+        mappings_articulos: Dict {"articulos_publicacion": {...}}.
+        modulo: Nombre del módulo en mayúsculas.
+        periodo: Código del período (ej: "MAY2026").
+        mes_actual: Nombre del mes actual en español (ej: "Mayo").
+        mes_anterior: Nombre del mes anterior en español (ej: "Abril").
+        ruta_reporting: Directorio raíz de reportes.
+
+    Returns:
+        DataFrame de metadatos (archivo, filas).
+    """
+    df = _construir_base_diagnostico(base_completa, divipola_raw, mappings_grupos, mappings_articulos)
+    col_pub = _NOMBRE_PUBLICA_SAS.get(modulo.upper(), "Nombre_Publica")
+
+    col_map = {
+        "CodigoDepto":                 "CodigoDepto",
+        "CodigoMpio":                  "CÓDIGO DIVIPOLA",
+        "NombreDepartamento":          "NombreDepartamento" if "NombreDepartamento" in df.columns else None,
+        "NombreMunicipio":             "NombreMunicipio" if "NombreMunicipio" in df.columns else None,
+        "Fuente":                      "FUENTE",
+        "Codigo CPC":                  "CÓDIGO CPC",
+        "Articulo":                    "ARTÍCULO",
+        col_pub:                       "Nombre_Publica",
+        "Grupo":                       "Grupo",
+        "UnMed.":                      "UNIDAD DE MEDIDA",
+        "CasaCom.":                    "CASA COMERCIAL",
+        "RegICA":                      "REGISTRO ICA",
+        mes_anterior:                  "PRECIO_ANTERIOR_RAW",
+        mes_actual:                   "PRECIO",
+        "VAR":                         "VAR",
+        "Estado":                      "ESTADO",
+        "Art_Unmed_Casacomer_ICA":     "LLAVE_ARTICULO",
+        "Observación":                 "OBSERVACION",
+        "Nov.":                        "NOV",
+    }
+    cols_sel = [v for v in col_map.values() if v and v in df.columns]
+    rename_inv = {v: k for k, v in col_map.items() if v and v in df.columns}
+    df_out = df[cols_sel].rename(columns=rename_inv)
+
+    nombre = f"BASE_INSUMOS_{modulo}_{periodo}.xlsx"
+    ruta = Path(ruta_reporting) / modulo.lower() / nombre
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    escribir_excel_multisheet(ruta, {"INFORMACIÓN INSUMOS": df_out})
+
+    log.info("exportar_base_insumos [%s] OK | archivo=%s | filas=%d", modulo, nombre, len(df_out))
+    return pd.DataFrame([{
+        "archivo": str(ruta),
+        "modulo": modulo,
+        "periodo": periodo,
+        "tipo": "BASE_INSUMOS",
+        "filas_totales": len(df_out),
+    }])
+
+
+# =============================================================================
+# Archivos de diagnóstico (FALTAN_GRUPO / FALTAN_PUBLICA / DUPLI / VAR_ATIPICO)
+# =============================================================================
+# Cada programa SAS de módulo usa etiquetas ligeramente distintas para las
+# mismas columnas (p.ej. "Nov." vs "Nov#", "Var." vs "Var#") — se listan aquí
+# tal como aparecen en los archivos SAS de referencia.
+_DIAG_LABELS: dict[str, dict[str, str | None]] = {
+    "AGRICOLAS":  {"llave": "Art_Unmed_Casacomer_ICA", "nov": "Nov.", "var_faltan": "Var.",  "precio_ante_faltan": "Precio Ante.",  "caracte": None},
+    "PECUARIOS":  {"llave": "Art_Unmed_Casacomer_ICA", "nov": "Nov.", "var_faltan": "Var.",  "precio_ante_faltan": "Precio Ante.",  "caracte": None},
+    "ELEMENTOS":  {"llave": "Art_Casacomer_ICA_Unmed",  "nov": "Nov.", "var_faltan": "Var.",  "precio_ante_faltan": "Precio Ante.",  "caracte": None},
+    "EMPAQUES":   {"llave": "Articulo_Caracte",         "nov": "Nov.", "var_faltan": "Var.",  "precio_ante_faltan": "Precio Ante.",  "caracte": "Caracte."},
+    "ARRIENDOS":  {"llave": "Articulo_Caracte",         "nov": "Nov#", "var_faltan": "Var#",  "precio_ante_faltan": "Precio Ante#",  "caracte": "Caracte#"},
+    "SERVICIOS":  {"llave": "Articulo_Caracte",         "nov": "Nov#", "var_faltan": "Var#",  "precio_ante_faltan": "Precio Ante#",  "caracte": "Caracte#"},
+}
+
+# Orden de columnas SAS por módulo (capturado de los archivos de referencia;
+# el orden varía entre programas SAS y no sigue una fórmula única).
+_DIAG_ORDEN_FALTAN_GRUPO: dict[str, list[str]] = {
+    "AGRICOLAS": ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Codigo CPC", "Articulo", "CasaCom.", "RegICA", "Precio Ante.", "Precio Actual", "Var.", "UnMed.", "Nov.", "Estado", "Observación", "Art_Unmed_Casacomer_ICA", "Grupo"],
+    "PECUARIOS": ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Codigo CPC", "Articulo", "CasaCom.", "RegICA", "Precio Ante.", "Precio Actual", "Var.", "UnMed.", "Nov.", "Estado", "Observación", "Art_Unmed_Casacomer_ICA", "Grupo"],
+}
+
+_DIAG_ORDEN_FALTAN_PUBLICA: dict[str, list[str]] = {
+    "AGRICOLAS": ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Codigo CPC", "Articulo", "CasaCom.", "RegICA", "Precio Ante.", "Precio Actual", "Var.", "UnMed.", "Nov.", "Estado", "Observación", "Art_Unmed_Casacomer_ICA", "Grupo", "__PUBLICA__"],
+    "PECUARIOS": ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Codigo CPC", "Articulo", "CasaCom.", "RegICA", "Precio Ante.", "Precio Actual", "Var.", "UnMed.", "Nov.", "Estado", "Observación", "Art_Unmed_Casacomer_ICA", "Grupo", "__PUBLICA__"],
+    "ELEMENTOS": ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Codigo CPC", "Articulo", "CasaCom.", "RegICA", "Precio Ante.", "Precio Actual", "Var.", "UnMed.", "Nov.", "Estado", "Observación", "Art_Casacomer_ICA_Unmed", "__PUBLICA__"],
+    "EMPAQUES":  ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Informante", "Codigo CPC", "Articulo", "Precio Ante.", "Precio Actual", "Var.", "Caracte.", "Nov.", "Estado", "Observación", "Articulo_Caracte", "__PUBLICA__"],
+    "ARRIENDOS": ["Articulo_Caracte", "NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Informante", "Codigo CPC", "Articulo", "Precio Ante#", "Precio Actual", "Var#", "Caracte#", "Nov#", "Estado", "Observación", "__PUBLICA__"],
+    "SERVICIOS": ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "CodigoDepto", "Fuente", "Informante", "Codigo CPC", "Articulo", "Precio Ante#", "Precio Actual", "Var#", "Caracte#", "Nov#", "Estado", "Observación", "Articulo_Caracte", "__PUBLICA__"],
+}
+
+_DIAG_ORDEN_DUPLI: dict[str, list[str]] = {
+    "AGRICOLAS": ["CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Codigo CPC", "Articulo", "__PUBLICA__", "Grupo", "UnMed.", "CasaCom.", "RegICA", "__MES_ANT__", "__MES_ACT__", "VAR", "Estado", "Art_Unmed_Casacomer_ICA", "Observación", "Nov."],
+    "PECUARIOS": ["CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Codigo CPC", "Articulo", "__PUBLICA__", "Grupo", "UnMed.", "CasaCom.", "RegICA", "__MES_ANT__", "__MES_ACT__", "VAR", "Nov.", "Estado", "Art_Unmed_Casacomer_ICA", "Observación"],
+    "ELEMENTOS": ["CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Codigo CPC", "Articulo", "__PUBLICA__", "__MES_ANT__", "__MES_ACT__", "VAR", "Observación", "UnMed.", "CasaCom.", "RegICA", "Estado", "Art_Casacomer_ICA_Unmed", "Nov."],
+    "EMPAQUES":  ["CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Codigo CPC", "Articulo", "__PUBLICA__", "__MES_ANT__", "__MES_ACT__", "VAR", "Observación", "Estado", "Articulo_Caracte", "Informante", "Caracte.", "Nov."],
+    "ARRIENDOS": ["CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Articulo", "__PUBLICA__", "__MES_ANT__", "__MES_ACT__", "VAR", "Observación", "Nov#", "Estado", "Articulo_Caracte", "Informante", "Codigo CPC", "Caracte#"],
+    "SERVICIOS": ["CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Articulo", "__PUBLICA__", "__MES_ANT__", "__MES_ACT__", "VAR", "Observación", "Nov#", "Estado", "Articulo_Caracte", "Informante", "Codigo CPC", "Caracte#"],
+}
+
+# Nombres de archivo SAS para cada diagnóstico
+_FALTAN_GRUPO_NOMBRES: dict[str, str] = {
+    "AGRICOLAS": "FALTAN_GRUPO_AGRICOLA",
+    "PECUARIOS": "FALTAN_GRUPO_PECUARIO",
+}
+_FALTAN_PUBLICA_NOMBRES: dict[str, str] = {
+    "AGRICOLAS": "FALTAN_PUBLICA_AGRICOLA",
+    "PECUARIOS": "FALTAN_PUBLICA_PECUARIO",
+    "ELEMENTOS": "FALTAN_PUBLICA_ELEMENTOS",
+    "EMPAQUES":  "FALTAN_PUBLICA_EMPAQUES",
+    "ARRIENDOS": "FALTAN_PUBLICA_ARRIENDOS",
+    "SERVICIOS": "FALTAN_PUBLICA_SERVICIOS",
+}
+_DUPLI_NOMBRES: dict[str, str] = {
+    "AGRICOLAS": "INSUMOS_AGRICOLAS_DUPLI",
+    "PECUARIOS": "INSUMOS_PECUARIOS_DUPLI",
+    "ELEMENTOS": "ELEM_AGROPE_DUPLI",
+    "EMPAQUES":  "EMPA_AGROPE_DUPLI",
+    "ARRIENDOS": "ARRIENDOS_DUPLI",
+    "SERVICIOS": "SERVICIOS_DUPLI",
+}
+_VAR_ATIPICO_NOMBRES: dict[str, str] = {
+    "AGRICOLAS": "VAR_ATIPICO_AGRICOLA",
+    "PECUARIOS": "VAR_ATIPICO_PECUARIO",
+    "ELEMENTOS": "VAR_ATIPICO_ELEMENTOS",
+    "EMPAQUES":  "VAR_ATIPICO_EMPAQUES",
+    "ARRIENDOS": "VAR_ATIPICO_ARRIENDOS",
+    "SERVICIOS": "VAR_ATIPICO_SERVICIOS",
+}
+_DUPLI_SHEET: dict[str, str] = {
+    "AGRICOLAS": "AGRICOLA_DUPLI",
+    "PECUARIOS": "PECUARIO_DUPLI",
+    "ELEMENTOS": "ELEM_AGROPE_DUPLI",
+    "EMPAQUES":  "EMPA_AGROPE_DUPLI",
+    "ARRIENDOS": "ARRIENDOS_DUPLI",
+    "SERVICIOS": "SERVICIOS_DUPLI",
+}
+
+
+def _diag_col_map(modulo: str, tipo_modulo: str, mes_anterior: str, mes_actual: str, kind: str) -> dict[str, str]:
+    """Mapa {etiqueta_salida_SAS: columna_interna} para un módulo/kind dado.
+
+    kind: "faltan" (FALTAN_GRUPO/FALTAN_PUBLICA — Precio Ante./Actual/Var.
+          con etiqueta fija) o "dupli" (DUPLI/VAR_ATIPICO — columnas con el
+          nombre del mes, VAR siempre en mayúsculas).
+    """
+    lbl = _DIAG_LABELS[modulo]
+    m: dict[str, str] = {
+        "CodigoDepto":        "CodigoDepto",
+        "CodigoMpio":         "CÓDIGO DIVIPOLA",
+        "NombreDepartamento": "NombreDepartamento",
+        "NombreMunicipio":    "NombreMunicipio",
+        "Fuente":             "FUENTE",
+        "Informante":         "INFORMANTE",
+        "Codigo CPC":         "CÓDIGO CPC",
+        "Articulo":           "ARTÍCULO",
+        "Estado":             "ESTADO",
+        "Observación":        "OBSERVACION",
+        "Grupo":              "Grupo",
+        "__PUBLICA__":        "Nombre_Publica",
+        lbl["llave"]:         "LLAVE_ARTICULO",
+    }
+    if tipo_modulo == "caracte":
+        m[lbl["caracte"]] = "CARACTERÍSTICA"
+    else:
+        m["UnMed."] = "UNIDAD DE MEDIDA"
+        m["CasaCom."] = "CASA COMERCIAL"
+        m["RegICA"] = "REGISTRO ICA"
+
+    m[lbl["nov"]] = "NOV"
+    if kind == "faltan":
+        m[lbl["precio_ante_faltan"]] = "PRECIO_ANTERIOR_RAW"
+        m["Precio Actual"] = "PRECIO"
+        m[lbl["var_faltan"]] = "VAR"
+    else:
+        m["__MES_ANT__"] = "PRECIO_ANTERIOR_RAW"
+        m["__MES_ACT__"] = "PRECIO"
+        m["VAR"] = "VAR"
+        m["REVISA"] = "REVISA"
+    return m
+
+
+def _sustituir_orden(orden: list[str], modulo: str, mes_anterior: str, mes_actual: str) -> list[str]:
+    col_pub = _NOMBRE_PUBLICA_SAS.get(modulo, "Nombre_Publica")
+    return [
+        {"__PUBLICA__": col_pub, "__MES_ANT__": mes_anterior, "__MES_ACT__": mes_actual}.get(c, c)
+        for c in orden
+    ]
+
+
+def _exportar_diag_hoja(
+    df: pd.DataFrame,
+    orden: list[str],
+    col_map: dict[str, str],
+    modulo: str,
+    mes_anterior: str,
+    mes_actual: str,
+    ruta: Path,
+    sheet_name: str,
+) -> int:
+    orden_sust = _sustituir_orden(orden, modulo, mes_anterior, mes_actual)
+    col_map_sust = {
+        {"__PUBLICA__": _NOMBRE_PUBLICA_SAS.get(modulo, "Nombre_Publica"),
+         "__MES_ANT__": mes_anterior, "__MES_ACT__": mes_actual}.get(k, k): v
+        for k, v in col_map.items()
+    }
+    rename_inv = {v: k for k, v in col_map_sust.items()}
+    cols_internos = [col_map_sust[c] for c in orden_sust if c in col_map_sust and col_map_sust[c] in df.columns]
+    df_out = df[cols_internos].rename(columns=rename_inv)
+    # Reordenar según orden_sust exacto (por si el rename produjo duplicados de nombre)
+    cols_finales = [c for c in orden_sust if c in df_out.columns]
+    df_out = df_out[cols_finales]
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    escribir_excel_multisheet(ruta, {sheet_name[:31]: df_out})
+    return len(df_out)
+
+
+def exportar_diagnosticos(
+    base_completa: pd.DataFrame,
+    divipola_raw: pd.DataFrame,
+    mappings_grupos: dict,
+    mappings_articulos: dict,
+    modulo: str,
+    periodo: str,
+    mes_actual: str,
+    mes_anterior: str,
+    tipo_modulo: str,
+    ruta_reporting: str,
+) -> pd.DataFrame:
+    """Exporta FALTAN_GRUPO / FALTAN_PUBLICA / DUPLI / VAR_ATIPICO con la
+    misma lógica fila-por-fila y nombres de columna SAS que BASE_INSUMOS,
+    en vez de la comparación agregada por municipio que usa el flujo
+    principal (quality.detectar_duplicados/detectar_var_atipica).
+
+    SAS calcula estos diagnósticos sobre la base SIN filtrar por Estado/
+    Precio, con el precio anterior embebido por fila (columna "Precio
+    Ante."), igual que BASE_INSUMOS — no sobre la base filtrada del flujo
+    principal ni contra el agregado del período anterior.
+    """
+    m = modulo.upper()
+    df = _construir_base_diagnostico(base_completa, divipola_raw, mappings_grupos, mappings_articulos)
+
+    carpeta = Path(ruta_reporting) / modulo.lower()
+    metas: list[dict] = []
+
+    # DUPLI/VAR_ATIPICO usan como encabezado el nombre del mes del período
+    # anterior SEGÚN LA PERIODICIDAD DEL MÓDULO (p.ej. "Marzo" para Elementos/
+    # Empaques bimestrales, "Febrero" para Arriendos/Servicios trimestrales),
+    # no el mes_anterior mensual genérico — igual que exportar_bases/exportar_anexos.
+    periodo_ant_mod = _periodo_anterior_modulo(periodo, m)
+    mes_anterior_dupli = _ABBR_A_MES_LARGO.get(periodo_ant_mod[:3], mes_anterior)
+
+    # --- FALTAN_GRUPO (solo módulos multi-grupo) ---
+    if m in _FALTAN_GRUPO_NOMBRES:
+        df_fg = df[df["Grupo"].isna()]
+        col_map = _diag_col_map(m, tipo_modulo, mes_anterior, mes_actual, kind="faltan")
+        ruta = carpeta / f"{_FALTAN_GRUPO_NOMBRES[m]}_{periodo}.xlsx"
+        n = _exportar_diag_hoja(
+            df_fg, _DIAG_ORDEN_FALTAN_GRUPO[m], col_map, m, mes_anterior, mes_actual,
+            ruta, f"FALTAN_GRUPO_{m}",
+        )
+        metas.append({"tipo": "FALTAN_GRUPO", "archivo": str(ruta), "filas": n})
+
+    # --- FALTAN_PUBLICA ---
+    df_fp = df[df["Nombre_Publica"].isna()]
+    col_map_fp = _diag_col_map(m, tipo_modulo, mes_anterior, mes_actual, kind="faltan")
+    ruta = carpeta / f"{_FALTAN_PUBLICA_NOMBRES[m]}_{periodo}.xlsx"
+    n = _exportar_diag_hoja(
+        df_fp, _DIAG_ORDEN_FALTAN_PUBLICA[m], col_map_fp, m, mes_anterior, mes_actual,
+        ruta, f"FALTAN_PUBLICA_{m}",
+    )
+    metas.append({"tipo": "FALTAN_PUBLICA", "archivo": str(ruta), "filas": n})
+
+    # --- DUPLI ---
+    llave_dup = [c for c in _LLAVE_DUPLICADOS if c in df.columns]
+    es_dupli = df.duplicated(subset=llave_dup, keep="first")
+    df_dupli = df[es_dupli]
+    col_map_dupli = _diag_col_map(m, tipo_modulo, mes_anterior_dupli, mes_actual, kind="dupli")
+    ruta = carpeta / f"{_DUPLI_NOMBRES[m]}_{periodo}.xlsx"
+    n = _exportar_diag_hoja(
+        df_dupli, _DIAG_ORDEN_DUPLI[m], col_map_dupli, m, mes_anterior_dupli, mes_actual,
+        ruta, _DUPLI_SHEET[m],
+    )
+    metas.append({"tipo": "DUPLI", "archivo": str(ruta), "filas": n})
+
+    # --- VAR_ATIPICO (REVISA: 1 = VAR>=25 o <=-25, 2 = sin VAR, 3 = VAR>=100) ---
+    df_var = df.copy()
+    df_var["REVISA"] = 0
+    df_var.loc[df_var["VAR"].isna(), "REVISA"] = 2
+    df_var.loc[
+        df_var["VAR"].notna() & ((df_var["VAR"] >= 25.0) | (df_var["VAR"] <= -25.0)), "REVISA"
+    ] = 1
+    df_var.loc[df_var["VAR"].notna() & (df_var["VAR"] >= 100.0), "REVISA"] = 3
+    df_var = df_var[df_var["REVISA"] > 0]
+    orden_var = _DIAG_ORDEN_DUPLI[m] + ["REVISA"]
+    ruta = carpeta / f"{_VAR_ATIPICO_NOMBRES[m]}_{periodo}.xlsx"
+    n = _exportar_diag_hoja(
+        df_var, orden_var, col_map_dupli, m, mes_anterior_dupli, mes_actual,
+        ruta, _VAR_ATIPICO_NOMBRES[m],
+    )
+    metas.append({"tipo": "VAR_ATIPICO", "archivo": str(ruta), "filas": n})
+
+    for meta in metas:
+        log.info("exportar_diagnosticos [%s] OK | tipo=%s | archivo=%s | filas=%d",
+                  m, meta["tipo"], meta["archivo"], meta["filas"])
+
+    return pd.DataFrame([{"modulo": modulo, "periodo": periodo, **meta} for meta in metas])
 
 
 def exportar_cuadros(
@@ -568,6 +940,14 @@ _MES_A_NUM = {
 }
 _NUM_A_MES = {v: k for k, v in _MES_A_NUM.items()}
 
+# Abreviatura (ENE/FEB/...) → nombre completo en español, para encabezados
+# de DUPLI/VAR_ATIPICO ("Marzo", "Febrero") según la periodicidad del módulo.
+_ABBR_A_MES_LARGO: dict[str, str] = {
+    "ENE": "Enero", "FEB": "Febrero", "MAR": "Marzo", "ABR": "Abril",
+    "MAY": "Mayo", "JUN": "Junio", "JUL": "Julio", "AGO": "Agosto",
+    "SEP": "Septiembre", "OCT": "Octubre", "NOV": "Noviembre", "DIC": "Diciembre",
+}
+
 # Salto de períodos por módulo (cuántos meses entre período actual y anterior)
 _SALTO_MESES: dict[str, int] = {
     "AGRICOLAS": 1, "PECUARIOS": 1,
@@ -576,18 +956,31 @@ _SALTO_MESES: dict[str, int] = {
     "JORNALES": 3, "ESPECIES": 3,
 }
 
-# Nombre SAS de la columna Nombre_Publica según módulo (máx 31 chars para Excel)
+# Nombre SAS de la columna Nombre_Publica según módulo (máx 32 bytes para Excel/SAS)
 _NOMBRE_PUBLICA_SAS: dict[str, str] = {
     "AGRICOLAS":   "Nombre_productos_agrícolas_publ",
-    "PECUARIOS":   "Nombre_insumos_pecuarios_publ",
-    "ELEMENTOS":   "Nombre_elementos_agropecuarios_publ",
-    "EMPAQUES":    "Nombre_empaques_agropecuarios_publ",
-    "ARRIENDOS":   "Nombre_arriendos_publ",
-    "SERVICIOS":   "Nombre_servicios_publ",
+    "PECUARIOS":   "Nombre_productos_pecuarios_publi",
+    "ELEMENTOS":   "Nombre_productos_elementos_publi",
+    "EMPAQUES":    "Nombre_productos_empaques_publi",
+    "ARRIENDOS":   "Nombre_productos_arriendos_publi",
+    "SERVICIOS":   "Nombre_productos_servicios_publi",
     "PROPAGACION": "Nombre_material_propagacion_publ",
     "JORNALES":    "Nombre_jornales_publ",
     "ESPECIES":    "Nombre_especies_productivas_publ",
 }
+
+# Módulos con más de un Grupo — incluyen la columna "Grupo" en MAYORESQUE2/
+# MENORESQUE2/MAYMEN (para módulos de un solo grupo, SAS omite la columna
+# por ser un valor constante sin información adicional).
+_MULTI_GRUPO_MODULOS = {"AGRICOLAS", "PECUARIOS"}
+
+# Módulos tipo "caracte" que en SAS usan N_INFORMANTE en vez de N_FUENTE en
+# los reportes de revisión (MAYORESQUE2/MENORESQUE2/MAYMEN).
+_CARACTE_N_INFORMANTE = {"EMPAQUES", "ARRIENDOS", "SERVICIOS", "JORNALES", "ESPECIES"}
+
+# Módulos que SAS no incluye con columna "Codigo CPC" en BASES/ANEXO/
+# MAYORESQUE2/MENORESQUE2/MAYMEN.
+_SIN_CODIGO_CPC = {"ARRIENDOS", "SERVICIOS"}
 
 
 def _periodo_anterior_modulo(periodo: str, modulo: str) -> str:
@@ -610,15 +1003,16 @@ def _col_mayor2(mayor2: pd.DataFrame, modulo: str = "", periodo: str = "") -> di
     m = modulo.upper()
     col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
     sfx = f"_{periodo}" if periodo else ""
+    col_n_fuente = f"N_INFORMANTE{sfx}" if m in _CARACTE_N_INFORMANTE else f"N_FUENTE{sfx}"
     return {
         "CodigoDepto":          "CodigoDepto" if "CodigoDepto" in mayor2.columns else None,
         "NombreDepartamento":   "NombreDepartamento" if "NombreDepartamento" in mayor2.columns else None,
         "CodigoMpio":           col_divipola,
         "NombreMunicipio":      "NombreMunicipio" if "NombreMunicipio" in mayor2.columns else None,
-        "Codigo CPC":           "CÓDIGO CPC" if "CÓDIGO CPC" in mayor2.columns else None,
+        "Codigo CPC":           "CÓDIGO CPC" if "CÓDIGO CPC" in mayor2.columns and m not in _SIN_CODIGO_CPC else None,
         col_pub_sas:            "Nombre_Publica" if "Nombre_Publica" in mayor2.columns else None,
-        "Grupo":                "Grupo" if "Grupo" in mayor2.columns else None,
-        f"N_FUENTE{sfx}":       "N_FUENTE" if "N_FUENTE" in mayor2.columns else None,
+        "Grupo":                "Grupo" if "Grupo" in mayor2.columns and m in _MULTI_GRUPO_MODULOS else None,
+        col_n_fuente:           "N_FUENTE" if "N_FUENTE" in mayor2.columns else None,
         f"N_ARTICULOS{sfx}":    "N_ARTICULOS" if "N_ARTICULOS" in mayor2.columns else None,
         f"PRECIO_PROMEDIO{sfx}":"PRECIO_PROMEDIO" if "PRECIO_PROMEDIO" in mayor2.columns else None,
     }
@@ -693,9 +1087,11 @@ def exportar_mayo_menores(
     col_div = next((c for c in ["CÓDIGO DIVIPOLA", "CodigoMpio"] if c in union.columns), None)
     llave_join = [c for c in [col_div, "Nombre_Publica"] if c]
 
+    col_n_fuente = "N_INFORMANTE" if m in _CARACTE_N_INFORMANTE else "N_FUENTE"
+
     # Renombrar N del período actual antes del join para separar ambos períodos
     union = union.rename(columns={
-        "N_FUENTE":    f"N_FUENTE_{periodo}",
+        "N_FUENTE":    f"{col_n_fuente}_{periodo}",
         "N_ARTICULOS": f"N_ARTICULOS_{periodo}",
     })
 
@@ -712,7 +1108,7 @@ def exportar_mayo_menores(
                 cols_ant.append("N_ARTICULOS")
             ant = mayor2_anterior[cols_ant].rename(columns={
                 "PRECIO_PROMEDIO": f"PRECIO_PROMEDIO_{periodo_ant}",
-                "N_FUENTE":        f"N_FUENTE_{periodo_ant}",
+                "N_FUENTE":        f"{col_n_fuente}_{periodo_ant}",
                 "N_ARTICULOS":     f"N_ARTICULOS_{periodo_ant}",
             })
             union = union.merge(ant, left_on=llave_join, right_on=llave_ant, how="left")
@@ -748,10 +1144,12 @@ def exportar_mayo_menores(
 
     cols_maymen = [
         "CodigoDepto", "NombreDepartamento", "CodigoMpio", "NombreMunicipio", "Mercado",
-        "Codigo CPC", col_pub_sas, "Grupo",
-        f"N_FUENTE_{periodo_ant}", f"N_ARTICULOS_{periodo_ant}",
+        *(["Codigo CPC"] if m not in _SIN_CODIGO_CPC else []),
+        col_pub_sas,
+        *(["Grupo"] if m in _MULTI_GRUPO_MODULOS else []),
+        f"{col_n_fuente}_{periodo_ant}", f"N_ARTICULOS_{periodo_ant}",
         f"PRECIO_PROMEDIO_{periodo_ant}",
-        f"N_FUENTE_{periodo}", f"N_ARTICULOS_{periodo}",
+        f"{col_n_fuente}_{periodo}", f"N_ARTICULOS_{periodo}",
         col_precio_actual,
         "Variacion(%)", "Tendencia",
     ]

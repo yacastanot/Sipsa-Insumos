@@ -434,7 +434,7 @@ async def upload_spa(
 
     cfg     = _read_globals()
     periodo = str(cfg.get("periodo", "MAY2026"))
-    dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / "SIN_PRECIO_ANT"
+    dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"SIN_PRECIO_ANT {periodo}"
     dest_dir.mkdir(parents=True, exist_ok=True)
     contents = await file.read()
     dest_path = dest_dir / file.filename

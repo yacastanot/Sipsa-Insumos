@@ -42,12 +42,6 @@ jornales.base_comparada:
   save_args:
     index: false
 
-jornales.faltan_divipola:
-  type: pandas.ExcelDataset
-  filepath: data/08_reporting/${globals:periodo}/jornales/FALTAN_DIVIPOLA_JORNALES_${globals:periodo}.xlsx
-  save_args:
-    index: false
-    sheet_name: "FALTAN_DIVIPOLA"
 
 jornales.faltan_grupo:
   type: pandas.ExcelDataset
