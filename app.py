@@ -18,7 +18,9 @@ Sin Precio Anterior (sub-módulos):
   Bim. impar: Elementos
   Bim. par  : Propagación
 
-Credenciales: INSUMOS_USER / INSUMOS_PASS (por defecto sipsa / cambiar_esta_clave)
+Credenciales: INSUMOS_USER / INSUMOS_PASS, definidas en .env (ver .env.example).
+No hay valor por defecto — si .env no existe o falta alguna clave, arranca
+en error en vez de exponer un usuario/clave conocido.
 """
 from __future__ import annotations
 
@@ -34,6 +36,7 @@ import threading
 from datetime import date
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -44,6 +47,13 @@ from pydantic import BaseModel
 # ── Rutas del proyecto ────────────────────────────────────────────────────────
 
 PROJECT_ROOT  = Path(__file__).parent
+
+load_dotenv(PROJECT_ROOT / ".env")
+if not os.environ.get("INSUMOS_USER") or not os.environ.get("INSUMOS_PASS"):
+    raise RuntimeError(
+        "Faltan INSUMOS_USER / INSUMOS_PASS. Copie .env.example a .env "
+        "y complete las credenciales antes de iniciar la aplicación."
+    )
 CONF_DIR      = PROJECT_ROOT / "conf" / "base"
 GLOBALS_YML   = CONF_DIR / "globals.yml"
 PARAMS_YML    = CONF_DIR / "parameters.yml"
@@ -282,8 +292,8 @@ def _set_spa_activo(modulo_id: str, activo: bool) -> None:
 # ── Autenticación ─────────────────────────────────────────────────────────────
 
 def _check_auth(credentials: HTTPBasicCredentials = Depends(security)) -> str:
-    exp_user = os.environ.get("INSUMOS_USER", "sipsa")
-    exp_pass = os.environ.get("INSUMOS_PASS", "cambiar_esta_clave")
+    exp_user = os.environ["INSUMOS_USER"]
+    exp_pass = os.environ["INSUMOS_PASS"]
     ok = (
         secrets.compare_digest(credentials.username.encode(), exp_user.encode())
         and secrets.compare_digest(credentials.password.encode(), exp_pass.encode())

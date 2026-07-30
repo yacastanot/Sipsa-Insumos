@@ -1,20 +1,25 @@
 @echo off
 chcp 65001 >nul
-title SIPSA Insumos — App Web
+title SIPSA Insumos - App Web
 
 cd /d "%~dp0"
 
-:: Credenciales (modificar antes de usar en producción)
-set INSUMOS_USER=sipsa
-set INSUMOS_PASS=insumos2024
+if not exist ".env" (
+    echo [ERROR] No existe .env - copie .env.example a .env y complete las credenciales.
+    pause
+    exit /b 1
+)
 
-:: Puerto
+:: Puerto y credenciales se leen de .env (app.py hace load_dotenv)
 set PORT=8080
+for /f "usebackq tokens=1,2 delims==" %%A in (".env") do (
+    if "%%A"=="PORT" set PORT=%%B
+)
 
 echo ============================================================
-echo   SIPSA Insumos Agropecuarios — Interfaz Web
+echo   SIPSA Insumos Agropecuarios - Interfaz Web
 echo   http://localhost:%PORT%
-echo   Usuario: %INSUMOS_USER%
+echo   Credenciales: ver .env
 echo ============================================================
 echo.
 
@@ -25,7 +30,7 @@ if exist ".venv\Scripts\activate.bat" (
     call venv\Scripts\activate.bat
 )
 
-:: Verificar que uvicorn esté disponible
+:: Verificar que uvicorn este disponible
 uvicorn --version >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] uvicorn no encontrado. Ejecute: pip install uvicorn fastapi jinja2
