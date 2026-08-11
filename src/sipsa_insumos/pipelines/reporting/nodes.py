@@ -22,9 +22,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from openpyxl import Workbook
 
 from sipsa_insumos.pipelines.quality.nodes import _LLAVE_DUPLICADOS
-from sipsa_insumos.utils.excel_writer import aplicar_formato_numerico_precio, escribir_excel_multisheet
+from sipsa_insumos.utils.excel_writer import (
+    escribir_excel_multisheet,
+    escribir_hoja_pivot_cpc,
+)
 
 log = logging.getLogger(__name__)
 
@@ -207,21 +211,38 @@ def exportar_tablas(
             continue
 
         pivot = (
-            df_grupo.groupby(["Nombre_Publica", "TENDENCIA"], observed=True)
+            df_grupo.groupby(["CÓDIGO CPC", "Nombre_Publica", "TENDENCIA"], observed=True)
             .size()
             .unstack(fill_value=0)
             .reset_index()
         )
-        # Asegurar que todas las columnas de tendencia existen
         for tend in ["Positiva", "Negativa", "Estable", "n.d."]:
             if tend not in pivot.columns:
                 pivot[tend] = 0
-        cols_orden = ["Nombre_Publica"] + [c for c in ["Positiva", "Negativa", "Estable", "n.d."] if c in pivot.columns]
-        pivot = pivot[cols_orden]
-        pivot["TOTAL"] = pivot[["Positiva", "Negativa", "Estable", "n.d."]].sum(axis=1)
+        pivot["Total"] = pivot[["Positiva", "Negativa", "Estable", "n.d."]].sum(axis=1)
+        pivot["_cpc_sort"] = pd.to_numeric(pivot["CÓDIGO CPC"], errors="coerce")
+        pivot = pivot.sort_values(["_cpc_sort", "Nombre_Publica"], na_position="last").drop(columns=["_cpc_sort"])
         hojas[grupo] = pivot
 
-    escribir_excel_multisheet(ruta, hojas)
+    wb = Workbook()
+    wb.remove(wb.active)
+    for nombre_hoja, df_hoja in hojas.items():
+        ws = wb.create_sheet(title=nombre_hoja)
+        if df_hoja.empty:
+            continue
+        escribir_hoja_pivot_cpc(
+            ws,
+            df_hoja,
+            cpc_col="CÓDIGO CPC",
+            prod_col="Nombre_Publica",
+            metric_cols=["Positiva", "Negativa", "Estable", "n.d.", "Total"],
+            sub_headers=["1.Positiva", "2.Negativa", "3.Estable", "4.n.d.", "Total"],
+            grupos_header=[("Tendencia_mod", 4)],
+            cols_punto_si_cero={"Positiva", "Negativa", "Estable", "n.d."},
+            cols_numero={"Total"},
+            total_label="Total",
+        )
+    wb.save(str(ruta))
 
     filas_totales = sum(len(df) for df in hojas.values())
     log.info("exportar_tablas [%s] OK | archivo=%s | hojas=%d | filas=%d",
@@ -788,30 +809,35 @@ def exportar_cuadros(
         )
 
         cuadro = conteo.merge(precios, on=["CÓDIGO CPC", "Nombre_Publica"], how="left")
-        cuadro = cuadro.rename(columns={
-            "Nombre_Publica": "Producto",
-            "Positiva": "SUBIO",
-            "Negativa": "BAJO",
-            "Estable": "ESTABLE",
-            "n.d.": "N.D.",
-        })
-
-        cols_orden = ["CÓDIGO CPC", "Producto", "SUBIO", "BAJO", "ESTABLE", "N.D.", "PRECIO_MIN", "PRECIO_MAX"]
-        cols_existentes = [c for c in cols_orden if c in cuadro.columns]
-        cuadro = cuadro[cols_existentes].sort_values("Producto")
+        cuadro = cuadro.rename(columns={"Nombre_Publica": "Producto"})
+        # SAS combina Estable + n.d. en una sola columna "Estable-n.d." y
+        # antepone "N" = total de mercados (Positiva+Negativa+Estable+n.d.)
+        cuadro["N"] = cuadro["Positiva"] + cuadro["Negativa"] + cuadro["Estable"] + cuadro["n.d."]
+        cuadro["ESTABLE_ND"] = cuadro["Estable"] + cuadro["n.d."]
+        cuadro = cuadro.rename(columns={"Positiva": "SUBIO", "Negativa": "BAJO"})
+        cuadro["_cpc_sort"] = pd.to_numeric(cuadro["CÓDIGO CPC"], errors="coerce")
+        cuadro = cuadro.sort_values(["_cpc_sort", "Producto"], na_position="last").drop(columns=["_cpc_sort"])
         hojas[grupo] = cuadro
 
-    # Escribir con formato numérico en columnas de precio
-    Path(ruta).parent.mkdir(parents=True, exist_ok=True)
-    with pd.ExcelWriter(str(ruta), engine="openpyxl") as writer:
-        for nombre_hoja, df_hoja in hojas.items():
-            df_hoja.to_excel(writer, sheet_name=nombre_hoja, index=False)
-            ws = writer.sheets[nombre_hoja]
-            # Aplicar formato de precio a PRECIO_MIN y PRECIO_MAX
-            for col_name in ["PRECIO_MIN", "PRECIO_MAX"]:
-                if col_name in df_hoja.columns:
-                    col_idx = list(df_hoja.columns).index(col_name) + 1
-                    aplicar_formato_numerico_precio(ws, col_idx, len(df_hoja))
+    wb = Workbook()
+    wb.remove(wb.active)
+    for nombre_hoja, df_hoja in hojas.items():
+        ws = wb.create_sheet(title=nombre_hoja)
+        if df_hoja.empty:
+            continue
+        escribir_hoja_pivot_cpc(
+            ws,
+            df_hoja,
+            cpc_col="CÓDIGO CPC",
+            prod_col="Producto",
+            metric_cols=["N", "SUBIO", "BAJO", "ESTABLE_ND", "PRECIO_MIN", "PRECIO_MAX"],
+            sub_headers=["N", "Subió", "Bajó", "Estable-n.d.", "Min", "Max"],
+            grupos_header=[("TOTAL", 1), ("MERCADOS", 3), (f"PRECIO DE {periodo}", 2)],
+            cols_punto_si_cero={"SUBIO", "BAJO", "ESTABLE_ND"},
+            cols_numero={"N"},
+            total_label="TOTAL",
+        )
+    wb.save(str(ruta))
 
     filas_totales = sum(len(df) for df in hojas.values())
     log.info("exportar_cuadros [%s] OK | archivo=%s | hojas=%d | filas=%d",

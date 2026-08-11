@@ -55,6 +55,12 @@ _COLS_CV_CONTEXTO = [
     "NombreDepartamento", "NombreMunicipio", "CÓDIGO CPC", "Grupo",
 ]
 
+# Módulos cuyo reporte de CVs en SAS NO incluye la columna "Grupo" (son de un
+# solo grupo — el valor sería redundante) y nombra la columna de coeficiente
+# "CV_{periodo}" en vez de "CV_Porcentaje_{periodo}". Confirmado contra SAS
+# JUL2026 para ELEMENTOS/EMPAQUES; agricolas/pecuarios sí usan Grupo + Porcentaje.
+_MODULOS_CV_SIN_GRUPO = {"ELEMENTOS", "EMPAQUES"}
+
 
 def detectar_duplicados(
     base_enriquecida: pd.DataFrame,
@@ -108,8 +114,15 @@ def calcular_cv(
         (base_con_cv, cvs_reporte): base original con columna 'CV' agregada +
             DataFrame del reporte de CVs con nombres de columna SAS.
     """
+    m = modulo.upper()
+    cols_contexto_modulo = (
+        [c for c in _COLS_CV_CONTEXTO if c != "Grupo"]
+        if m in _MODULOS_CV_SIN_GRUPO
+        else _COLS_CV_CONTEXTO
+    )
+
     llave_cv = [c for c in _LLAVE_CV if c in base_sin_dupli.columns]
-    cols_contexto = [c for c in _COLS_CV_CONTEXTO if c in base_sin_dupli.columns]
+    cols_contexto = [c for c in cols_contexto_modulo if c in base_sin_dupli.columns]
     llave_completa = llave_cv + [c for c in cols_contexto if c not in llave_cv]
 
     agg = (
@@ -141,8 +154,8 @@ def calcular_cv(
 
     # Renombrar columnas del reporte para que coincidan con SAS
     sfx = f"_{periodo}" if periodo else ""
-    m = modulo.upper()
     col_pub_sas = _NOMBRE_PUBLICA_SAS.get(m, "Nombre_Publica")
+    col_cv_sas = f"CV{sfx}" if m in _MODULOS_CV_SIN_GRUPO else f"CV_Porcentaje{sfx}"
     rename_agg: dict[str, str] = {}
     if "CÓDIGO DIVIPOLA" in agg.columns:
         rename_agg["CÓDIGO DIVIPOLA"] = "CodigoMpio"
@@ -155,7 +168,7 @@ def calcular_cv(
         "MIN":             f"Min{sfx}",
         "MAX":             f"Max{sfx}",
         "PRECIO_PROMEDIO_CV": f"Promedio{sfx}",
-        "CV":              f"CV_Porcentaje{sfx}",
+        "CV":              col_cv_sas,
     })
     agg_out = agg.rename(columns=rename_agg)
 
