@@ -175,8 +175,11 @@ def leer_base_completa(
         tipo_llave: "unmed" o "casacom_ica_unmed" — igual que leer_base_liviana,
                     para construir LLAVE_ARTICULO y poder cruzar Grupo/Nombre_Publica.
     """
+    # Solo las celdas vacías son faltantes: textos como "NA" o "N/A" (p.ej. en
+    # Registro ICA de Elementos) se conservan tal cual, igual que PROC IMPORT de SAS.
     df = pd.read_excel(
         archivo_liviana, sheet_name=hoja_liviana, header=0, dtype=_DTYPE_EXCEL,
+        keep_default_na=False, na_values=[""],
     )
     rename_map = _RENAME_CARACTE if tipo_modulo == "caracte" else _RENAME_ESTANDAR
     df = df.rename(columns={**rename_map, **_RENAME_QA_EXTRA})

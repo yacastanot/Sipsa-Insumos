@@ -43,7 +43,7 @@ from .pipelines.quality.pipeline import create_pipeline as quality
 from .pipelines.aggregation.pipeline import create_pipeline as aggregation
 from .pipelines.comparison.pipeline import create_pipeline as comparison
 from .pipelines.reporting.pipeline import create_pipeline as reporting
-from .pipelines.reporting.nodes import exportar_base_insumos, exportar_diagnosticos
+from .pipelines.reporting.nodes import exportar_base_insumos, exportar_diagnosticos, exportar_revisiones
 from .pipelines.sin_precio_ant.pipeline import (
     create_pipeline as sin_precio_ant,
     create_pipeline_agricolas as sin_precio_ant_agricolas,
@@ -54,11 +54,15 @@ from .pipelines.sin_precio_ant.pipeline import (
 
 # Módulos con BASE_INSUMOS_{MODULO}_{PERIODO}.xlsx implementado (réplica SAS
 # con Precio Ante. embebido por fila). Se amplía módulo por módulo tras validar.
-MODULOS_BASE_INSUMOS = ["agricolas"]
+MODULOS_BASE_INSUMOS = [
+    "agricolas", "pecuarios", "elementos", "empaques",
+    "arriendos", "servicios", "propagacion", "jornales", "especies",
+]
 
 # Módulos con FALTAN_GRUPO/FALTAN_PUBLICA/DUPLI/VAR_ATIPICO implementados con
 # la misma lógica fila-por-fila que BASE_INSUMOS (ver exportar_diagnosticos).
-MODULOS_DIAGNOSTICOS = ["agricolas", "pecuarios", "elementos", "empaques", "arriendos", "servicios"]
+MODULOS_DIAGNOSTICOS = ["agricolas", "pecuarios", "elementos", "empaques", "arriendos", "servicios",
+                        "propagacion", "jornales", "especies"]
 
 MODULOS = [
     "agricolas",
@@ -111,6 +115,17 @@ def _pipeline_base_insumos(nombre: str) -> Pipeline:
                 ],
                 outputs="base_insumos_meta",
                 name="exportar_base_insumos",
+            ),
+            node(
+                func=exportar_revisiones,
+                inputs=[
+                    "base_completa", "divipola_raw",
+                    "mappings_grupos_actualizado", "mappings_articulos_actualizado",
+                    "params:modulo", "params:periodo", "params:mes_actual", "params:mes_anterior",
+                    "params:ruta_reporting",
+                ],
+                outputs="revision_hist_meta",
+                name="exportar_revisiones",
             ),
         ]),
         namespace=nombre,
@@ -186,7 +201,7 @@ def _pipeline_modulo(nombre: str) -> Pipeline:
         + pipeline(
             reporting(),
             namespace=nombre,
-            parameters={"periodo", "ruta_reporting", "mes_actual", "mes_anterior", "mes_num_actual"},
+            parameters={"periodo", "ruta_reporting", "mes_actual", "mes_anterior"},
             tags=[nombre],
           )
     )

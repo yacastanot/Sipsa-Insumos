@@ -35,7 +35,8 @@ class TestCalcularCV:
             "PRECIO": [100.0, 110.0, 90.0, 100.0],
         })
         base_con_cv, cvs = calcular_cv(df)
-        cv_calculado = cvs["CV"].iloc[0]
+        # El reporte usa el nombre de columna SAS (CV_Porcentaje[_{periodo}]).
+        cv_calculado = cvs["CV_Porcentaje"].iloc[0]
         std = pd.Series([100.0, 110.0, 90.0, 100.0]).std()
         mean = 100.0
         cv_esperado = std / mean * 100
@@ -48,7 +49,7 @@ class TestCalcularCV:
             "PRECIO": [100.0],
         })
         _, cvs = calcular_cv(df)
-        assert pd.isna(cvs["CV"].iloc[0])
+        assert pd.isna(cvs["CV_Porcentaje"].iloc[0])
 
     def test_agrega_columna_cv(self, base_enriquecida_minimal):
         base_con_cv, _ = calcular_cv(base_enriquecida_minimal)

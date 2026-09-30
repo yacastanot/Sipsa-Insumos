@@ -59,17 +59,29 @@ def calcular_precio_promedio(base_calidad: pd.DataFrame) -> pd.DataFrame:
     # Para mantener las columnas DIVIPOLA en el resultado agrupado
     llave_completa = llave + [c for c in cols_divipola if c not in llave]
 
-    agg = (
-        base_calidad.groupby(llave_completa, dropna=False)["PRECIO"]
-        .agg(
-            N_FUENTE=lambda x: x.notna().sum(),
-            N_ARTICULOS="count",
-            PRECIO_PROMEDIO="mean",
-            PRECIO_MIN="min",
-            PRECIO_MAX="max",
-        )
-        .reset_index()
-    )
+    # SAS: N_FUENTE = COUNT(DISTINCT Fuente) y, en módulos caracte,
+    # N_INFORMANTE = COUNT(DISTINCT Informante) — no el número de precios
+    # (eso es N_ARTICULOS). Verificado contra MAYORESQUE2/MAY_MEN de SAS.
+    con_precio = base_calidad[base_calidad["PRECIO"].notna()]
+    aggs = {
+        "N_ARTICULOS": ("PRECIO", "count"),
+        "PRECIO_PROMEDIO": ("PRECIO", "mean"),
+        "PRECIO_MIN": ("PRECIO", "min"),
+        "PRECIO_MAX": ("PRECIO", "max"),
+    }
+    if "FUENTE" in con_precio.columns:
+        aggs["N_FUENTE"] = ("FUENTE", "nunique")
+    if "INFORMANTE" in con_precio.columns:
+        aggs["N_INFORMANTE"] = ("INFORMANTE", "nunique")
+    agg = con_precio.groupby(llave_completa, dropna=False).agg(**aggs).reset_index()
+    if "N_FUENTE" not in agg.columns:
+        agg["N_FUENTE"] = agg["N_ARTICULOS"]
+    orden = ["N_FUENTE", *(["N_INFORMANTE"] if "N_INFORMANTE" in agg.columns else []),
+             "N_ARTICULOS", "PRECIO_PROMEDIO", "PRECIO_MIN", "PRECIO_MAX"]
+    agg = agg[llave_completa + orden]
+    # SAS: PRECIO_PROMEDIO=round(SUM/N_ARTICULOS, 0.0000001). Redondear evita
+    # variaciones de ~1e-10 que cambian la tendencia de "Estable" a +/-.
+    agg["PRECIO_PROMEDIO"] = agg["PRECIO_PROMEDIO"].round(7)
 
     # Reasignar CÓDIGO CPC: CPC más frecuente por Nombre_Publica
     if "CÓDIGO CPC" in base_calidad.columns and "Nombre_Publica" in base_calidad.columns:
@@ -91,6 +103,7 @@ def calcular_precio_promedio(base_calidad: pd.DataFrame) -> pd.DataFrame:
 def aplicar_secreto_estadistico(
     precio_promedio: pd.DataFrame,
     min_n: int = 2,
+    cpc_publicar_siempre: list | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Aplica el criterio de secreto estadístico (N_ARTICULOS >= min_n).
 
@@ -98,15 +111,31 @@ def aplicar_secreto_estadistico(
       IF N_ARTICULOS >= 2 THEN OUTPUT MAYOR2; (agricolas/pecuarios/elementos)
       IF N_ARTICULOS >= 1 THEN OUTPUT MAYOR2; (arriendos/servicios/empaques)
 
+    Los productos cuyo Código CPC está en cpc_publicar_siempre se publican
+    aunque tengan una sola observación (Material AGO2026: semilla de arroz
+    Fedearroz, CPC 113101). Quedan marcados en PUBLICA_SIEMPRE para que el
+    reporte los escriba primero, como el SET de SAS.
+
     Args:
         precio_promedio: DataFrame del nodo calcular_precio_promedio.
         min_n: Mínimo de fuentes para publicar (2 para secreto estadístico, 1 sin secreto).
+        cpc_publicar_siempre: Códigos CPC exentos del secreto estadístico.
 
     Returns:
         (mayor2, menor2): publicables + bajo umbral.
     """
-    mayor2 = precio_promedio[precio_promedio["N_ARTICULOS"] >= min_n].copy()
-    menor2 = precio_promedio[precio_promedio["N_ARTICULOS"] < min_n].copy()
+    # Comparación numérica: la base guarda el CPC con ceros a la izquierda ("0113101").
+    cpcs = {int(c) for c in (cpc_publicar_siempre or [])}
+    siempre = (
+        pd.to_numeric(precio_promedio["CÓDIGO CPC"], errors="coerce").isin(cpcs)
+        if cpcs and "CÓDIGO CPC" in precio_promedio.columns
+        else pd.Series(False, index=precio_promedio.index)
+    )
+    publicable = (precio_promedio["N_ARTICULOS"] >= min_n) | siempre
+    mayor2 = precio_promedio[publicable].copy()
+    menor2 = precio_promedio[~publicable].copy()
+    if cpcs:
+        mayor2["PUBLICA_SIEMPRE"] = siempre[publicable].values
 
     log.info(
         "aplicar_secreto_estadistico OK | publicables(N>=%d)=%d | secreto=%d",

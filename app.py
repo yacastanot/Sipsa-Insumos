@@ -95,16 +95,20 @@ MODULOS: list[dict] = [
 SPA_MODULOS: list[dict] = [
     {"id": "agricolas",   "label": "Insumos Agrícolas",       "meses": list(range(1, 13)),
      "file_hist": "Ins_Agrícolas para revisiones.xlsx",
-     "file_var":  "VAR_ATIPICO_AGRICOLA_{PERIODO}.XLSX"},
+     "file_var":  "VAR_ATIPICO_AGRICOLA_{PERIODO}.XLSX",
+     "var_pipeline": "agricolas/VAR_ATIPICO_AGRICOLA_{PERIODO}.xlsx"},
     {"id": "pecuarios",   "label": "Insumos Pecuarios",       "meses": list(range(1, 13)),
      "file_hist": "Ins_Pecuarios para revisiones.xlsx",
-     "file_var":  "VAR_ATIPICO_PECUARIO_{PERIODO}.XLSX"},
+     "file_var":  "VAR_ATIPICO_PECUARIO_{PERIODO}.XLSX",
+     "var_pipeline": "pecuarios/VAR_ATIPICO_PECUARIO_{PERIODO}.xlsx"},
     {"id": "elementos",   "label": "Elementos Agropecuarios", "meses": [1, 3, 5, 7, 9, 11],
      "file_hist": "Elementos para revisiones.xlsx",
-     "file_var":  "VAR_ATIPICO_ELEMENTOS_{PERIODO}.XLSX"},
+     "file_var":  "VAR_ATIPICO_ELEMENTOS_{PERIODO}.XLSX",
+     "var_pipeline": "elementos/VAR_ATIPICO_ELEMENTOS_{PERIODO}.xlsx"},
     {"id": "propagacion", "label": "Material de Propagación", "meses": [2, 4, 6, 8, 10, 12],
      "file_hist": "Material_propag para revisiones.xlsx",
-     "file_var":  "VAR_ATIPICO_MATERIAL_{PERIODO}.XLSX"},
+     "file_var":  "VAR_ATIPICO_MATERIAL_{PERIODO}.XLSX",
+     "var_pipeline": "propagacion/VAR_ATIPICO_MATERIAL_{PERIODO}.xlsx"},
 ]
 
 
@@ -207,8 +211,9 @@ def _write_config(mes_num: int, anio: int) -> dict:
         p = _set_int(p, k, v)
     PARAMS_YML.write_text(p, encoding="utf-8")
 
-    # Actualizar flags 'activo' en parameters_sin_precio_ant.yml
+    # Actualizar flags 'activo' y rutas del período en parameters_sin_precio_ant.yml
     _update_spa_activos(mes_num)
+    _reset_spa_rutas(periodo)
 
     return {
         "ok":              True,
@@ -220,25 +225,66 @@ def _write_config(mes_num: int, anio: int) -> dict:
     }
 
 
-def _update_archivo_liviana(modulo_id: str, periodo: str, filename: str) -> None:
+def _read_param_ruta(modulo_id: str, campo: str) -> str | None:
+    """Lee el valor de `campo` en parameters_{modulo_id}.yml (None si no existe)."""
+    params_file = CONF_DIR / f"parameters_{modulo_id}.yml"
+    if not params_file.exists():
+        return None
+    m = re.search(rf'^\s+{re.escape(campo)}:\s*"([^"]*)"',
+                  params_file.read_text(encoding="utf-8"), flags=re.MULTILINE)
+    return m.group(1) if m else None
+
+
+def _update_param_ruta(modulo_id: str, campo: str, new_path: str) -> None:
     params_file = CONF_DIR / f"parameters_{modulo_id}.yml"
     if not params_file.exists():
         return
-    new_path = f"data/01_raw/{periodo}/BASES LIVIANAS {periodo}/{filename}"
-    text = params_file.read_text(encoding="utf-8")
+    # newline="" conserva los fin de línea originales del YAML (LF).
+    with open(params_file, encoding="utf-8", newline="") as f:
+        text = f.read()
     text = re.sub(
-        r'^(\s+archivo_liviana:\s*)"[^"]*"',
-        rf'\1"{new_path}"',
+        rf'^([ \t]+{re.escape(campo)}:[ \t]*)"[^"]*"',
+        lambda m: f'{m.group(1)}"{new_path}"',
         text, flags=re.MULTILINE,
     )
-    params_file.write_text(text, encoding="utf-8")
+    with open(params_file, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
+def _update_archivo_liviana(modulo_id: str, periodo: str, filename: str) -> None:
+    new_path = f"data/01_raw/{periodo}/BASES LIVIANAS {periodo}/{filename}"
+    _update_param_ruta(modulo_id, "archivo_liviana", new_path)
+
+
+def _update_archivo_divipola(modulo_id: str, periodo: str, filename: str) -> None:
+    # Módulos caracte tienen archivo_divipola_grupos "" (no soportado por
+    # actualizar_mappings_divipola) — no se les asigna ruta.
+    if not _read_param_ruta(modulo_id, "archivo_divipola_grupos"):
+        return
+    new_path = f"data/01_raw/{periodo}/DIVIPOLA {periodo}/{filename}"
+    _update_param_ruta(modulo_id, "archivo_divipola_grupos", new_path)
+
+
+def _rutas_desactualizadas(modulo_id: str, periodo: str) -> list[str]:
+    """Rutas de insumos del módulo que no apuntan a data/01_raw/{periodo}/.
+
+    Una DIVIPOLA de otro mes no trae los insumos nuevos del período y deja
+    filas en FALTAN_GRUPO / FALTAN_PUBLICA.
+    """
+    problemas = []
+    for campo in ("archivo_liviana", "archivo_divipola_grupos"):
+        ruta = _read_param_ruta(modulo_id, campo)
+        if ruta and f"data/01_raw/{periodo}/" not in ruta.replace("\\", "/"):
+            problemas.append(f"{campo} = {ruta}")
+    return problemas
 
 
 def _update_spa_ruta(modulo_id: str, campo: str, nuevo_path: str) -> None:
     """Actualiza ruta_historico o ruta_var_atipico en parameters_sin_precio_ant.yml."""
     if not SPA_PARAMS.exists():
         return
-    text = SPA_PARAMS.read_text(encoding="utf-8")
+    with open(SPA_PARAMS, encoding="utf-8", newline="") as f:
+        text = f.read()
     # Reemplaza dentro del bloque del módulo: busca `    campo: "..."` bajo `  modulo_id:`
     # Usamos un approach de sección: encontramos la sección del módulo y cambiamos el campo
     lines = text.splitlines(keepends=True)
@@ -257,10 +303,74 @@ def _update_spa_ruta(modulo_id: str, campo: str, nuevo_path: str) -> None:
             if indent <= depth and stripped and not stripped.startswith("#"):
                 in_section = False
             elif re.match(rf'\s+{re.escape(campo)}:\s*"', line):
-                line = re.sub(r'"[^"]*"', f'"{nuevo_path}"', line)
+                line = re.sub(r'"[^"]*"', lambda _m: f'"{nuevo_path}"', line, count=1)
                 in_section = False  # reemplazado, salir de la sección
         new_lines.append(line)
-    SPA_PARAMS.write_text("".join(new_lines), encoding="utf-8")
+    with open(SPA_PARAMS, "w", encoding="utf-8", newline="") as f:
+        f.write("".join(new_lines))
+
+
+def _read_spa_ruta(modulo_id: str, campo: str) -> str | None:
+    """Lee ruta_historico / ruta_var_atipico del bloque del módulo en SPA_PARAMS."""
+    if not SPA_PARAMS.exists():
+        return None
+    m = re.search(
+        rf'^  {re.escape(modulo_id)}:.*?^\s+{re.escape(campo)}:\s*"([^"]*)"',
+        SPA_PARAMS.read_text(encoding="utf-8"), flags=re.MULTILINE | re.DOTALL,
+    )
+    return m.group(1) if m else None
+
+
+def _spa_rutas_default(mod: dict, periodo: str) -> dict[str, str]:
+    """Rutas por defecto de un sub-módulo SPA para el período.
+
+    ruta_historico: el Excel "para revisiones" cargado en SIN_PRECIO_ANT {periodo}/.
+    ruta_var_atipico: el VAR_ATIPICO que genera el propio pipeline del módulo
+    (si se carga uno externo desde la app, la carga lo reemplaza).
+    """
+    root = str(PROJECT_ROOT).replace("\\", "/")
+    return {
+        "ruta_historico":   f"{root}/data/01_raw/{periodo}/SIN_PRECIO_ANT {periodo}/{mod['file_hist']}",
+        "ruta_var_atipico": f"{root}/data/08_reporting/{periodo}/"
+                            + mod["var_pipeline"].replace("{PERIODO}", periodo),
+    }
+
+
+def _reset_spa_rutas(periodo: str) -> None:
+    """Al cambiar de período, apunta las rutas SPA al período nuevo."""
+    for mod in SPA_MODULOS:
+        for campo, ruta in _spa_rutas_default(mod, periodo).items():
+            _update_spa_ruta(mod["id"], campo, ruta)
+
+
+def _spa_rutas_problemas(modulo_id: str, periodo: str) -> list[str]:
+    """Rutas SPA del módulo que no son del período o cuyo archivo no existe."""
+    problemas = []
+    for campo in ("ruta_historico", "ruta_var_atipico"):
+        ruta = _read_spa_ruta(modulo_id, campo)
+        if not ruta:
+            continue
+        # Rutas con ${globals:periodo} se resuelven al período activo.
+        ruta_res = ruta.replace("${globals:periodo}", periodo).replace("\\", "/")
+        if f"/{periodo}/" not in ruta_res:
+            problemas.append(f"{campo} es de otro período: {ruta}")
+        elif not Path(ruta_res).exists():
+            problemas.append(f"{campo} no existe: {ruta_res}")
+    return problemas
+
+
+def _spa_activos_config() -> list[str]:
+    """Sub-módulos SPA con activo: true en SPA_PARAMS."""
+    if not SPA_PARAMS.exists():
+        return []
+    text = SPA_PARAMS.read_text(encoding="utf-8")
+    activos = []
+    for mod in SPA_MODULOS:
+        m = re.search(rf'^  {re.escape(mod["id"])}:.*?activo:\s*(true|false)',
+                      text, flags=re.MULTILINE | re.DOTALL)
+        if m and m.group(1) == "true":
+            activos.append(mod["id"])
+    return activos
 
 
 def _update_spa_activos(mes_num: int) -> None:
@@ -400,6 +510,8 @@ async def upload_divipola(
     # El maestro DIVIPOLA.xlsx tiene ruta fija en el catalog — se normaliza el nombre.
     filename = "DIVIPOLA.xlsx" if tipo == "master" else file.filename
     (dest_dir / filename).write_bytes(contents)
+    if tipo != "master":
+        _update_archivo_divipola(tipo, periodo, filename)
     return {"ok": True, "filename": filename, "tipo": tipo,
             "size_kb": round(len(contents) / 1024, 1)}
 
@@ -540,6 +652,16 @@ async def run_pipeline(
                     cfg     = _read_globals()
                     mes_num = int(cfg.get("mes_num_actual", 5))
                     activos = modulos_activos(mes_num)
+                periodo = str(_read_globals().get("periodo", ""))
+                desactualizados = {m: p for m in activos if (p := _rutas_desactualizadas(m, periodo))}
+                if desactualizados:
+                    line_queue.put(f"✖ Hay insumos que no corresponden a {periodo}. "
+                                   "Cargue la base liviana / DIVIPOLA del período:")
+                    for mod, problemas in desactualizados.items():
+                        for p in problemas:
+                            line_queue.put(f"   {mod.upper()}: {p}")
+                    line_queue.put(("__DONE__", "insumos de otro período"))
+                    return
                 for mod in activos:
                     rc = _run_one(
                         [sys.executable, "-m", "kedro", "run", "--pipeline", mod],
@@ -550,6 +672,20 @@ async def run_pipeline(
                         return
                 line_queue.put(("__DONE__", 0))
             else:
+                if pipeline_name.startswith("sin_precio_ant"):
+                    periodo = str(_read_globals().get("periodo", ""))
+                    sufijo  = pipeline_name.removeprefix("sin_precio_ant").lstrip("_")
+                    spa_ids = [sufijo] if sufijo else _spa_activos_config()
+                    problemas = {m: p for m in spa_ids if (p := _spa_rutas_problemas(m, periodo))}
+                    if problemas:
+                        line_queue.put(f"✖ Insumos de Sin Precio Anterior no listos para {periodo}. "
+                                       "Cargue el histórico / VAR_ATIPICO del período "
+                                       "o corra primero el módulo correspondiente:")
+                        for mod, lista in problemas.items():
+                            for p in lista:
+                                line_queue.put(f"   {mod.upper()}: {p}")
+                        line_queue.put(("__DONE__", "insumos SPA de otro período"))
+                        return
                 cmd = [sys.executable, "-m", "kedro", "run"]
                 if pipeline_name != "__default__":
                     cmd += ["--pipeline", pipeline_name]

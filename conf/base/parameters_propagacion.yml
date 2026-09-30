@@ -1,10 +1,11 @@
 propagacion:
   modulo: "PROPAGACION"
-  archivo_liviana: "data/01_raw/JUN2026/BASES LIVIANAS JUN2026/Material de Propagación jun 2026.xlsx"
+  archivo_liviana: "data/01_raw/AGO2026/BASES LIVIANAS AGO2026/Material de Propagación ago 2026.xlsx"
   hoja_liviana: "Información Insumos"
-  archivo_divipola_grupos: "data/01_raw/JUN2026/DIVIPOLA JUN2026/divipola material propagación jun 2026.xlsx"
+  archivo_divipola_grupos: "data/01_raw/AGO2026/DIVIPOLA AGO2026/divipola material propagación ago 2026.xlsx"
   tipo_modulo: "estandar"
-  tipo_llave: "unmed"
+  tipo_llave: "casacom_ica_unmed"   # SAS asigna el nombre por la hoja de llave completa (DivArt), la corta se repite
   min_n: 2
+  cpc_publicar_siempre: ["113101"]   # SAS publica la semilla de arroz Fedearroz aunque N_ARTICULOS=1
   grupos:
     - "MATERIAL DE PROPAGACION"

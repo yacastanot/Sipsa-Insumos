@@ -44,17 +44,21 @@ def actualizar_mappings_divipola(
     mappings_articulos: dict,
     modulo: str,
 ) -> tuple[dict, dict]:
-    """Agrega al mapping las entradas nuevas del DIVIPOLA propio del módulo.
+    """Actualiza el mapping con el DIVIPOLA propio del módulo del período.
 
     Lee la hoja 'Articulo' (Grupo, Nombre_Publica) y, si existe, la hoja
     'Grupo' del archivo DIVIPOLA {modulo} {periodo}.xlsx (columna compuesta
     Art_Unmed_Casacomer_ICA o Art_Casacomer_ICA_Unmed), reconstruye la
     LLAVE_ARTICULO con la misma lógica que usa el pipeline al leer la base
-    liviana, y agrega las claves que todavía no existan en
-    mappings_grupos.yml / mappings_articulos.yml — sin tocar ni sobreescribir
-    las ya existentes. Los cambios quedan tanto en memoria (para que el
-    resto de este mismo pipeline los use de inmediato) como persistidos en
-    disco (para las próximas ejecuciones).
+    liviana, y la registra en mappings_grupos.yml / mappings_articulos.yml.
+
+    El DIVIPOLA del período manda, igual que en SAS (que cruza siempre contra
+    el DIVIPOLA del mes): las llaves nuevas se agregan y las existentes cuyo
+    nombre o grupo cambió se actualizan (p.ej. "Destierro Sl" → "Destierro
+    150 Sl"). Las llaves que el DIVIPOLA no trae se conservan. Dentro del
+    mismo archivo, si una llave aparece repetida, gana la primera aparición.
+    Los cambios quedan tanto en memoria (para que el resto de este mismo
+    pipeline los use de inmediato) como persistidos en disco.
 
     Args:
         archivo_divipola_grupos: Ruta al DIVIPOLA propio del módulo.
@@ -84,46 +88,77 @@ def actualizar_mappings_divipola(
 
     nuevos_grupos = 0
     nuevos_articulos = 0
+    cambiados_grupos = 0
+    cambiados_articulos = 0
+    vistos_art: set[str] = set()
+    vistos_grp: set[str] = set()
 
+    def _registrar(dic: dict, vistos: set, llave: str, valor: str) -> str | None:
+        """Registra valor; devuelve 'nuevo', 'cambio' o None."""
+        if llave in vistos:
+            return None
+        vistos.add(llave)
+        if llave not in dic:
+            dic[llave] = valor
+            return "nuevo"
+        if dic[llave] != valor:
+            dic[llave] = valor
+            return "cambio"
+        return None
+
+    # Hojas con nombre de publicación: "Articulo" y, además, cualquier hoja con
+    # llave completa (p.ej. "DivArt_jun2026" de Material, Art_Casacomer_ICA_Unmed).
+    # Con tipo_llave "casacom_ica_unmed" solo sirven las hojas de llave completa:
+    # la llave corta Articulo_UnMed puede repetirse con nombres distintos
+    # (Material JUN2026: "Pasto Brachiaria Decumbens_BOLSA|KILOGRAMO|1").
     hoja_articulo = _hoja_case_insensitive(hojas, ["Articulo", "Artículo"])
-    if hoja_articulo:
+    hoja_grupo = _hoja_case_insensitive(hojas, ["Grupo"])
+    hojas_nombre = [h for h in [hoja_articulo] if h] + [
+        h for h in hojas if h not in (hoja_articulo, hoja_grupo)
+    ]
+    for hoja_articulo in hojas_nombre:
         df = pd.read_excel(archivo_divipola_grupos, sheet_name=hoja_articulo)
-        col_llave = next((c for c in df.columns if "art_unmed" in c.lower() or "art_casacomer" in c.lower()), None)
+        col_llave = next((c for c in df.columns if "unmed" in str(c).lower() or "casacomer" in str(c).lower()), None)
         col_nombre = next(
-            (c for c in df.columns if any(k in c.lower() for k in ("nombre", "publica", "product"))),
+            (c for c in df.columns if any(k in str(c).lower() for k in ("nombre", "publica", "product"))),
             None,
         )
-        col_grupo = next((c for c in df.columns if c.strip().lower() == "grupo"), None)
+        col_grupo = next((c for c in df.columns if str(c).strip().lower() == "grupo"), None)
+        if col_llave is None or col_nombre is None:
+            if hoja_articulo == hojas_nombre[0] and len(df):
+                log.warning(
+                    "[%s] actualizar_mappings_divipola | no se encontró columna clave/nombre en hoja '%s'",
+                    modulo, hoja_articulo,
+                )
+            continue
+        if tipo_llave == "casacom_ica_unmed" and "casacomer" not in str(col_llave).lower():
+            continue
         if col_llave and col_nombre:
             for _, row in df.iterrows():
                 llave = parsear_llave_divipola(row[col_llave], tipo_llave)
                 if not llave:
                     continue
-                if llave not in articulos_dict:
-                    articulos_dict[llave] = str(row[col_nombre]).strip()
-                    nuevos_articulos += 1
-                if col_grupo is not None and llave not in grupos_dict:
-                    grupos_dict[llave] = str(row[col_grupo]).strip()
-                    nuevos_grupos += 1
-        else:
-            log.warning(
-                "[%s] actualizar_mappings_divipola | no se encontró columna clave/nombre en hoja '%s'",
-                modulo, hoja_articulo,
-            )
+                r = _registrar(articulos_dict, vistos_art, llave, str(row[col_nombre]).strip())
+                nuevos_articulos += r == "nuevo"
+                cambiados_articulos += r == "cambio"
+                if col_grupo is not None and pd.notna(row[col_grupo]):
+                    r = _registrar(grupos_dict, vistos_grp, llave, str(row[col_grupo]).strip())
+                    nuevos_grupos += r == "nuevo"
+                    cambiados_grupos += r == "cambio"
 
-    hoja_grupo = _hoja_case_insensitive(hojas, ["Grupo"])
     if hoja_grupo:
         df = pd.read_excel(archivo_divipola_grupos, sheet_name=hoja_grupo)
-        col_llave = next((c for c in df.columns if "art_unmed" in c.lower() or "art_casacomer" in c.lower()), None)
+        col_llave = next((c for c in df.columns if "unmed" in c.lower() or "casacomer" in c.lower()), None)
         col_grupo = next((c for c in df.columns if "grupo" in c.lower()), None)
         if col_llave and col_grupo:
             for _, row in df.iterrows():
                 llave = parsear_llave_divipola(row[col_llave], tipo_llave)
-                if llave and llave not in grupos_dict:
-                    grupos_dict[llave] = str(row[col_grupo]).strip()
-                    nuevos_grupos += 1
+                if llave and pd.notna(row[col_grupo]):
+                    r = _registrar(grupos_dict, vistos_grp, llave, str(row[col_grupo]).strip())
+                    nuevos_grupos += r == "nuevo"
+                    cambiados_grupos += r == "cambio"
 
-    if nuevos_grupos or nuevos_articulos:
+    if nuevos_grupos or nuevos_articulos or cambiados_grupos or cambiados_articulos:
         MAPPINGS_GRUPOS_PATH.parent.mkdir(parents=True, exist_ok=True)
         with open(MAPPINGS_GRUPOS_PATH, "w", encoding="utf-8") as f:
             yaml.dump({"grupos": dict(sorted(grupos_dict.items()))}, f, allow_unicode=True, default_flow_style=False)
@@ -134,8 +169,10 @@ def actualizar_mappings_divipola(
             )
 
     log.info(
-        "[%s] actualizar_mappings_divipola OK | grupos_nuevos=%d | articulos_nuevos=%d | total_grupos=%d | total_articulos=%d",
-        modulo, nuevos_grupos, nuevos_articulos, len(grupos_dict), len(articulos_dict),
+        "[%s] actualizar_mappings_divipola OK | grupos_nuevos=%d | grupos_cambiados=%d | "
+        "articulos_nuevos=%d | articulos_cambiados=%d | total_grupos=%d | total_articulos=%d",
+        modulo, nuevos_grupos, cambiados_grupos, nuevos_articulos, cambiados_articulos,
+        len(grupos_dict), len(articulos_dict),
     )
     return {"grupos": grupos_dict}, {"articulos_publicacion": articulos_dict}
 
@@ -278,6 +315,20 @@ def asignar_articulo_publica(
     sin_publica = df["Nombre_Publica"].isna()
     faltan_publica = df[sin_publica].copy()
     base_enriquecida = df[~sin_publica].copy()
+
+    # SAS agrega por (municipio, Nombre_Publica): si el DIVIPOLA asigna grupos
+    # distintos a marcas del mismo nombre de publicación (p.ej. "Sales del 6%,
+    # 40 kilogramos" VITAMINAS/ALIMENTOS en JUL2026), SAS igual publica una
+    # sola fila con un grupo. Se unifica al grupo más frecuente del período
+    # para no partir el producto en BASES/CUADROS/MAYORESQUE2.
+    if "Grupo" in base_enriquecida.columns and len(base_enriquecida):
+        grupo_pub = (
+            base_enriquecida.dropna(subset=["Grupo"])
+            .groupby("Nombre_Publica")["Grupo"]
+            .agg(lambda s: s.value_counts().index[0])
+        )
+        base_enriquecida["Grupo"] = base_enriquecida["Nombre_Publica"].map(grupo_pub).fillna(
+            base_enriquecida["Grupo"])
 
     if len(faltan_publica) > 0:
         llaves = faltan_publica["LLAVE_ARTICULO"].unique().tolist()

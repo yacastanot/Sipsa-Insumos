@@ -4,12 +4,12 @@
 # Actualizar al inicio de cada período mensual.
 # =============================================================================
 
-periodo: "JUL2026"                      # ID del período: MMMAAAA (mayúsculas)
-periodo_anterior: "JUN2026"             # ID período anterior (mensual)
-periodo_anterior_bimestral: "MAY2026"   # ID período anterior bimestral impar (Elementos, Empaques: ENE,MAR,MAY,JUL... | Propagacion: FEB,ABR,JUN...)
-periodo_anterior_trimestral: "MAR2026"  # ID período anterior trimestral (Arriendos,Servicios: FEB,MAY,AGO,NOV | Jornales,Especies: MAR,JUN,SEP,DIC) — sin módulos trimestrales activos en julio
-mes_actual: "Julio"                     # Nombre mes actual en español
-mes_anterior: "Junio"                   # Nombre mes anterior en español
-mes_num_actual: 7                       # Número del mes actual (sin cero)
-mes_num_anterior: 6                     # Número del mes anterior
+periodo: "SEP2026"                      # ID del período: MMMAAAA (mayúsculas)
+periodo_anterior: "AGO2026"             # ID período anterior (mensual)
+periodo_anterior_bimestral: "JUL2026"   # ID período anterior bimestral (Elementos, Empaques: ENE,MAR,MAY,JUL... | Propagacion: FEB,ABR,JUN,AGO... — AGO usa la de Propagacion, único bimestral activo este mes)
+periodo_anterior_trimestral: "JUN2026"  # ID período anterior trimestral (Arriendos,Servicios: FEB,MAY,AGO,NOV | Jornales,Especies: MAR,JUN,SEP,DIC) — AGO usa la de Arriendos/Servicios
+mes_actual: "Septiembre"                    # Nombre mes actual en español
+mes_anterior: "Agosto"                   # Nombre mes anterior en español
+mes_num_actual: 9                       # Número del mes actual (sin cero)
+mes_num_anterior: 8                     # Número del mes anterior
 anio: 2026                              # Año del período

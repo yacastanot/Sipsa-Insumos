@@ -241,7 +241,10 @@ def revisar_sin_precio(
     if formato_nuevo:
         var_at1 = var_at1.rename(columns={precio_col_origen: precio_actual_col})
         # Construir ID en VAR_ATIPICO (columnas SAS ya con los nombres finales)
-        var_at1["_ID"] = _construir_id(var_at1, "CodigoMpio", "CasaCom.", "UnMed.")
+        # Material usa las etiquetas SAS "CasaCom#"/"UnMed#" en vez de "CasaCom."/"UnMed."
+        col_casa = "CasaCom." if "CasaCom." in var_at1.columns else "CasaCom#"
+        col_unmed = "UnMed." if "UnMed." in var_at1.columns else "UnMed#"
+        var_at1["_ID"] = _construir_id(var_at1, "CodigoMpio", col_casa, col_unmed)
     else:
         var_at1 = var_at1.rename(columns={
             "CÓDIGO DIVIPOLA": "CodigoMpio",

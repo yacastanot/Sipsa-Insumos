@@ -92,9 +92,3 @@ elementos.revision_hist_meta:
   filepath: data/08_reporting/${globals:periodo}/elementos/meta_revision_hist_${globals:periodo}.parquet
   save_args:
     index: false
-
-elementos.revision_tematica_meta:
-  type: pandas.ParquetDataset
-  filepath: data/08_reporting/${globals:periodo}/elementos/meta_revision_tematica_${globals:periodo}.parquet
-  save_args:
-    index: false

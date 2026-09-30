@@ -15,7 +15,7 @@ def create_pipeline(**kwargs) -> Pipeline:
             ),
             node(
                 func=aplicar_secreto_estadistico,
-                inputs=["precio_promedio", "params:min_n"],
+                inputs=["precio_promedio", "params:min_n", "params:cpc_publicar_siempre"],
                 outputs=["mayor2", "menor2"],
                 name="aplicar_secreto_estadistico",
             ),

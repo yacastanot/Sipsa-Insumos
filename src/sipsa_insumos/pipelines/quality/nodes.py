@@ -26,9 +26,11 @@ _NOMBRE_PUBLICA_SAS: dict[str, str] = {
     "EMPAQUES":    "Nombre_productos_empaques_publi",
     "ARRIENDOS":   "Nombre_productos_arriendos_publi",
     "SERVICIOS":   "Nombre_productos_servicios_publi",
-    "PROPAGACION": "Nombre_material_propagacion_publ",
-    "JORNALES":    "Nombre_jornales_publ",
-    "ESPECIES":    "Nombre_especies_productivas_publ",
+    "PROPAGACION": "Nombre_productos_material_publi",   # CV's MATERIAL AGO2026
+    # Sin referencia SAS: igual que reporting._NOMBRE_PUBLICA_SAS para que el
+    # CV's use el mismo nombre de columna que el resto de archivos del módulo.
+    "JORNALES":    "Nombre_productos_jornales_publi",
+    "ESPECIES":    "Nombre_productos_especie_publi",
 }
 
 # Llave compuesta para detección de duplicados (equivale a SAS PROC SORT nodup)
@@ -58,8 +60,14 @@ _COLS_CV_CONTEXTO = [
 # Módulos cuyo reporte de CVs en SAS NO incluye la columna "Grupo" (son de un
 # solo grupo — el valor sería redundante) y nombra la columna de coeficiente
 # "CV_{periodo}" en vez de "CV_Porcentaje_{periodo}". Confirmado contra SAS
-# JUL2026 para ELEMENTOS/EMPAQUES; agricolas/pecuarios sí usan Grupo + Porcentaje.
-_MODULOS_CV_SIN_GRUPO = {"ELEMENTOS", "EMPAQUES"}
+# JUL2026 para ELEMENTOS/EMPAQUES y AGO2026 para ARRIENDOS/SERVICIOS/MATERIAL;
+# agricolas/pecuarios sí usan Grupo + Porcentaje. JORNALES/ESPECIES por analogía
+# (un solo grupo) — sin referencia SAS todavía.
+_MODULOS_CV_SIN_GRUPO = {"ELEMENTOS", "EMPAQUES", "ARRIENDOS", "SERVICIOS",
+                         "PROPAGACION", "JORNALES", "ESPECIES"}
+
+# Módulos cuyo reporte de CVs en SAS no trae "Codigo CPC" (AGO2026).
+_MODULOS_CV_SIN_CPC = {"ARRIENDOS", "SERVICIOS"}
 
 
 def detectar_duplicados(
@@ -115,11 +123,9 @@ def calcular_cv(
             DataFrame del reporte de CVs con nombres de columna SAS.
     """
     m = modulo.upper()
-    cols_contexto_modulo = (
-        [c for c in _COLS_CV_CONTEXTO if c != "Grupo"]
-        if m in _MODULOS_CV_SIN_GRUPO
-        else _COLS_CV_CONTEXTO
-    )
+    excluir = ({"Grupo"} if m in _MODULOS_CV_SIN_GRUPO else set()) | (
+        {"CÓDIGO CPC"} if m in _MODULOS_CV_SIN_CPC else set())
+    cols_contexto_modulo = [c for c in _COLS_CV_CONTEXTO if c not in excluir]
 
     llave_cv = [c for c in _LLAVE_CV if c in base_sin_dupli.columns]
     cols_contexto = [c for c in cols_contexto_modulo if c in base_sin_dupli.columns]
@@ -171,6 +177,16 @@ def calcular_cv(
         "CV":              col_cv_sas,
     })
     agg_out = agg.rename(columns=rename_agg)
+    # Orden SAS (igual en todos los módulos): Depto, Mpio, CodigoMpio, [CPC],
+    # nombre de publicación, [Grupo], N, Min, Max, Promedio, CV.
+    orden = ["NombreDepartamento", "NombreMunicipio", "CodigoMpio", "Codigo CPC",
+             col_pub_sas, "Grupo", f"N{sfx}", f"Min{sfx}", f"Max{sfx}",
+             f"Promedio{sfx}", col_cv_sas]
+    agg_out = agg_out[[c for c in orden if c in agg_out.columns]
+                      + [c for c in agg_out.columns if c not in orden]]
+    # SAS ordena el reporte por el CV (faltantes primero); los empates
+    # conservan el orden por municipio/producto de la agregación.
+    agg_out = agg_out.sort_values(col_cv_sas, kind="mergesort", na_position="first")
 
     return base_con_cv, agg_out
 

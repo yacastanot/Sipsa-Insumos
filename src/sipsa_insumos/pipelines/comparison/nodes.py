@@ -62,8 +62,21 @@ def calcular_variacion_tendencia(
     anterior = mayor2_anterior[llave + ["PRECIO_PROMEDIO"]].rename(
         columns={"PRECIO_PROMEDIO": f"PRECIO_{mes_anterior}"}
     )
+    # SAS: PRECIO_PROMEDIO_&MES_ANTE=round(...,0.0000001) al importar el período anterior.
+    anterior[f"PRECIO_{mes_anterior}"] = anterior[f"PRECIO_{mes_anterior}"].round(7)
+
+    # SAS: MERGE actual (IN=A) anterior; el anterior también trae 'Codigo CPC'n,
+    # así que cuando el producto existía se queda con el CPC del período
+    # anterior (p.ej. Rafenelle SEP2026: 35262 de AGO, no 3526202 del mes).
+    if "CÓDIGO CPC" in df.columns and "CÓDIGO CPC" in mayor2_anterior.columns:
+        cpc_ant = mayor2_anterior[llave + ["CÓDIGO CPC"]].drop_duplicates(llave).rename(
+            columns={"CÓDIGO CPC": "_CPC_ANT"})
+        anterior = anterior.merge(cpc_ant, on=llave, how="left")
 
     df = df.merge(anterior, on=llave, how="left")
+    if "_CPC_ANT" in df.columns:
+        df["CÓDIGO CPC"] = df["_CPC_ANT"].where(df["_CPC_ANT"].notna(), df["CÓDIGO CPC"])
+        df = df.drop(columns="_CPC_ANT")
 
     df["VARIACION"] = (
         (df[f"PRECIO_{mes_actual}"] - df[f"PRECIO_{mes_anterior}"])

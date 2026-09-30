@@ -23,9 +23,9 @@ sin_precio_ant:
 
   # ─── Insumos Agrícolas (mensual) ───────────────────────────────────────────
   agricolas:
-    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/${globals:periodo}/SIN_PRECIO_ANT ${globals:periodo}/Ins_Agrícolas para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/SEP2026/SIN_PRECIO_ANT SEP2026/Ins_Agrícolas para revisiones.xlsx"
     hoja_historico: "Agrícolas"
-    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/08_reporting/${globals:periodo}/agricolas/VAR_ATIPICO_AGRICOLA_${globals:periodo}.xlsx"
+    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/SEP2026/SIN_PRECIO_ANT SEP2026/VAR_ATIPICO_AGRICOLA_SEP2026.xlsx"
     hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."
@@ -34,9 +34,9 @@ sin_precio_ant:
 
   # ─── Insumos Pecuarios (mensual) ───────────────────────────────────────────
   pecuarios:
-    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/${globals:periodo}/SIN_PRECIO_ANT ${globals:periodo}/Ins_Pecuarios para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/SEP2026/SIN_PRECIO_ANT SEP2026/Ins_Pecuarios para revisiones.xlsx"
     hoja_historico: "Pecuarios"
-    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/08_reporting/${globals:periodo}/pecuarios/VAR_ATIPICO_PECUARIO_${globals:periodo}.xlsx"
+    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/SEP2026/SIN_PRECIO_ANT SEP2026/VAR_ATIPICO_PECUARIO_SEP2026.xlsx"
     hoja_var_atipico: "VAR_ATIPICO_PECUARIO"
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."
@@ -45,22 +45,22 @@ sin_precio_ant:
 
   # ─── Elementos Agropecuarios (bimestral impar: ENE, MAR, MAY, JUL, SEP, NOV)
   elementos:
-    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/${globals:periodo}/SIN_PRECIO_ANT ${globals:periodo}/Elementos para revisiones.xlsx"
+    ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/SEP2026/SIN_PRECIO_ANT SEP2026/Elementos para revisiones.xlsx"
     hoja_historico: "Elementos"
-    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/08_reporting/${globals:periodo}/elementos/VAR_ATIPICO_ELEMENTOS_${globals:periodo}.xlsx"
+    ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/SEP2026/SIN_PRECIO_ANT SEP2026/VAR_ATIPICO_ELEMENTOS_SEP2026.xlsx"
     hoja_var_atipico: "VAR_ATIPICO_ELEMENTOS"
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."
     modulo:           "ELEMENTOS"
-    activo:           true        # JUL es bimestral impar → activo
+    activo:           true       # AGO no es bimestral impar → inactivo
 
   # ─── Material de Propagación (bimestral par: FEB, ABR, JUN, AGO, OCT, DIC)
   propagacion:
     ruta_historico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/01_raw/${globals:periodo}/SIN_PRECIO_ANT ${globals:periodo}/Material_propag para revisiones.xlsx"
     hoja_historico: "Material"
     ruta_var_atipico: "C:/Users/Jeferson/Kedro/Sipsa-Insumos/data/08_reporting/${globals:periodo}/propagacion/VAR_ATIPICO_MATERIAL_${globals:periodo}.xlsx"
-    hoja_var_atipico: "VAR_ATIPICO_MATERIAL"
+    hoja_var_atipico: "VAR_ATIPICO_AGRICOLA"   # SAS (y la réplica Python) nombran así la hoja de Material
     casacom_col_hist: "CasaCom."
     unmed_col_hist:   "UnMed."
     modulo:           "MATERIAL"
-    activo:           false       # JUL no es bimestral par → inactivo
+    activo:           false        # AGO es bimestral par → activo

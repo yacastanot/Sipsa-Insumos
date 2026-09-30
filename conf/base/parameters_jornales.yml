@@ -1,10 +1,11 @@
 jornales:
   modulo: "JORNALES"
-  archivo_liviana: "data/01_raw/JUN2026/BASES LIVIANAS JUN2026/Jornales jun 2026.xlsx"
+  archivo_liviana: "data/01_raw/SEP2026/BASES LIVIANAS SEP2026/Jornales sep 2026.xlsx"
   hoja_liviana: "Información Insumos"
   archivo_divipola_grupos: ""   # tipo_modulo=caracte, no soportado aún por actualizar_mappings_divipola
   tipo_modulo: "caracte"
   tipo_llave: "unmed"
   min_n: 2
+  cpc_publicar_siempre: []
   grupos:
     - "JORNALES"

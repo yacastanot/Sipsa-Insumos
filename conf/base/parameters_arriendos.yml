@@ -1,10 +1,11 @@
 arriendos:
   modulo: "ARRIENDOS"
-  archivo_liviana: "data/01_raw/MAY2026/BASES LIVIANAS MAY2026/Arriendos may 2026.xlsx"
+  archivo_liviana: "data/01_raw/AGO2026/BASES LIVIANAS AGO2026/Arriendos ago 2026.xlsx"
   hoja_liviana: "Información Insumos"
   archivo_divipola_grupos: ""   # tipo_modulo=caracte, no soportado aún por actualizar_mappings_divipola
   tipo_modulo: "caracte"
   tipo_llave: "unmed"
   min_n: 2
+  cpc_publicar_siempre: []
   grupos:
     - "ARRIENDOS"
