@@ -151,6 +151,35 @@ corresponde ese período (ver calendario en
 
 ---
 
+## `src/sipsa_insumos/pipelines/serie_deptal/`
+
+**Propósito**: réplica de los programas SAS de `03SERIE_DEPTAL`
+(`NNSerie_Departamental_<Módulo>_<MES>.sas`). Por módulo genera los 5
+archivos departamentales: `ANEXO ... DEPTO`, `*_MAYORESQUE2`,
+`*_MENORESQUE2`, `*_DUPLICADOS` y `FALTAN_*`, en
+`data/08_reporting/<periodo>/serie_deptal/<carpeta SAS>/`.
+
+- `generar_serie_deptal(periodo, modulo, ruta_reporting, ...)` — un solo
+  nodo genérico; las variantes de cada programa (llave de publicación,
+  conteo por fuente o informante, cruce con el mes anterior, columnas del
+  ANEXO, nombres de archivo) están en el diccionario `_MODULOS`.
+- Emula las reglas de SAS que cambian el resultado: tipado de `PROC IMPORT`
+  (`dbms=xlsx` vs `dbms=excel`, celdas de fecha como número de serie),
+  orden de variables del PDV (`RETAIN`, `LENGTH` antes de `SET`),
+  `PROC SORT NODUPKEY`, `MERGE ... BY` con grupos muchos-a-muchos
+  (`_merge_sas`) y el "remerge" de `PROC SQL` (Empaques).
+- No usa rutas en parámetros: busca la base liviana y la DIVIPOLA del
+  período por nombre en `data/01_raw/<periodo>/`.
+- **Mes anterior**: toma el `*_MAYORESQUE2` departamental de la salida
+  Python del período anterior; si no existe (primer mes), lo busca en
+  `data/01_raw/<periodo>/SERIE_DEPTAL <periodo>/` (copiarlo ahí desde las
+  salidas SAS).
+
+**Cómo ejecutarlo**: corre dentro de `kedro run --pipeline <modulo>` y
+también por separado con `kedro run --pipeline serie_deptal_<modulo>`.
+
+---
+
 ## `src/sipsa_insumos/utils/parsers.py`
 
 **Propósito**: parseo de la columna pipe-delimitada `UNIDAD DE MEDIDA`

@@ -44,6 +44,7 @@ from .pipelines.aggregation.pipeline import create_pipeline as aggregation
 from .pipelines.comparison.pipeline import create_pipeline as comparison
 from .pipelines.reporting.pipeline import create_pipeline as reporting
 from .pipelines.reporting.nodes import exportar_base_insumos, exportar_diagnosticos, exportar_revisiones
+from .pipelines.serie_deptal.pipeline import create_pipeline as serie_deptal
 from .pipelines.sin_precio_ant.pipeline import (
     create_pipeline as sin_precio_ant,
     create_pipeline_agricolas as sin_precio_ant_agricolas,
@@ -211,6 +212,7 @@ def _pipeline_modulo(nombre: str) -> Pipeline:
         resultado = resultado + _pipeline_base_insumos(nombre)
     if nombre in MODULOS_DIAGNOSTICOS:
         resultado = resultado + _pipeline_diagnosticos(nombre)
+    resultado = resultado + serie_deptal(nombre)
     return resultado
 
 
@@ -220,6 +222,10 @@ def register_pipelines() -> dict[str, Pipeline]:
     pipelines["__default__"] = sum(pipelines[m] for m in MODULOS)
 
     # Sin Precio Anterior: pipeline auxiliar post-procesamiento
+    # Serie departamental (03SERIE_DEPTAL): también corre dentro de cada módulo
+    for m in MODULOS:
+        pipelines[f"serie_deptal_{m}"] = serie_deptal(m)
+
     pipelines["sin_precio_ant"] = sin_precio_ant()
     pipelines["sin_precio_ant_agricolas"] = sin_precio_ant_agricolas()
     pipelines["sin_precio_ant_pecuarios"] = sin_precio_ant_pecuarios()

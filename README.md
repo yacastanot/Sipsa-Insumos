@@ -36,6 +36,9 @@ kedro run --pipeline agricolas   # o: iniciar_app.bat (interfaz web)
 
 ## Estado del proyecto
 
-**En desarrollo** — 6 de 9 módulos (Agrícolas, Pecuarios, Elementos, Empaques,
-Arriendos, Servicios) validados byte-a-byte contra SAS. Propagación, Jornales
-y Especies operativos, sin validación exhaustiva aún.
+**En validación final** — los 9 módulos, Sin Precio Anterior y la Serie
+Departamental (03SERIE_DEPTAL) producen los mismos archivos, columnas y filas
+que SAS. La única diferencia que no se puede replicar es el orden de filas
+empatadas en los `PROC SQL ... ORDER BY` de SAS (archivo CV's y ANEXO
+departamental). Detalle en
+[docs/05_flujo_datos.md](docs/05_flujo_datos.md#pendientes-conocidos-de-paridad-con-sas).

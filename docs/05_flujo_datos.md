@@ -12,9 +12,16 @@ data/01_raw/JUL2026/
 ├── DIVIPOLA JUL2026/                # municipio/departamento + Grupo/Nombre_Publica por módulo
 │   ├── DIVIPOLA.xlsx                # maestro compartido (municipios/departamentos)
 │   └── divipola insumos agrícolas jul 2026.xlsx
-└── SIN_PRECIO_ANT JUL2026/          # histórico "para revisiones" (insumo del pipeline auxiliar)
-    └── Ins_Agrícolas para revisiones.xlsx
+├── SIN_PRECIO_ANT JUL2026/          # histórico "para revisiones" (insumo del pipeline auxiliar)
+│   └── Ins_Agrícolas para revisiones.xlsx
+└── SERIE_DEPTAL JUL2026/            # solo si falta la salida Python del mes anterior:
+    └── INSU_AGRIC_MAYORESQUE2_DEPTO_JUN2026.XLSX   # MAYORESQUE2 departamental de SAS
 ```
+
+La serie departamental escribe en
+`data/08_reporting/<periodo>/serie_deptal/<carpeta SAS>/` (`Ins_Agrícolas`,
+`Ins_Pecuarios`, `Material_Propaga`, `Arriendos`, `Servicios`, `Elementos`,
+`Empaques`, `Jornales`, `Especies`).
 
 Ningún archivo de `data/` se comitea (todo `data/` está en `.gitignore`,
 salvo el árbol de directorios) — son insumos y salidas operativas, no
@@ -86,9 +93,19 @@ regenera sin tocar el período activo:
 
 ## Pendientes conocidos de paridad con SAS
 
-- **TEMÁTICA / 4MESES / TABREV** (`exportar_revision_tematica`,
-  `exportar_revision_historica`): estructura con gaps grandes frente a SAS
-  (columnas nacionales/departamentales/municipales faltantes). Requiere
-  revisar de nuevo los programas SAS fuente antes de tocar código.
+- **Orden de filas empatadas** (no replicable): SAS ordena el archivo
+  CV's (`ORDER BY CV`) y el ANEXO departamental (`ORDER BY CodigoDepto,
+  Nombre`) con `PROC SQL`, que no fija el orden de las filas empatadas.
+  Filas y valores son idénticos; solo cambia ese orden.
+- **Serie departamental** validada FEB–AGO 2026 en cadena (cada mes con la
+  salida Python del anterior): Arriendos, Servicios, Jornales, Especies y
+  Empaques idénticos; Agrícolas, Pecuarios, Material y Elementos idénticos
+  salvo el orden de empates del ANEXO. Pecuarios FEB2026: SAS escribió el
+  mes en mayúscula (`FEB2026`); desde ABR usa minúscula, como Python.
+- **Julio 2026 (Elementos/Empaques)**: se usa la versión publicada. SAS
+  reprocesó julio después de publicarlo; ese reproceso no se usa.
+- **Septiembre 2026**: Python es la referencia; la corrida SAS de ese mes
+  tuvo errores de parámetros (mes en inglés, año 1926, mes anterior de
+  Elementos/Empaques).
 - **Elementos/Empaques, línea base MAR2026**: bloqueada — no hay datos
   crudos de marzo 2026 disponibles (ver memoria del proyecto para detalle).
