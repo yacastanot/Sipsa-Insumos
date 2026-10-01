@@ -43,6 +43,7 @@ def _inputs_modulo(mod: str) -> list[str]:
         "params:ruta_reporting",    # argumento 9: ruta_reporting
         "params:mes_actual",        # argumento 10: mes_actual
         f"{p}.activo",              # argumento 11: activo (default=True)
+        f"{p}.formato_sas",         # argumento 12: layout del programa SAS
     ]
 
 

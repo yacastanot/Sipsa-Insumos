@@ -31,6 +31,15 @@ sin_precio_ant:
     unmed_col_hist:   "UnMed."
     modulo:           "AGRICOLAS"
     activo:           true        # siempre activo (mensual)
+    # Formato de salida idéntico al programa SAS (PROGRAMA REVISIÓN SIN PRECIO INSUMOS AGRÍCOLAS SEP2026.sas).
+    # Lista fija de meses y variaciones tal como está en el programa: actualizar
+    # aquí cuando el equipo actualice el programa SAS.
+    formato_sas:
+      nombre_salida: "AGRICOLA"
+      largo_id: 210
+      columnas_base: ["ID", "CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Articulo", "Nombre_productos_agrícolas_publ", "Grupo", "UnMed.", "CasaCom.", "RegICA", "VAR", "Nov.", "Estado", "Art_Unmed_Casacomer_ICA", "Observación", "REVISA"]
+      meses_fijos: ["DIC2025", "NOV2025", "OCT2025", "SEP2025", "AGO2025", "JUL2025", "JUN2025", "MAY2025", "ABR2025", "MAR2025", "FEB2025", "ENE2025", "DIC2024", "NOV2024", "AGO2024", "MAY2024", "ABR2024", "MAR2024", "FEB2024", "ENE2024", "DIC2023", "NOV2023", "OCT2023", "SEP2023", "AGO2023", "JUL2023", "JUN2023", "MAY2023", "ABR2023", "MAR2023", "FEB2023", "ENE2023", "DIC2022", "NOV2022", "OCT2022", "SEP2022", "AGO2022", "JUL2022", "JUN2022", "MAY2022", "ABR2022", "MAR2022", "FEB2022", "ENE2022", "DIC2021", "NOV2021", "OCT2021", "SEP2021", "AGO2021", "JUL2021", "JUN2021", "MAY2021", "ABR2021", "MAR2021", "FEB2021", "ENE2021"]
+      variaciones: ["_DIC2025", "_NOV2025", "_OCT2025", "_SEP2025", "_AGO2025", "_JUL2025", "_JUN2025", "_MAY2025", "_ABR2025", "_MAR2025", "_FEB2025", "_ENE2025", "_DIC2024", "_NOV2024", "_AGO2024", "_MAY2024", "_ABR2024", "_MAR2024", "_FEB2024", "_ENE2024", "_DIC2023", "_NOV2023", "_OCT2023", "_SEP2023", "_AGO2023", "_JUL2023", "_JUN2023", "_MAY2023", "_ABR2023", "_MAR2023", "_FEB2023", "_ENE2023", "_DIC2022", "_NOV2022", "_OCT2022", "_SEP2022", "_AGO2022", "_JUL2022", "_JUN2022", "_MAY2022", "_ABR2022", "_MAR2022", "_FEB2022", "_ENE2022"]
 
   # ─── Insumos Pecuarios (mensual) ───────────────────────────────────────────
   pecuarios:
@@ -42,6 +51,15 @@ sin_precio_ant:
     unmed_col_hist:   "UnMed."
     modulo:           "PECUARIOS"
     activo:           true        # siempre activo (mensual)
+    # Formato de salida idéntico al programa SAS (PROGRAMA REVISIÓN SIN PRECIO INSUMOS PECUARIOS SEP2026.sas).
+    # Lista fija de meses y variaciones tal como está en el programa: actualizar
+    # aquí cuando el equipo actualice el programa SAS.
+    formato_sas:
+      nombre_salida: "PECUARIO"
+      largo_id: 213
+      columnas_base: ["ID", "CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Articulo", "Nombre_productos_pecuarios_publi", "Grupo", "UnMed.", "CasaCom.", "RegICA", "VAR", "Nov.", "Estado", "Art_Unmed_Casacomer_ICA", "Observación", "REVISA"]
+      meses_fijos: ["DIC2025", "NOV2025", "OCT2025", "SEP2025", "AGO2025", "JUL2025", "JUN2025", "MAY2025", "ABR2025", "MAR2025", "FEB2025", "ENE2025", "DIC2024", "NOV2024", "OCT2024", "AGO2024", "MAY2024", "FEB2024", "ENE2024", "DIC2023", "NOV2023", "OCT2023", "SEP2023", "AGO2023", "JUL2023", "JUN2023", "MAY2023", "ABR2023", "MAR2023", "FEB2023", "ENE2023", "DIC2022", "NOV2022", "OCT2022", "SEP2022", "AGO2022", "JUL2022", "JUN2022", "MAY2022", "ABR2022", "MAR2022", "FEB2022", "ENE2022", "DIC2021", "NOV2021", "OCT2021", "SEP2021", "AGO2021", "JUL2021", "JUN2021", "MAY2021", "ABR2021", "MAR2021", "FEB2021", "ENE2021"]
+      variaciones: ["DIC2025", "NOV2025", "OCT2025", "SEP2025", "AGO2025", "JUL2025", "JUN2025", "MAY2025", "ABR2025", "MAR2025", "FEB2025", "ENE2025", "DIC2024", "NOV2024", "_OCT2024", "_AGO2024", "_MAY2024", "_FEB2024", "_ENE2024", "_DIC2023", "_DIC2023", "_NOV2023", "_OCT2023", "_SEP2023", "_AGO2023", "_JUL2023", "_JUN2023", "_MAY2023", "_ABR2023", "_MAR2023", "_FEB2023", "_ENE2023", "_DIC2022", "_NOV2022", "_OCT2022", "_SEP2022", "_AGO2022", "_JUL2022", "_JUN2022", "_MAY2022", "_ABR2022", "_MAR2022", "_FEB2022", "_ENE2022"]
 
   # ─── Elementos Agropecuarios (bimestral impar: ENE, MAR, MAY, JUL, SEP, NOV)
   elementos:
@@ -53,6 +71,15 @@ sin_precio_ant:
     unmed_col_hist:   "UnMed."
     modulo:           "ELEMENTOS"
     activo:           true       # AGO no es bimestral impar → inactivo
+    # Formato de salida idéntico al programa SAS (PROGRAMA REVISIÓN SIN PRECIO ELEMENTOS SEPTIEMBRE2026.sas).
+    # Lista fija de meses y variaciones tal como está en el programa: actualizar
+    # aquí cuando el equipo actualice el programa SAS.
+    formato_sas:
+      nombre_salida: "ELEMENTOS"
+      largo_id: 320
+      columnas_base: ["ID", "CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Articulo", "Nombre_productos_elementos_publi", "UnMed.", "CasaCom.", "RegICA", "VAR", "Nov.", "Estado", "Art_Casacomer_ICA_Unmed", "Observación", "REVISA"]
+      meses_fijos: ["NOV2025", "SEP2025", "JUL2025", "MAY2025", "MAR2025", "NOV2024", "MAY2024", "MAR2024", "ENE2024", "NOV2023", "SEP2023", "JUL2023", "MAY2023", "MAR2023", "ENE2023", "NOV2022", "SEP2022", "JUL2022", "MAY2022", "MAR2022", "ENE2022", "NOV2021", "SEP2021", "JUL2021", "MAY2021", "MAR2021", "ENE2021", "NOV2020", "SEP2020", "JUL2020"]
+      variaciones: ["_NOV2025", "_SEP2025", "_JUL2025", "_MAY2025", "_MAR2025", "_NOV2024", "_MAY2024", "_MAR2024", "_ENE2024", "_NOV2023", "_SEP2023", "_JUL2023", "_MAY2023", "_MAR2023", "_ENE2023", "_NOV2022", "_SEP2022", "_JUL2022", "_MAY2022", "_MAR2022", "_ENE2022", "_NOV2021", "_SEP2021", "_JUL2021", "_MAY2021"]
 
   # ─── Material de Propagación (bimestral par: FEB, ABR, JUN, AGO, OCT, DIC)
   propagacion:
@@ -64,3 +91,12 @@ sin_precio_ant:
     unmed_col_hist:   "UnMed."
     modulo:           "MATERIAL"
     activo:           false        # AGO es bimestral par → activo
+    # Formato de salida idéntico al programa SAS (PROGRAMA REVISIÓN SIN PRECIO MATERIAL PROPAGA AGO2026.sas).
+    # Lista fija de meses y variaciones tal como está en el programa: actualizar
+    # aquí cuando el equipo actualice el programa SAS.
+    formato_sas:
+      nombre_salida: "MATERIAL"
+      largo_id: 210
+      columnas_base: ["ID", "CodigoDepto", "CodigoMpio", "NombreDepartamento", "NombreMunicipio", "Fuente", "Articulo", "Nombre_productos_material_publi", "UnMed#", "CasaCom#", "RegICA", "VAR", "Nov#", "Estado", "Articulo_Unmed", "Observación", "REVISA"]
+      meses_fijos: ["DIC2025", "OCT2025", "AGO2025", "JUN2025", "ABR2025", "FEB2025", "DIC2024", "oct2024", "AGO2024", "JUN2024", "ABR2024", "FEB2024", "DIC2023", "OCT2023", "AGO2023", "JUN2023", "ABR2023", "FEB2023", "DIC2022", "OCT2022", "AGO2022", "JUN2022", "ABR2022", "FEB2022", "DIC2021", "OCT2021", "AGO2021", "JUN2021", "ABR2021", "FEB2021"]
+      variaciones: ["_DIC2025", "_OCT2025", "_AGO2025", "_JUN2025", "_ABR2025", "_FEB2025", "_DIC2024", "_OCT2024", "_AGO2024", "_JUN2024", "_ABR2024", "_FEB2024", "_DIC2023", "_OCT2023", "_AGO2023", "_JUN2023", "_ABR2023", "_FEB2023", "_DIC2022", "_OCT2022", "_AGO2022", "_JUN2022", "_ABR2022", "_FEB2022", "_DIC2021", "_OCT2021", "_AGO2021", "_JUN2021", "_ABR2021", "_FEB2021"]
