@@ -25,6 +25,9 @@ en error en vez de exponer un usuario/clave conocido.
 from __future__ import annotations
 
 import asyncio
+import io
+import zipfile
+from urllib.parse import quote
 import json as _json
 import os
 import queue
@@ -265,6 +268,13 @@ def _update_archivo_divipola(modulo_id: str, periodo: str, filename: str) -> Non
     _update_param_ruta(modulo_id, "archivo_divipola_grupos", new_path)
 
 
+def _nombre_inicial(modulo_id: str, campo: str, periodo: str) -> str | None:
+    """Nombre del archivo inicial configurado para el período (la versión ajustada
+    debe llevar el mismo nombre para reemplazarlo)."""
+    ruta = _read_param_ruta(modulo_id, campo)
+    return Path(ruta).name if ruta and f"/{periodo}/" in ruta.replace("\\", "/") else None
+
+
 def _rutas_desactualizadas(modulo_id: str, periodo: str) -> list[str]:
     """Rutas de insumos del módulo que no apuntan a data/01_raw/{periodo}/.
 
@@ -471,8 +481,12 @@ async def configure_spa_activo(body: SpaActivoRequest, _: str = Depends(_check_a
 async def upload_cuadros(
     modulo_id: str,
     file: UploadFile = File(...),
+    ajustada: bool = False,
     _: str = Depends(_check_auth),
 ) -> dict:
+    """Base liviana del período. Con ?ajustada=true es la versión que temática
+    reenvía después de revisar: se guarda en AJUSTADOS <P>/ con el nombre de la
+    base inicial y el proceso la toma en su lugar (utils/insumos.ruta_vigente)."""
     valid_ids = {m["id"] for m in MODULOS}
     if modulo_id not in valid_ids:
         raise HTTPException(400, f"Módulo desconocido: {modulo_id}")
@@ -481,12 +495,19 @@ async def upload_cuadros(
 
     cfg     = _read_globals()
     periodo = str(cfg.get("periodo", "MAY2026"))
+    contents = await file.read()
+    if ajustada:
+        filename = _nombre_inicial(modulo_id, "archivo_liviana", periodo) or file.filename
+        dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"AJUSTADOS {periodo}" / f"BASES LIVIANAS {periodo}"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        (dest_dir / filename).write_bytes(contents)
+        return {"ok": True, "filename": filename, "modulo": modulo_id, "version": "ajustada",
+                "size_kb": round(len(contents) / 1024, 1)}
     dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"BASES LIVIANAS {periodo}"
     dest_dir.mkdir(parents=True, exist_ok=True)
-    contents = await file.read()
     (dest_dir / file.filename).write_bytes(contents)
     _update_archivo_liviana(modulo_id, periodo, file.filename)
-    return {"ok": True, "filename": file.filename, "modulo": modulo_id,
+    return {"ok": True, "filename": file.filename, "modulo": modulo_id, "version": "inicial",
             "size_kb": round(len(contents) / 1024, 1)}
 
 
@@ -494,6 +515,7 @@ async def upload_cuadros(
 async def upload_divipola(
     tipo: str,   # "master" | id de módulo en MODULOS
     file: UploadFile = File(...),
+    ajustada: bool = False,
     _: str = Depends(_check_auth),
 ) -> dict:
     valid_ids = {"master"} | {m["id"] for m in MODULOS}
@@ -504,15 +526,24 @@ async def upload_divipola(
 
     cfg     = _read_globals()
     periodo = str(cfg.get("periodo", "MAY2026"))
-    dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"DIVIPOLA {periodo}"
-    dest_dir.mkdir(parents=True, exist_ok=True)
     contents = await file.read()
     # El maestro DIVIPOLA.xlsx tiene ruta fija en el catalog — se normaliza el nombre.
     filename = "DIVIPOLA.xlsx" if tipo == "master" else file.filename
+    if ajustada:
+        # Versión reenviada por temática: mismo nombre que la inicial, en AJUSTADOS <P>/.
+        if tipo != "master":
+            filename = _nombre_inicial(tipo, "archivo_divipola_grupos", periodo) or filename
+        dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"AJUSTADOS {periodo}" / f"DIVIPOLA {periodo}"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        (dest_dir / filename).write_bytes(contents)
+        return {"ok": True, "filename": filename, "tipo": tipo, "version": "ajustada",
+                "size_kb": round(len(contents) / 1024, 1)}
+    dest_dir = PROJECT_ROOT / "data" / "01_raw" / periodo / f"DIVIPOLA {periodo}"
+    dest_dir.mkdir(parents=True, exist_ok=True)
     (dest_dir / filename).write_bytes(contents)
     if tipo != "master":
         _update_archivo_divipola(tipo, periodo, filename)
-    return {"ok": True, "filename": filename, "tipo": tipo,
+    return {"ok": True, "filename": filename, "tipo": tipo, "version": "inicial",
             "size_kb": round(len(contents) / 1024, 1)}
 
 
@@ -573,24 +604,123 @@ async def status(_: str = Depends(_check_auth)) -> dict:
     return {"running": _pipeline_running}
 
 
+# ── Árbol de salidas, organizado como la carpeta de resultados de SAS ──────────
+#   <P>/
+#     REVISIÓN <P>/
+#       AGRICOLAS_<P>/ ... (reportes municipales de cada módulo)
+#       DEPARTAMENTAL_<P>/Ins_Agrícolas/ ... (serie departamental)
+#       Revisión insumos agrícolas <mes siguiente>.xlsx ... (sueltos, como en SAS)
+#     SIN PRECIO ANTERIOR <P>/
+#     PRELIMINAR (enviado a temática)/  (misma estructura; solo si hubo ejecución definitiva)
+_CARPETA_MODULO_SAS = {
+    "agricolas": "AGRICOLAS", "pecuarios": "PECUARIOS", "propagacion": "MATERIAL",
+    "arriendos": "ARRIENDOS", "servicios": "SERVICIOS", "elementos": "ELEMENTOS",
+    "empaques": "EMPAQUES", "jornales": "JORNALES", "especies": "ESPECIES",
+}
+_ORDEN_MESES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"]
+
+
+def _es_salida(f: Path) -> bool:
+    return f.is_file() and f.suffix.lower() in (".xlsx", ".xls") and not f.name.startswith("~$")
+
+
+def _nodo(nombre: str, archivos: list[Path] | None = None, carpetas: list[dict] | None = None) -> dict:
+    archivos = sorted(archivos or [], key=lambda f: f.name.lower())
+    carpetas = [c for c in (carpetas or []) if c["total"]]
+    return {
+        "nombre": nombre,
+        "archivos": [{"nombre": f.name,
+                      "ruta": f.relative_to(REPORTING_DIR).as_posix(),
+                      "kb": round(f.stat().st_size / 1024, 1)} for f in archivos],
+        "carpetas": carpetas,
+        "total": len(archivos) + sum(c["total"] for c in carpetas),
+    }
+
+
+def _arbol_revision(base: Path, periodo: str, nombre: str) -> dict:
+    """REVISIÓN <P>: módulos, DEPARTAMENTAL y los archivos 'Revisión ...' sueltos."""
+    modulos, sueltos = [], []
+    for mod, carpeta_sas in _CARPETA_MODULO_SAS.items():
+        d = base / mod
+        if not d.is_dir():
+            continue
+        archivos = [f for f in d.iterdir() if _es_salida(f)]
+        sueltos += [f for f in archivos if f.name.lower().startswith("revisi")]
+        modulos.append(_nodo(f"{carpeta_sas}_{periodo}",
+                             [f for f in archivos if not f.name.lower().startswith("revisi")]))
+    deptal = base / "serie_deptal"
+    departamental = _nodo(f"DEPARTAMENTAL_{periodo}", carpetas=[
+        _nodo(d.name, [f for f in d.iterdir() if _es_salida(f)])
+        for d in sorted(deptal.iterdir()) if d.is_dir()
+    ] if deptal.is_dir() else [])
+    return _nodo(nombre, sueltos, modulos + [departamental])
+
+
+def _arbol_periodo(d: Path) -> dict:
+    periodo = d.name
+    spa = d / "sin_precio_ant"
+    carpetas = [
+        _arbol_revision(d, periodo, f"REVISIÓN {periodo}"),
+        _nodo(f"SIN PRECIO ANTERIOR {periodo}",
+              [f for f in spa.iterdir() if _es_salida(f)] if spa.is_dir() else []),
+    ]
+    pre = d / "_PRELIMINAR"
+    if pre.is_dir():
+        carpetas.append(_nodo("PRELIMINAR (enviado a temática)",
+                              carpetas=[_arbol_revision(pre, periodo, f"REVISIÓN {periodo}")]))
+    return _nodo(periodo, carpetas=carpetas)
+
+
+def _clave_periodo(nombre: str) -> tuple[int, int]:
+    mes, anio = nombre[:3].upper(), nombre[3:]
+    return (int(anio) if anio.isdigit() else 0,
+            _ORDEN_MESES.index(mes) + 1 if mes in _ORDEN_MESES else 0)
+
+
+def _arbol_salidas() -> list[dict]:
+    if not REPORTING_DIR.exists():
+        return []
+    periodos = [d for d in REPORTING_DIR.iterdir() if d.is_dir() and _clave_periodo(d.name)[1]]
+    arbol = [_arbol_periodo(d) for d in sorted(periodos, key=lambda d: _clave_periodo(d.name), reverse=True)]
+    return [n for n in arbol if n["total"]]
+
+
+def _buscar_nodo(ruta: str) -> tuple[dict, list[dict]] | None:
+    """Nodo del árbol por su ruta de nombres ('SEP2026/REVISIÓN SEP2026/...')."""
+    nivel, camino = _arbol_salidas(), []
+    for parte in [p for p in ruta.split("/") if p]:
+        nodo = next((c for c in nivel if c["nombre"] == parte), None)
+        if nodo is None:
+            return None
+        camino.append(nodo)
+        nivel = nodo["carpetas"]
+    return (camino[-1], camino) if camino else None
+
+
 @app.get("/outputs")
 async def list_outputs(_: str = Depends(_check_auth)) -> dict:
-    if not REPORTING_DIR.exists():
-        return {"cuadros": [], "spa": []}
+    return {"periodo_actual": str(_read_globals().get("periodo", "")), "arbol": _arbol_salidas()}
 
-    spa_dir = REPORTING_DIR / "sin_precio_ant"
-    cuadros = sorted(
-        [f for f in REPORTING_DIR.rglob("*.xlsx") if spa_dir not in f.parents],
-        key=lambda f: f.stat().st_mtime, reverse=True,
-    )
-    spa = sorted(
-        [f for f in spa_dir.glob("*.xlsx")] if spa_dir.exists() else [],
-        key=lambda f: f.stat().st_mtime, reverse=True,
-    )
-    return {
-        "cuadros": [str(f.relative_to(REPORTING_DIR)).replace("\\", "/") for f in cuadros],
-        "spa":     [f.name for f in spa],
-    }
+
+@app.get("/download/zip/{ruta:path}")
+async def download_zip(ruta: str, _: str = Depends(_check_auth)) -> StreamingResponse:
+    """Descarga una carpeta del árbol como .zip, con la misma estructura de carpetas."""
+    encontrado = _buscar_nodo(ruta)
+    if encontrado is None:
+        raise HTTPException(404, "Carpeta no encontrada")
+    nodo, _camino = encontrado
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        def agregar(n: dict, prefijo: str) -> None:
+            for a in n["archivos"]:
+                z.write(REPORTING_DIR / a["ruta"], f"{prefijo}{a['nombre']}")
+            for c in n["carpetas"]:
+                agregar(c, f"{prefijo}{c['nombre']}/")
+        agregar(nodo, f"{nodo['nombre']}/")
+    buf.seek(0)
+    nombre_zip = (nodo["nombre"] if len(_camino) == 1 else f"{_camino[0]['nombre']} - {nodo['nombre']}") + ".zip"
+    return StreamingResponse(buf, media_type="application/zip", headers={
+        "Content-Disposition": f"attachment; filename*=UTF-8''{quote(nombre_zip)}"})
 
 
 @app.get("/download/cuadros/{filename:path}")
@@ -606,7 +736,7 @@ async def download_cuadros(filename: str, _: str = Depends(_check_auth)) -> File
 
 @app.get("/download/spa/{filename}")
 async def download_spa(filename: str, _: str = Depends(_check_auth)) -> FileResponse:
-    spa_dir = REPORTING_DIR / "sin_precio_ant"
+    spa_dir = REPORTING_DIR / str(_read_globals().get("periodo", "")) / "sin_precio_ant"
     path    = (spa_dir / filename).resolve()
     if not str(path).startswith(str(spa_dir.resolve())):
         raise HTTPException(403, "Acceso denegado")

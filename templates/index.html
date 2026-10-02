@@ -120,14 +120,6 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
 .terminal::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
 
 /* Archivos de salida */
-.outputs-section{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-@media(max-width:640px){.outputs-section{grid-template-columns:1fr}}
-.outputs-group{border:1.5px solid #e0e0e0;border-radius:10px;overflow:hidden}
-.outputs-group-header{padding:.65rem 1rem;font-weight:700;font-size:.82rem;
-  display:flex;align-items:center;gap:.5rem}
-.outputs-group.cuadros .outputs-group-header{background:#e8f5e9;color:#1b4332}
-.outputs-group.spa .outputs-group-header{background:#e8eaf6;color:#283593}
-.outputs-list{padding:.5rem;max-height:260px;overflow-y:auto}
 .output-item{display:flex;align-items:center;justify-content:space-between;
   padding:.4rem .6rem;border-radius:7px;font-size:.78rem;transition:.1s}
 .output-item:hover{background:#f5f5f5}
@@ -136,10 +128,31 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
 .output-dl{color:#2d6a4f;font-weight:600;text-decoration:none;font-size:.75rem;
   flex-shrink:0;padding:.2rem .5rem;border-radius:5px;background:#e8f5e9}
 .output-dl:hover{background:#c8e6c9}
-.outputs-group.spa .output-dl{color:#3949ab;background:#e8eaf6}
-.outputs-group.spa .output-dl:hover{background:#c5cae9}
 .outputs-empty{padding:.75rem;text-align:center;color:#aaa;font-style:italic;font-size:.8rem}
 .refresh-row{display:flex;justify-content:flex-end;margin-bottom:.6rem}
+/* Árbol de salidas (misma organización que la carpeta de resultados) */
+.out-tree{border:1.5px solid #e0e0e0;border-radius:10px;padding:.4rem;max-height:520px;overflow-y:auto}
+.out-tree details{margin-left:.9rem}
+.out-tree > details{margin-left:0}
+.out-tree summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.45rem;
+  padding:.35rem .5rem;border-radius:7px;font-size:.82rem;color:#1b4332;font-weight:600}
+.out-tree summary::-webkit-details-marker{display:none}
+.out-tree summary:hover{background:#f1f8f4}
+.out-tree summary .chev{display:inline-block;width:.8rem;color:#74a68a;transition:transform .15s}
+.out-tree details[open] > summary .chev{transform:rotate(90deg)}
+.out-tree .folder-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.out-tree .folder-count{font-size:.7rem;font-weight:600;color:#777;background:#f0f0f0;
+  padding:.05rem .45rem;border-radius:10px}
+.out-tree .zip-dl{font-size:.7rem;font-weight:600;text-decoration:none;color:#2d6a4f;
+  background:#e8f5e9;padding:.15rem .5rem;border-radius:5px}
+.out-tree .zip-dl:hover{background:#c8e6c9}
+.out-tree .periodo > summary{font-size:.9rem;color:#081c15}
+.out-tree .badge-actual{font-size:.65rem;font-weight:700;color:#fff;background:#2d6a4f;
+  padding:.05rem .45rem;border-radius:10px}
+.out-tree .preliminar > summary{color:#8a5a00}
+.out-tree .files{margin-left:1.9rem}
+.out-tree .output-item{padding:.28rem .5rem}
+.out-tree .output-kb{font-size:.68rem;color:#999;margin-right:.6rem;flex-shrink:0}
 
 /* Toast */
 .toast-container{position:fixed;top:1rem;right:1rem;display:flex;flex-direction:column;
@@ -494,19 +507,8 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
       <div class="refresh-row">
         <button class="btn btn-secondary btn-sm" onclick="loadOutputs()">⟳ Actualizar lista</button>
       </div>
-      <div class="outputs-section">
-        <div class="outputs-group cuadros">
-          <div class="outputs-group-header">📊 CUADROS — BASES_*.xlsx</div>
-          <div class="outputs-list" id="cuadros-list">
-            <div class="outputs-empty">Sin archivos</div>
-          </div>
-        </div>
-        <div class="outputs-group spa">
-          <div class="outputs-group-header">📋 SIN_PRECIO_ANT — REV_*.xlsx</div>
-          <div class="outputs-list" id="spa-list">
-            <div class="outputs-empty">Sin archivos</div>
-          </div>
-        </div>
+      <div class="out-tree" id="out-tree">
+        <div class="outputs-empty">Sin archivos</div>
       </div>
     </div>
   </div>
@@ -818,36 +820,63 @@ async function runPipeline(name) {
   }
 }
 
-// ── Archivos de salida ────────────────────────────────────────────────────────
+// ── Archivos de salida (árbol como la carpeta de resultados de SAS) ─────────
+const _abiertos = new Set();   // carpetas abiertas, se conservan al actualizar
+
 async function loadOutputs() {
   try {
     const r = await fetch('/outputs');
     const data = await r.json();
-    renderOutputList('cuadros-list', data.cuadros, 'cuadros');
-    renderOutputList('spa-list',     data.spa,     'spa');
+    renderArbol(data.arbol || [], data.periodo_actual || '');
   } catch (e) {
     console.error('Error cargando outputs', e);
   }
 }
 
-function renderOutputList(elId, files, tipo) {
-  const el = document.getElementById(elId);
-  if (!files || files.length === 0) {
+function _esc(t) {
+  return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function _url(base, ruta) {
+  return base + ruta.split('/').map(encodeURIComponent).join('/');
+}
+
+function _carpeta(n, ruta, nivel, periodoActual) {
+  const abierta = _abiertos.has(ruta) || (nivel === 0 && n.nombre === periodoActual && !_abiertos.size)
+                  || (nivel === 1 && n.nombre.startsWith('REVISIÓN') && ruta.startsWith(periodoActual) && !_abiertos.size);
+  const clase = nivel === 0 ? 'periodo' : (n.nombre.startsWith('PRELIMINAR') ? 'preliminar' : '');
+  const icono = nivel === 0 ? '📅' : (n.nombre.startsWith('PRELIMINAR') ? '🗂️' : '📁');
+  const actual = nivel === 0 && n.nombre === periodoActual ? '<span class="badge-actual">PERÍODO ACTUAL</span>' : '';
+  const sub = n.carpetas.map(c => _carpeta(c, ruta + '/' + c.nombre, nivel + 1, periodoActual)).join('');
+  const archivos = n.archivos.length ? '<div class="files">' + n.archivos.map(a => `
+      <div class="output-item">
+        <span class="output-name" title="${_esc(a.nombre)}">📄 ${_esc(a.nombre)}</span>
+        <span class="output-kb">${a.kb.toLocaleString('es-CO')} KB</span>
+        <a class="output-dl" href="${_url('/download/cuadros/', a.ruta)}" download="${_esc(a.nombre)}">⬇ Descargar</a>
+      </div>`).join('') + '</div>' : '';
+  return `
+    <details class="${clase}" data-ruta="${_esc(ruta)}" ${abierta ? 'open' : ''}>
+      <summary>
+        <span class="chev">▶</span><span>${icono}</span>
+        <span class="folder-name" title="${_esc(n.nombre)}">${_esc(n.nombre)}</span>${actual}
+        <span class="folder-count">${n.total} archivo${n.total === 1 ? '' : 's'}</span>
+        <a class="zip-dl" href="${_url('/download/zip/', ruta)}" onclick="event.stopPropagation()"
+           title="Descargar la carpeta completa">⬇ .zip</a>
+      </summary>
+      ${sub}${archivos}
+    </details>`;
+}
+
+function renderArbol(arbol, periodoActual) {
+  const el = document.getElementById('out-tree');
+  if (!arbol.length) {
     el.innerHTML = '<div class="outputs-empty">Sin archivos</div>';
     return;
   }
-  el.innerHTML = files.map(f => {
-    const href = '/download/' + tipo + '/' + f.split('/').map(encodeURIComponent).join('/');
-    const base = f.split('/').pop();
-    return `
-    <div class="output-item">
-      <span class="output-name" title="${f}">${f}</span>
-      <a class="output-dl" href="${href}" download="${base}">
-        ⬇ Descargar
-      </a>
-    </div>
-  `;
-  }).join('');
+  el.innerHTML = arbol.map(n => _carpeta(n, n.nombre, 0, periodoActual)).join('');
+  el.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => {
+    if (d.open) _abiertos.add(d.dataset.ruta); else _abiertos.delete(d.dataset.ruta);
+  }));
+  el.querySelectorAll('details[open]').forEach(d => _abiertos.add(d.dataset.ruta));
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
