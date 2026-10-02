@@ -1,22 +1,67 @@
 # Flujo de datos
 
+## Ciclo mensual: ejecución preliminar y definitiva
+
+Cada período se procesa en dos rondas:
+
+| Paso | Quién | Qué se hace | Insumos | Salidas |
+|---|---|---|---|---|
+| 1. Envío inicial | Producción | Se reciben las bases livianas, las DIVIPOLA y los archivos de Sin Precio Anterior | — | `data/01_raw/<P>/` (versión **inicial**) |
+| 2. Ejecución preliminar | Este proyecto | Reportes municipales de cada módulo (`kedro run --pipeline <modulo>`) y Sin Precio Anterior (`--pipeline sin_precio_ant`) | Versión inicial | `data/08_reporting/<P>/<modulo>/`, `.../sin_precio_ant/` → se envían a temática |
+| 3. Revisión | Temática | Revisa las alertas (VAR_ATIPICO, CV, FALTAN, revisiones…) y corrige precios, novedades y estados | Salidas preliminares | En algunos meses, bases livianas y/o DIVIPOLA **ajustadas** |
+| 4. Ejecución definitiva | Este proyecto | Se corren de nuevo los reportes municipales y la serie departamental de los módulos ajustados | Versión ajustada (o inicial si el módulo no se ajustó) | Reemplaza `data/08_reporting/<P>/<modulo>/` y `.../serie_deptal/` |
+
+**Sin Precio Anterior solo se ejecuta en la ronda preliminar**: en la
+ejecución definitiva no se vuelve a correr, aunque cambie el VAR_ATIPICO.
+
+La serie departamental forma parte del pipeline de cada módulo, así que en la
+ejecución definitiva sale con los mismos insumos que los reportes
+municipales. La DIVIPOLA es siempre la misma del procesamiento de bases
+livianas, salvo que temática envíe una DIVIPOLA ajustada.
+
+Antes de la ejecución definitiva conviene copiar las salidas preliminares
+de los módulos ajustados a `data/08_reporting/<P>/_PRELIMINAR/`, para
+conservar lo que se envió a temática.
+
 ## De dónde vienen los datos
 
 Todo entra manualmente (o vía la interfaz web) en `data/01_raw/<PERIODO>/`,
-organizado por período de procesamiento:
+organizado por período de procesamiento. Las versiones iniciales y las
+ajustadas quedan separadas:
 
 ```
-data/01_raw/JUL2026/
-├── BASES LIVIANAS JUL2026/          # Excel de supervisión por módulo, insumo principal
-│   └── Insumos agrícolas jul 2026.xlsx
-├── DIVIPOLA JUL2026/                # municipio/departamento + Grupo/Nombre_Publica por módulo
+data/01_raw/SEP2026/
+├── BASES LIVIANAS SEP2026/          # INICIAL: Excel de supervisión por módulo, insumo principal
+│   └── Insumos agrícolas sep 2026.xlsx
+├── DIVIPOLA SEP2026/                # INICIAL: municipio/departamento + Grupo/Nombre_Publica por módulo
 │   ├── DIVIPOLA.xlsx                # maestro compartido (municipios/departamentos)
-│   └── divipola insumos agrícolas jul 2026.xlsx
-├── SIN_PRECIO_ANT JUL2026/          # histórico "para revisiones" (insumo del pipeline auxiliar)
+│   └── divipola insumos agrícolas sep 2026.xlsx
+├── SIN_PRECIO_ANT SEP2026/          # histórico "para revisiones" (insumo del pipeline auxiliar)
 │   └── Ins_Agrícolas para revisiones.xlsx
-└── SERIE_DEPTAL JUL2026/            # solo si falta la salida Python del mes anterior:
-    └── INSU_AGRIC_MAYORESQUE2_DEPTO_JUN2026.XLSX   # MAYORESQUE2 departamental de SAS
+├── AJUSTADOS SEP2026/               # AJUSTADA: lo que temática reenvía después de revisar
+│   ├── BASES LIVIANAS SEP2026/      #   solo los módulos ajustados, con el MISMO nombre de archivo
+│   │   └── Elementos sep 2026.xlsx
+│   └── DIVIPOLA SEP2026/            #   solo si reenvían DIVIPOLA (mismo nombre de archivo)
+└── SERIE_DEPTAL SEP2026/            # solo si falta la salida Python del mes anterior:
+    └── INSU_AGRIC_MAYORESQUE2_DEPTO_AGO2026.XLSX   # MAYORESQUE2 departamental de SAS
 ```
+
+**Cómo se elige la versión.** Los parámetros siempre apuntan a la versión
+inicial. Al leer cada insumo, `utils/insumos.ruta_vigente` busca en
+`AJUSTADOS <P>/` un archivo con el mismo nombre en la misma subcarpeta y, si
+existe, lo usa en su lugar; si no, usa el inicial. Aplica a la base
+liviana, la DIVIPOLA del módulo, el maestro `DIVIPOLA.xlsx` (vía el
+resolver `${vigente:...}` del catálogo) y la serie departamental. El log de
+Kedro muestra `Insumo AJUSTADO | <ruta>` cada vez que toma una versión
+ajustada. Por eso:
+
+- Un módulo que no se ajustó sigue usando su versión inicial sin tocar nada.
+- La versión ajustada **debe tener el mismo nombre** que la inicial. La
+  interfaz web lo hace sola: al cargar con la opción "ajustada"
+  (`?ajustada=true` en `/upload/cuadros/<modulo>` y `/upload/divipola/<tipo>`)
+  guarda el archivo en `AJUSTADOS <P>/` con el nombre de la base inicial.
+- Para volver a la versión inicial basta con sacar el archivo de
+  `AJUSTADOS <P>/`.
 
 La serie departamental escribe en
 `data/08_reporting/<periodo>/serie_deptal/<carpeta SAS>/` (`Ins_Agrícolas`,

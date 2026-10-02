@@ -26,6 +26,7 @@ from datetime import date
 
 import pandas as pd
 
+from sipsa_insumos.utils.insumos import ruta_vigente
 from sipsa_insumos.utils.parsers import agregar_columnas_unidad_medida
 from sipsa_insumos.validations.schemas import SCHEMA_BASE_LIVIANA
 
@@ -82,6 +83,7 @@ def leer_base_liviana(
         tipo_modulo: "estandar" (UnMed/CasaCom/ICA) o "caracte" (Caracte.).
         tipo_llave: "unmed" (ARTÍCULO+UNMED) o "casacom_ica_unmed" (Elementos).
     """
+    archivo_liviana = ruta_vigente(archivo_liviana)
     log.info(
         "Leyendo base liviana: %s | tipo_modulo=%s | tipo_llave=%s",
         archivo_liviana, tipo_modulo, tipo_llave,
@@ -177,6 +179,7 @@ def leer_base_completa(
     """
     # Solo las celdas vacías son faltantes: textos como "NA" o "N/A" (p.ej. en
     # Registro ICA de Elementos) se conservan tal cual, igual que PROC IMPORT de SAS.
+    archivo_liviana = ruta_vigente(archivo_liviana)
     df = pd.read_excel(
         archivo_liviana, sheet_name=hoja_liviana, header=0, dtype=_DTYPE_EXCEL,
         keep_default_na=False, na_values=[""],

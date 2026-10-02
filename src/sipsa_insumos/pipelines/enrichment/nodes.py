@@ -20,6 +20,7 @@ import openpyxl
 import pandas as pd
 import yaml
 
+from sipsa_insumos.utils.insumos import ruta_vigente
 from sipsa_insumos.utils.parsers import parsear_llave_divipola
 
 log = logging.getLogger(__name__)
@@ -75,6 +76,8 @@ def actualizar_mappings_divipola(
         mappings_articulos.get("articulos_publicacion", mappings_articulos)
     )
 
+    if archivo_divipola_grupos:
+        archivo_divipola_grupos = str(ruta_vigente(archivo_divipola_grupos))
     if not archivo_divipola_grupos or not Path(archivo_divipola_grupos).exists():
         log.info(
             "[%s] actualizar_mappings_divipola | sin archivo_divipola_grupos configurado — se omite.",

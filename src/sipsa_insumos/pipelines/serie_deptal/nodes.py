@@ -32,6 +32,7 @@ from openpyxl import Workbook
 from python_calamine import CalamineWorkbook
 
 from sipsa_insumos.pipelines.reporting.nodes import _periodo_anterior_modulo
+from sipsa_insumos.utils.insumos import ruta_vigente, version_insumo
 
 log = logging.getLogger(__name__)
 
@@ -542,10 +543,13 @@ def generar_serie_deptal(
         return [mapa.get(c, c) for c in cols]
 
     # ── 1. Importación ────────────────────────────────────────────────────────
-    ruta_base = _buscar(raw / f"BASES LIVIANAS {periodo}", cfg["clave"])
-    ruta_div_mod = _buscar(raw / f"DIVIPOLA {periodo}", cfg["clave"], prefijo="divipola")
-    ruta_div = _buscar_nombre([raw / f"DIVIPOLA {periodo}"], "DIVIPOLA.xlsx")
-    log.info("[%s] Serie departamental %s | base=%s", m, periodo, ruta_base.name)
+    # Mismos insumos que los reportes municipales: la versión ajustada de cada
+    # archivo si temática la reenvió (AJUSTADOS <periodo>/), si no la inicial.
+    ruta_base = ruta_vigente(_buscar(raw / f"BASES LIVIANAS {periodo}", cfg["clave"]))
+    ruta_div_mod = ruta_vigente(_buscar(raw / f"DIVIPOLA {periodo}", cfg["clave"], prefijo="divipola"))
+    ruta_div = ruta_vigente(_buscar_nombre([raw / f"DIVIPOLA {periodo}"], "DIVIPOLA.xlsx"))
+    log.info("[%s] Serie departamental %s | base %s=%s | divipola %s", m, periodo, version_insumo(ruta_base),
+             ruta_base.name, version_insumo(ruta_div_mod))
 
     base = _leer_hoja(ruta_base, "Información Insumos", cfg["motor"])
     mpio = base["Municipio"]
