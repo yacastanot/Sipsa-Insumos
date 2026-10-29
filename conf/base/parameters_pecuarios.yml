@@ -1,8 +1,8 @@
 pecuarios:
   modulo: "PECUARIOS"
-  archivo_liviana: "data/01_raw/SEP2026/BASES LIVIANAS SEP2026/Insumos pecuarios sep 2026.xlsx"
+  archivo_liviana: "data/01_raw/OCT2026/BASES LIVIANAS OCT2026/Insumos pecuarios oct 2026.xlsx"
   hoja_liviana: "Información Insumos"
-  archivo_divipola_grupos: "data/01_raw/SEP2026/DIVIPOLA SEP2026/divipola insumos pecuarios sep 2026.xlsx"
+  archivo_divipola_grupos: "data/01_raw/OCT2026/DIVIPOLA OCT2026/divipola insumos pecuarios oct 2026.xlsx"
   tipo_modulo: "estandar"
   tipo_llave: "casacom_ica_unmed"
   min_n: 2

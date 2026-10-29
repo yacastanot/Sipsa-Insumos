@@ -1,8 +1,8 @@
 agricolas:
   modulo: "AGRICOLAS"
-  archivo_liviana: "data/01_raw/SEP2026/BASES LIVIANAS SEP2026/Insumos agrícolas sep 2026.xlsx"
+  archivo_liviana: "data/01_raw/OCT2026/BASES LIVIANAS OCT2026/Insumos agrícolas oct 2026.xlsx"
   hoja_liviana: "Información Insumos"
-  archivo_divipola_grupos: "data/01_raw/SEP2026/DIVIPOLA SEP2026/divipola insumos agrícolas sep 2026.xlsx"
+  archivo_divipola_grupos: "data/01_raw/OCT2026/DIVIPOLA OCT2026/divipola insumos agrícolas oct 2026.xlsx"
   tipo_modulo: "estandar"
   tipo_llave: "casacom_ica_unmed"   # SAS cruza Grupo/Nombre por Art_Unmed_Casacomer_ICA completo
   min_n: 2
