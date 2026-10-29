@@ -154,6 +154,29 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
 .out-tree .output-item{padding:.28rem .5rem}
 .out-tree .output-kb{font-size:.68rem;color:#999;margin-right:.6rem;flex-shrink:0}
 
+/* Validación del período */
+.val-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem}
+.val-estado{font-weight:700;font-size:.85rem;padding:.3rem .8rem;border-radius:8px}
+.val-estado.ok{background:#e8f5e9;color:#1b5e20}
+.val-estado.alerta{background:#fff3e0;color:#9a5b00}
+.val-estado.error{background:#ffebee;color:#b71c1c}
+.val-estado.none{background:#f0f0f0;color:#777}
+.val-cifra{font-size:.75rem;font-weight:600;padding:.15rem .55rem;border-radius:10px}
+.val-cifra.ok{background:#e8f5e9;color:#1b5e20}
+.val-cifra.alerta{background:#fff3e0;color:#9a5b00}
+.val-cifra.error{background:#ffebee;color:#b71c1c}
+.val-fecha{font-size:.72rem;color:#888;margin-left:auto}
+.val-filtro{font-size:.75rem;color:#555;display:flex;align-items:center;gap:.3rem}
+.val-tabla{width:100%;border-collapse:collapse;font-size:.76rem}
+.val-tabla th{text-align:left;background:#f5f5f5;padding:.4rem .5rem;font-weight:700;color:#444;position:sticky;top:0}
+.val-tabla td{padding:.35rem .5rem;border-top:1px solid #eee;vertical-align:top}
+.val-tabla td.est{white-space:nowrap;font-weight:700}
+.val-tabla tr.ok td.est{color:#2e7d32}
+.val-tabla tr.alerta td.est{color:#b26a00}
+.val-tabla tr.error td.est{color:#c62828}
+.val-tabla tr.error{background:#fff8f8}
+.val-wrap{border:1.5px solid #e0e0e0;border-radius:10px;max-height:420px;overflow:auto}
+
 /* Toast */
 .toast-container{position:fixed;top:1rem;right:1rem;display:flex;flex-direction:column;
   gap:.5rem;z-index:9999;pointer-events:none}
@@ -513,6 +536,28 @@ header span{color:#95d5b2;font-size:.85rem;margin-left:.5rem;font-weight:400}
     </div>
   </div>
 
+  <!-- ── 7. Validación del período ──────────────────────────────────── -->
+  <div class="step open" id="step-validacion">
+    <div class="step-header" onclick="toggleStep('step-validacion')">
+      <div class="step-num">7</div>
+      <span class="step-title">Validación del período</span>
+      <span class="step-arrow">▼</span>
+    </div>
+    <div class="step-body">
+      <div class="val-head">
+        <span class="val-estado none" id="val-estado">Sin validar</span>
+        <span id="val-cifras"></span>
+        <label class="val-filtro"><input type="checkbox" id="val-solo-problemas" checked
+               onchange="renderValidacion(_ultimaValidacion)"> Solo alertas y errores</label>
+        <span class="val-fecha" id="val-fecha"></span>
+        <button class="btn btn-secondary btn-sm" id="btn-validar" onclick="ejecutarValidacion()">✔ Validar ahora</button>
+      </div>
+      <div class="val-wrap" id="val-tabla">
+        <div class="outputs-empty">La validación se ejecuta sola al terminar una corrida, o con “Validar ahora”.</div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /container -->
 
 <div class="toast-container" id="toasts"></div>
@@ -805,6 +850,7 @@ async function runPipeline(name) {
             logLine('__SUCCESS__');
             toast('Pipeline completado exitosamente', 'success', 6000);
             loadOutputs();
+            loadValidacion();
           } else if (msg.startsWith('__ERROR__')) {
             const detail = msg.replace('__ERROR__', '').trim();
             logLine(`ERROR: ${detail || 'Pipeline falló'}`);
@@ -879,8 +925,71 @@ function renderArbol(arbol, periodoActual) {
   el.querySelectorAll('details[open]').forEach(d => _abiertos.add(d.dataset.ruta));
 }
 
+// ── Validación del período ────────────────────────────────────────────────────
+let _ultimaValidacion = null;
+const _ICONO = {ok: '✔', alerta: '⚠', error: '✖'};
+const _TEXTO = {ok: 'TODO EN ORDEN', alerta: 'CON ALERTAS', error: 'CON ERRORES'};
+
+async function loadValidacion() {
+  try {
+    const r = await fetch('/validacion');
+    renderValidacion(await r.json());
+  } catch (e) { console.error('Error cargando validación', e); }
+}
+
+async function ejecutarValidacion() {
+  const btn = document.getElementById('btn-validar');
+  btn.disabled = true; btn.textContent = '⏳ Validando…';
+  try {
+    const r = await fetch('/validacion', {method: 'POST', body: new FormData()});
+    if (!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+    renderValidacion(data);
+    toast(`Validación ${data.periodo}: ${_TEXTO[data.estado]}`, data.estado === 'error' ? 'error' : 'success');
+    loadOutputs();
+  } catch (e) {
+    toast('No se pudo validar: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '✔ Validar ahora';
+  }
+}
+
+function renderValidacion(v) {
+  _ultimaValidacion = v;
+  const est = document.getElementById('val-estado');
+  const tabla = document.getElementById('val-tabla');
+  if (!v || !v.estado) {
+    est.className = 'val-estado none';
+    est.textContent = v && v.periodo ? `${v.periodo}: sin validar` : 'Sin validar';
+    document.getElementById('val-cifras').innerHTML = '';
+    document.getElementById('val-fecha').textContent = '';
+    return;
+  }
+  est.className = 'val-estado ' + v.estado;
+  est.textContent = `${_ICONO[v.estado]} ${v.periodo}: ${_TEXTO[v.estado]}`;
+  document.getElementById('val-cifras').innerHTML =
+    `<span class="val-cifra ok">${v.resumen.ok} ok</span> ` +
+    `<span class="val-cifra alerta">${v.resumen.alerta} alertas</span> ` +
+    `<span class="val-cifra error">${v.resumen.error} errores</span>`;
+  document.getElementById('val-fecha').textContent = 'Validado: ' + v.fecha;
+  const solo = document.getElementById('val-solo-problemas').checked;
+  const orden = {error: 0, alerta: 1, ok: 2};
+  const filas = v.verificaciones.filter(i => !solo || i.estado !== 'ok')
+                 .sort((a, b) => orden[a.estado] - orden[b.estado]);
+  if (!filas.length) {
+    tabla.innerHTML = '<div class="outputs-empty">✔ Sin alertas ni errores.</div>';
+    return;
+  }
+  tabla.innerHTML = '<table class="val-tabla"><thead><tr><th>Estado</th><th>Grupo</th><th>Módulo</th>' +
+    '<th>Verificación</th><th>Detalle</th></tr></thead><tbody>' +
+    filas.map(i => `<tr class="${i.estado}"><td class="est">${_ICONO[i.estado]} ${i.estado.toUpperCase()}</td>` +
+      `<td>${_esc(i.grupo)}</td><td>${_esc(i.modulo)}</td><td>${_esc(i.verificacion)}</td>` +
+      `<td>${_esc(i.detalle)}</td></tr>`).join('') + '</tbody></table>';
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadOutputs();
+loadValidacion();
 </script>
 </body>
 </html>

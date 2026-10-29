@@ -23,6 +23,29 @@ Antes de la ejecución definitiva conviene copiar las salidas preliminares
 de los módulos ajustados a `data/08_reporting/<P>/_PRELIMINAR/`, para
 conservar lo que se envió a temática.
 
+## Validación de cierre del período
+
+Desde OCT2026 no hay SAS para comparar; cada mes se valida la consistencia
+del propio proceso con `python scripts/validar_periodo.py [PERIODO]`
+(`src/sipsa_insumos/utils/validacion.py`). En el aplicativo web corre sola al
+terminar una ejecución exitosa y también desde la sección **7. Validación del
+período** (botón "Validar ahora"). El resultado queda en
+`data/08_reporting/<P>/VALIDACION_<P>.json` y `.xlsx` (descargable desde la
+raíz del período en el árbol de salidas).
+
+| Grupo | Qué revisa | Error si… |
+|---|---|---|
+| Configuración | `globals.yml` y rutas de los módulos activos | las rutas no son del período |
+| Insumos | Base liviana, DIVIPOLA del módulo y maestro; versión inicial/ajustada; checksum contra OneDrive (`validacion.ruta_onedrive_insumos`) | falta un insumo o la versión inicial difiere de OneDrive |
+| Ejecución | Salidas posteriores a los insumos; BASE con las mismas filas que la base vigente; respaldo preliminar y base ajustada presentes | llegó un insumo después de la corrida, o la salida no viene de la base vigente |
+| Completitud | Mismos archivos que el período anterior del módulo; 5 archivos de serie departamental; Sin Precio Anterior de los módulos activos | falta algún archivo |
+| Diagnósticos | FALTAN vacíos (DUPLICADOS con filas = alerta) | un FALTAN tiene registros |
+| Continuidad | Los MAYORESQUE2 y "Revisión …" del mes anterior que llegan con el período son idénticos a la salida Python de ese mes | hay valores distintos |
+
+Las diferencias que ya se conocen y se aceptan se declaran en
+`parameters.yml` (`validacion.diferencias_conocidas`, con su motivo) y se
+reportan como alerta en lugar de error.
+
 ## De dónde vienen los datos
 
 Todo entra manualmente (o vía la interfaz web) en `data/01_raw/<PERIODO>/`,

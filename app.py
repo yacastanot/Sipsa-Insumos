@@ -40,6 +40,7 @@ from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
+from sipsa_insumos.utils.validacion import texto_resumen, validar_periodo
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, Response, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -668,7 +669,8 @@ def _arbol_periodo(d: Path) -> dict:
     if pre.is_dir():
         carpetas.append(_nodo("PRELIMINAR (enviado a temática)",
                               carpetas=[_arbol_revision(pre, periodo, f"REVISIÓN {periodo}")]))
-    return _nodo(periodo, carpetas=carpetas)
+    validacion = [f for f in d.glob(f"VALIDACION_{periodo}.xlsx") if _es_salida(f)]
+    return _nodo(periodo, validacion, carpetas)
 
 
 def _clave_periodo(nombre: str) -> tuple[int, int]:
@@ -695,6 +697,24 @@ def _buscar_nodo(ruta: str) -> tuple[dict, list[dict]] | None:
         camino.append(nodo)
         nivel = nodo["carpetas"]
     return (camino[-1], camino) if camino else None
+
+
+@app.get("/validacion")
+async def get_validacion(periodo: str = "", _: str = Depends(_check_auth)) -> dict:
+    """Última validación guardada del período (por defecto, el configurado)."""
+    periodo = (periodo or str(_read_globals().get("periodo", ""))).upper()
+    f = REPORTING_DIR / periodo / f"VALIDACION_{periodo}.json"
+    if not f.exists():
+        return {"periodo": periodo, "estado": None}
+    return _json.loads(f.read_text(encoding="utf-8"))
+
+
+@app.post("/validacion")
+async def run_validacion(periodo: str = Form(""), _: str = Depends(_check_auth)) -> dict:
+    """Ejecuta la validación de cierre del período y la guarda (JSON + Excel)."""
+    periodo = (periodo or str(_read_globals().get("periodo", ""))).upper()
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, lambda: validar_periodo(periodo, root=PROJECT_ROOT))
 
 
 @app.get("/outputs")
@@ -770,6 +790,16 @@ async def run_pipeline(
         proc.wait()
         return proc.returncode
 
+    def _validar_al_terminar() -> None:
+        """Validación de cierre del período al terminar una ejecución exitosa."""
+        line_queue.put("▶ Validación del período")
+        try:
+            out = validar_periodo(str(_read_globals().get("periodo", "")), root=PROJECT_ROOT)
+            for linea in texto_resumen(out):
+                line_queue.put(linea)
+        except Exception as exc:  # la validación nunca debe tumbar la ejecución
+            line_queue.put(f"⚠ No se pudo validar el período: {exc}")
+
     def _run_worker() -> None:
         try:
             if pipeline_name == "all_active":
@@ -800,6 +830,7 @@ async def run_pipeline(
                     if rc != 0:
                         line_queue.put(("__DONE__", rc))
                         return
+                _validar_al_terminar()
                 line_queue.put(("__DONE__", 0))
             else:
                 if pipeline_name.startswith("sin_precio_ant"):
@@ -820,6 +851,8 @@ async def run_pipeline(
                 if pipeline_name != "__default__":
                     cmd += ["--pipeline", pipeline_name]
                 rc = _run_one(cmd, pipeline_name.upper())
+                if rc == 0:
+                    _validar_al_terminar()
                 line_queue.put(("__DONE__", rc))
         except Exception as exc:
             line_queue.put(("__DONE__", str(exc)))

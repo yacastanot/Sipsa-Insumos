@@ -3,16 +3,16 @@
 # Actualizar junto con globals.yml al inicio de cada período mensual.
 # =============================================================================
 
-periodo: "SEP2026"
-periodo_anterior: "AGO2026"
-mes_actual: "Septiembre"
-mes_anterior: "Agosto"
-mes_num_actual: 9
-mes_num_anterior: 8
-mes_num_menos2: 7       # Número mes t-2
-mes_num_menos3: 6       # Número mes t-3
+periodo: "OCT2026"
+periodo_anterior: "SEP2026"
+mes_actual: "Octubre"
+mes_anterior: "Septiembre"
+mes_num_actual: 10
+mes_num_anterior: 9
+mes_num_menos2: 8       # Número mes t-2
+mes_num_menos3: 7       # Número mes t-3
 anio: 2026
-fecha_proceso: "20260928"   # YYYYMMDD para nombres de archivo de salida
+fecha_proceso: "20261029"   # YYYYMMDD para nombres de archivo de salida
 
 # Rutas de salida
 ruta_reporting: "data/08_reporting/${globals:periodo}"
@@ -26,3 +26,13 @@ umbral_var_alta: 25.0       # VAR >= umbral → REVISA=1
 umbral_var_baja: -25.0      # VAR <= umbral → REVISA=1
 umbral_var_extrema: 100.0   # VAR >= umbral → REVISA=3
 umbral_cv: 30.0             # CV > umbral → alerta en informe
+
+# Validación de cierre del período (scripts/validar_periodo.py): carpeta de OneDrive
+# con un folder por mes ("9. SEPTIEMBRE 2026") para comparar checksums de los insumos.
+validacion:
+  ruta_onedrive_insumos: "C:/Users/Jeferson/OneDrive - Cloud Integration Hub/Documentos/DANE Automatización/SIPSA Insumos/SIPSA Insumos"
+  # Archivos del mes anterior que se sabe que no coinciden con la salida Python
+  # (se reportan como alerta con su motivo, no como error).
+  diferencias_conocidas:
+    - archivo: "ELEM_AGROPE_MAYORESQUE2_JUL2026.XLSX"
+      motivo: "SAS reprocesó julio de elementos; se usa la versión publicada (decisión 2026-09-30)"
