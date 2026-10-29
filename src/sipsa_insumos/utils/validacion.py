@@ -93,11 +93,11 @@ def _plantilla(nombre: str) -> str:
 
 
 def _llegada(f: Path) -> float:
-    """Momento en que el insumo quedó en raw. Si la fecha de modificación está en el
-    futuro (archivo de un equipo con el reloj adelantado), se usa la de creación."""
+    """Momento en que el insumo quedó en raw: la fecha de creación del archivo en la
+    carpeta. No se usa la de modificación porque los insumos traen la del equipo
+    donde se prepararon (en OCT2026 llegaron con el reloj adelantado)."""
     st = f.stat()
-    creado = getattr(st, "st_birthtime", st.st_ctime)
-    return creado if st.st_mtime > dt.datetime.now().timestamp() else max(creado, st.st_mtime)
+    return getattr(st, "st_birthtime", st.st_ctime)
 
 
 def _md5(f: Path) -> str:
@@ -218,6 +218,7 @@ def validar_periodo(periodo: str | None = None, root: str | Path = ".", guardar:
     r.add("Insumos", "—", "DIVIPOLA maestro", "ok" if maestro.exists() else "error",
           f"{version_insumo(maestro)}: {maestro.name}" if maestro.exists() else "no existe")
     bases: dict[str, Path] = {}
+    divipolas: dict[str, Path] = {}
     for m in activos:
         for sub, prefijo, etiqueta in ((f"BASES LIVIANAS {periodo}", "", "Base liviana"),
                                        (f"DIVIPOLA {periodo}", "divipola", "DIVIPOLA del módulo")):
@@ -230,8 +231,7 @@ def validar_periodo(periodo: str | None = None, root: str | Path = ".", guardar:
                 continue
             inicial = cands[0]
             vigente = ruta_vigente(inicial)
-            if etiqueta == "Base liviana":
-                bases[m] = vigente
+            (bases if etiqueta == "Base liviana" else divipolas)[m] = vigente
             detalle = f"versión {version_insumo(vigente)}: {vigente.name}"
             estado = "ok"
             if carpeta_od:
@@ -266,7 +266,7 @@ def validar_periodo(periodo: str | None = None, root: str | Path = ".", guardar:
         base = bases.get(m)
         if base and base.exists():
             mas_vieja = min(f.stat().st_mtime for f in salidas)
-            insumos = [base] + [x for x in [maestro] if x.exists()]
+            insumos = [base] + [x for x in [divipolas.get(m), maestro] if x and x.exists()]
             nuevos = [x.name for x in insumos if _llegada(x) > mas_vieja]
             r.add("Ejecución", m, "Salidas posteriores a los insumos", "error" if nuevos else "ok",
                   f"hay insumos más nuevos que las salidas ({', '.join(nuevos)}): falta volver a correr"
@@ -277,11 +277,12 @@ def validar_periodo(periodo: str | None = None, root: str | Path = ".", guardar:
                 r.add("Ejecución", m, "Salidas hechas con la base vigente", "ok" if n_sal == n_base else "error",
                       f"{arch_base.name}: {n_sal} filas = base {version_insumo(base)} ({n_base})" if n_sal == n_base
                       else f"{arch_base.name} tiene {n_sal} filas y la base {version_insumo(base)} {n_base}")
-            if (rep / "_PRELIMINAR" / m).is_dir() and version_insumo(base) == "inicial":
-                r.add("Ejecución", m, "Base ajustada disponible", "error",
-                      "hubo ejecución definitiva pero la base ajustada ya no está en "
-                      f"AJUSTADOS {periodo}/: una nueva corrida usaría la inicial")
-            elif version_insumo(base) == "ajustada" and not (rep / "_PRELIMINAR" / m).is_dir():
+            ajustados = [x for x in [base, divipolas.get(m)] if x and version_insumo(x) == "ajustada"]
+            if (rep / "_PRELIMINAR" / m).is_dir() and not ajustados:
+                r.add("Ejecución", m, "Insumo ajustado disponible", "error",
+                      "hubo ejecución definitiva pero no hay base ni DIVIPOLA ajustada en "
+                      f"AJUSTADOS {periodo}/: una nueva corrida usaría la versión inicial")
+            elif ajustados and not (rep / "_PRELIMINAR" / m).is_dir():
                 r.add("Ejecución", m, "Respaldo de la versión preliminar", "alerta",
                       f"no existe {rep / '_PRELIMINAR' / m}")
 
